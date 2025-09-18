@@ -1,0 +1,56 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input ChangeStatusInput {
+  status: Boolean!
+  userId: String!
+}
+
+input EmailInput {
+  email: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  AdminLogin(input: LoginInput!): User!
+  changeStatus(input: ChangeStatusInput!): Boolean!
+  createUser(input: SignUpInput!): User!
+  forgotPassword(input: EmailInput!): Boolean!
+  loginUser(input: LoginInput!): User!
+  verifyEmail(input: TokenInput!): User!
+  verifyResetPassword(input: PasswordInput!): User!
+  verifyResetToken(input: TokenInput!): User!
+}
+
+input PasswordInput {
+  password: String!
+}
+
+type Query {
+  findDoctors: [User!]!
+  findUsers: [User!]!
+}
+
+input SignUpInput {
+  email: String!
+  fullName: String!
+  password: String!
+  role: String!
+}
+
+input TokenInput {
+  token: String!
+}
+
+type User {
+  email: String!
+  fullName: String!
+  id: ID!
+  isAdmin: Boolean!
+  isBlocked: Boolean!
+}
