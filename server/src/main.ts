@@ -6,6 +6,9 @@ import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
+import { graphqlUploadExpress } from 'graphql-upload-ts';
+import * as express from 'express';
+
 
 async function bootstrap() {
 
@@ -42,12 +45,21 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { logger });
   const configService = app.get(ConfigService);
 
+  app.use(graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 10 }));
+
+  app.use((req: express.Request, res: express.Response, next) => {
+    if (req.originalUrl.startsWith('/graphql') && req.headers['content-type']?.includes('multipart/form-data')) {
+      return next();
+    }
+    express.json({ limit: '10mb' })(req, res, next);
+  });
+
   const CLIENT_URL = configService.get<string>('FRONT_END_URL');
   app.enableCors({
     origin: CLIENT_URL,
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization',
+    allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
   });
 
   app.useGlobalPipes(
@@ -59,9 +71,7 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new GlobalGraphQLExceptionFilter());
-
   const PORT = configService.get<number>('PORT');
-
   app.use(cookieParser());
   await app.listen(PORT);
 }

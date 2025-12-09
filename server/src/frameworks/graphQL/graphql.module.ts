@@ -11,6 +11,7 @@ import { join } from 'path';
       sortSchema: true,
       playground: true,
       introspection: true,
+      csrfPrevention: false,
       context: ({ req, res }) => ({ req, res }),
 
       formatError: (error) => {

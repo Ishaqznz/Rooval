@@ -2,13 +2,108 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input ChangeDoctorStatusInput {
+  status: String!
+  userId: String!
+}
+
 input ChangeStatusInput {
   status: Boolean!
   userId: String!
 }
 
+input CountDoctorsInput {
+  search: String!
+  status: String!
+}
+
+input CountUsersInput {
+  search: String!
+  status: String!
+}
+
+input DeleteDoctorInput {
+  userId: String!
+}
+
+type Doctor {
+  certificates: [String!]
+  email: String!
+  fullName: String!
+  id: ID!
+  onboarding: DoctorOnboarding
+  profilePhoto: String
+  status: String!
+}
+
+input DoctorFileUpdateInput {
+  certificates: [Upload!]!
+}
+
+input DoctorFileUploadInput {
+  certificates: [Upload!]!
+  profilePhoto: Upload!
+}
+
+type DoctorOnboarding {
+  acceptingPatients: Boolean!
+  bio: String!
+  consultationDuration: String!
+  consultationFee: String!
+  consultationModes: [String!]!
+  country: String!
+  experience: String!
+  gender: String!
+  languages: [String!]!
+  phone: String!
+  preferredMode: String!
+  profileVisibility: Boolean!
+  registrationNumber: String!
+  rejectionReason: String
+  specializations: [String!]!
+  state: String!
+  username: String!
+}
+
+input DoctorOnboardingInput {
+  acceptingPatients: Boolean! = true
+  bio: String!
+  consultationDuration: String!
+  consultationFee: String!
+  consultationModes: [String!]!
+  country: String!
+  experience: String!
+  gender: String!
+  languages: [String!]!
+  phone: String!
+  preferredMode: String!
+  profileVisibility: Boolean! = true
+  registrationNumber: String!
+  specializations: [String!]!
+  state: String!
+  username: String!
+}
+
 input EmailInput {
   email: String!
+}
+
+input FindByUsernameInput {
+  Username: String!
+}
+
+input FindUsersInput {
+  filter: String
+  limit: Float!
+  page: Float!
+  search: String
+}
+
+input GoogleLoginInput {
+  email: String!
+  fullName: String!
+  googleId: String!
+  role: String!
 }
 
 input LoginInput {
@@ -17,11 +112,21 @@ input LoginInput {
 }
 
 type Mutation {
-  AdminLogin(input: LoginInput!): User!
+  FileReUpload(input: DoctorFileUpdateInput!): Boolean!
+  addRejectionReason(input: RejectionReasonInput!): Boolean!
+  adminLogin(input: LoginInput!): User!
+  changeDoctorStatus(input: ChangeDoctorStatusInput!): Boolean!
   changeStatus(input: ChangeStatusInput!): Boolean!
   createUser(input: SignUpInput!): User!
+  deleteDoctor(input: DeleteDoctorInput!): Boolean!
+  deleteUser(input: deleteUserInput!): Boolean!
+  doctorFileUpload(input: DoctorFileUploadInput!): Boolean!
+  doctorOnboard(input: DoctorOnboardingInput!): Boolean!
   forgotPassword(input: EmailInput!): Boolean!
   loginUser(input: LoginInput!): User!
+  loginWithGoogle(input: GoogleLoginInput!): User!
+  logout: Boolean!
+  refreshToken: String!
   verifyEmail(input: TokenInput!): User!
   verifyResetPassword(input: PasswordInput!): User!
   verifyResetToken(input: TokenInput!): User!
@@ -32,8 +137,18 @@ input PasswordInput {
 }
 
 type Query {
-  findDoctors: [User!]!
-  findUsers: [User!]!
+  countDoctors(input: CountDoctorsInput!): Float!
+  countUsers(input: CountUsersInput!): Float!
+  findDoctor: Doctor!
+  findDoctorByUsername(input: FindByUsernameInput!): Doctor!
+  findDoctors(input: findDoctorsInput!): [Doctor!]!
+  findUser: User!
+  findUsers(input: FindUsersInput!): [User!]!
+}
+
+input RejectionReasonInput {
+  doctorId: String!
+  rejectionReason: String!
 }
 
 input SignUpInput {
@@ -47,10 +162,24 @@ input TokenInput {
   token: String!
 }
 
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
 type User {
-  email: String!
+  email: String
   fullName: String!
-  id: ID!
+  id: ID
   isAdmin: Boolean!
   isBlocked: Boolean!
+}
+
+input deleteUserInput {
+  userId: String!
+}
+
+input findDoctorsInput {
+  filter: String
+  limit: Float!
+  page: Float!
+  search: String
 }

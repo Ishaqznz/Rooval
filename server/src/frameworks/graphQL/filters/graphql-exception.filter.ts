@@ -1,5 +1,6 @@
 import { Catch, HttpStatus } from '@nestjs/common';
 import { GqlExceptionFilter } from '@nestjs/graphql';
+import { GraphQLError } from 'graphql';
 import { BusinessRuleViolationError } from 'src/core/errors/business-rule.error';
 import { NotFoundError } from 'src/core/errors/not-found.error';
 import { UnAuthorizedError } from 'src/core/errors/unauthorized.error';
@@ -7,7 +8,8 @@ import { UnAuthorizedError } from 'src/core/errors/unauthorized.error';
 @Catch()
 export class GlobalGraphQLExceptionFilter implements GqlExceptionFilter {
   catch(exception: any) {
-    console.log('Caught exception: ', exception);
+    console.log('Caught exception:', exception);
+
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let code = 'INTERNAL_ERROR';
     let message = 'Internal server error';
@@ -28,12 +30,15 @@ export class GlobalGraphQLExceptionFilter implements GqlExceptionFilter {
       message = exception.message;
     }
 
-    return {
-      success: false,
-      message,
-      code,
-      status,
-      timestamp: new Date().toISOString(),
-    };
+    console.log('Final formatted message:', message, code);
+
+    return new GraphQLError(message, {
+      extensions: {
+        code,
+        status,
+        success: false,
+        timestamp: new Date().toISOString(),
+      },
+    });
   }
 }
