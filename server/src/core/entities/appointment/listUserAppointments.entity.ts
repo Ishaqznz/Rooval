@@ -1,0 +1,29 @@
+import { AppointmentStatus } from "src/core/enums/user/appointment.enums";
+import { AppointmentType } from "src/core/enums/user/profile.enum";
+
+
+export class ListUserAppointments {
+    constructor(
+        public readonly input: {
+            userId: string,
+            page: number,
+            limit: number,
+            search?: string,
+            appointmentType?: AppointmentType,
+            appointmentStatus?: AppointmentStatus
+        }
+    ) { }
+
+    static create(
+        input: {
+            userId: string,
+            page: number,
+            limit: number,
+            search?: string,
+            appointmentType?: AppointmentType,
+            appointmentStatus?: AppointmentStatus
+        }
+    ): ListUserAppointments {
+        return new ListUserAppointments(input)
+    }
+}

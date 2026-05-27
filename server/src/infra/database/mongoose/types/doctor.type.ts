@@ -1,0 +1,1 @@
+export type DoctorStatus = 'rejected' | 'approved' | 'pending';

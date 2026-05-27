@@ -1,0 +1,739 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Appointment {
+  amount: Float
+  bufferTime: Float!
+  cancelReason: String
+  cancelledBy: String
+  createdAt: DateTime!
+  doctor: Doctor!
+  doctorId: String!
+  id: ID!
+  isCheckedIn: Boolean!
+  notes: String
+  patientId: String!
+  paymentId: String
+  paymentStatus: PaymentStatus!
+  reason: String
+  reminderSent: Boolean!
+  session: AppointmentAvailability!
+  slotDuration: Float!
+  status: AppointmentStatus!
+  type: AppointmentType!
+  updatedAt: DateTime!
+  user: User
+}
+
+type AppointmentAvailability {
+  endTime: DateTime!
+  startTime: DateTime!
+}
+
+input AppointmentAvailabilityInput {
+  endTime: DateTime!
+  startTime: DateTime!
+}
+
+enum AppointmentStatus {
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+  SCHEDULED
+}
+
+enum AppointmentType {
+  OFFLINE
+  ONLINE
+}
+
+enum Audience {
+  BOTH
+  DOCTOR
+  USER
+}
+
+enum AuthFilter {
+  ALL
+  GOOGLE
+  PASSWORD
+}
+
+type AvailabilitySession {
+  endTime: String!
+  startTime: String!
+}
+
+input AvailabilitySessionInput {
+  endTime: String!
+  startTime: String!
+}
+
+input CancelAppointmentByDoctorInput {
+  appointmentId: String!
+  reason: String!
+}
+
+input CancelAppointmentInput {
+  appointmentId: String!
+  reason: String!
+}
+
+input ChangeDoctorStatusInput {
+  status: String!
+  userId: String!
+}
+
+input ChangePasswordInput {
+  newPassword: String!
+  oldPassword: String!
+}
+
+input ChangeStatusInput {
+  status: Boolean!
+  userId: String!
+}
+
+type Clinic {
+  address: String
+  country: String
+  name: String
+  phoneNumber: String
+  workingDays: String
+}
+
+input ClinicInput {
+  address: String
+  country: String
+  name: String
+  phoneNumber: String
+  workingDays: String
+}
+
+input ConsulationSettingsInput {
+  cancellationPolicy: String
+  duration: Float
+  inPersonFee: Float
+  sessionBufferTime: String
+  type: ConsultationType
+  videoFee: Float
+}
+
+type Consultation {
+  cancellationPolicy: String
+  consultationFee: Float
+  consultationModes: [String!]
+  duration: String
+  inPersonFee: Float
+  sessionBufferTime: String
+  type: String
+  videoFee: Float
+}
+
+enum ConsultationType {
+  IN_PERSON
+  ONLINE
+}
+
+type Conversation {
+  createdAt: DateTime!
+  id: ID!
+  lastMessage: String!
+  lastMessageAt: DateTime!
+  lastMessageType: MessageType!
+  participants: [ConversationParticipantsModel!]!
+  updatedAt: DateTime!
+}
+
+input ConversationParticipants {
+  userId: String!
+}
+
+type ConversationParticipantsModel {
+  role: Role!
+  userId: String!
+}
+
+input CountDoctorsInput {
+  search: String!
+  status: String!
+}
+
+input CountUsersInput {
+  search: String!
+  status: String!
+}
+
+input CreateAppointmentInput {
+  amount: Float!
+  appointmentType: DoctorAppointmentType!
+  bufferTime: Float!
+  doctorId: String!
+  session: AppointmentAvailabilityInput!
+  slotDuration: Float!
+}
+
+input CreateConversationInput {
+  lastMessage: String!
+  lastMessageAt: DateTime!
+  lastMessageType: MessageType!
+  participants: [ConversationParticipants!]!
+}
+
+input CreatePaymentSessionInput {
+  appointmentId: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum DayOfWeek {
+  FRIDAY
+  MONDAY
+  SATURDAY
+  SUNDAY
+  THURSDAY
+  TUESDAY
+  WEDNESDAY
+}
+
+input DeleteDoctorInput {
+  userId: String!
+}
+
+type Doctor {
+  appointments: [Appointment!]!
+  availabilities: [DoctorAvailability!]!
+  availability: [DoctorAvailability!]
+  certificates: [String!]
+  email: String!
+  fullName: String!
+  id: ID!
+  profile: DoctorProfile
+  profilePhoto: String
+  status: String!
+}
+
+enum DoctorAppointmentType {
+  BOTH
+  OFFLINE
+  ONLINE
+}
+
+type DoctorAvailability {
+  dayOfWeek: DayOfWeek!
+  doctorId: ID!
+  endDate: String
+  id: ID!
+  isAvailable: Boolean!
+  sessions: [AvailabilitySession!]
+  slotDuration: Float
+  startDate: String!
+  timezone: String!
+}
+
+input DoctorFileUpdateInput {
+  certificates: [Upload!]!
+}
+
+input DoctorFileUploadInput {
+  certificates: [Upload!]!
+  profilePhoto: Upload!
+}
+
+input DoctorFilterInput {
+  availableToday: Boolean
+  city: String
+  consultationType: ConsultationType
+  maxFee: Float
+  minExperience: Int
+  minFee: Float
+  minRating: Float
+  search: String
+  specialization: [String!]
+}
+
+input DoctorOnboardingInput {
+  acceptingPatients: Boolean! = true
+  bio: String!
+  consultationDuration: Float!
+  consultationFee: Float!
+  consultationModes: [ConsultationType!]!
+  country: String!
+  experience: Float!
+  gender: String!
+  languages: [String!]!
+  phone: String!
+  preferredMode: ConsultationType!
+  profileVisibility: Boolean! = true
+  registrationNumber: String!
+  specializations: [DoctorSpecialization]
+  state: String!
+  username: String!
+}
+
+type DoctorProfile {
+  clinic: Clinic
+  consultationSettings: Consultation
+  personal: Personal
+}
+
+enum DoctorSortBy {
+  AVAILABILITY
+  EXPERIENCE
+  FEE
+  RATING
+}
+
+enum DoctorSortField {
+  CREATEDAT
+  EMAIL
+  EXPERIENCE
+  FULLNAME
+}
+
+input DoctorSortInput {
+  order: OrderBy! = DESC
+  sortBy: DoctorSortBy! = EXPERIENCE
+}
+
+enum DoctorSortOrder {
+  ASC
+  DESC
+}
+
+enum DoctorSpecialization {
+  CARDIOLOGIST
+  DERMATOLOGIST
+  ENT_SPECIALIST
+  GENERAL_PHYSICIAN
+  NEUROLOGIST
+  ORTHOPEDIC_SURGEON
+  PEDIATRICIAN
+  PSYCHIATRIST
+}
+
+enum DoctorStatusFilter {
+  ALL
+  APPROVED
+  PENDING
+  REJECTED
+}
+
+input EmailInput {
+  email: String!
+}
+
+input FindByUsernameInput {
+  Username: String!
+}
+
+input FindDoctorsInput {
+  consultationMode: consultationFilter
+  filter: DoctorStatusFilter
+  limit: Float!
+  maxExperience: Float
+  minExperience: Float
+  page: Float!
+  search: String
+  sortBy: DoctorSortField
+  sortOrder: DoctorSortOrder
+  specialization: String
+}
+
+input FindUserByIdInput {
+  userId: String!
+}
+
+input FindUsersInput {
+  authMethod: AuthFilter
+  filter: StatusFilter
+  limit: Float!
+  page: Float!
+  role: RoleFilter
+  search: String
+  sortBy: SortField
+  sortOrder: SortOrder
+}
+
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+}
+
+input GetConversationByIdInput {
+  conversationId: String!
+}
+
+input GetConversationsByParticipantsInput {
+  userIds: [String!]!
+}
+
+input GetDoctorInput {
+  doctorId: String!
+}
+
+input GetMessagesInput {
+  conversationId: String!
+}
+
+input GoogleLoginInput {
+  email: String!
+  fullName: String!
+  googleId: String!
+  role: String!
+}
+
+type Health {
+  allergies: [String!]
+  currentMedication: [String!]
+  preferredLanguage: String
+}
+
+input ListAllAppointmentsInput {
+  appointmentStatus: AppointmentStatus
+  appointmentType: AppointmentType
+  limit: Float!
+  page: Float!
+  search: String
+}
+
+type ListAppointments {
+  appointments: [Appointment!]!
+  appointmentsCount: Int!
+}
+
+input ListAppointmentsInput {
+  appointmentStatus: AppointmentStatus
+  appointmentType: AppointmentType
+  limit: Float!
+  page: Float!
+  search: String
+}
+
+type ListDoctors {
+  doctors: [Doctor!]!
+  doctorsCount: Int!
+}
+
+input ListDoctorsInput {
+  filter: DoctorFilterInput!
+  pagination: PaginationInput!
+  sorting: DoctorSortInput!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input MarkAsReadInput {
+  conversationId: String!
+  userId: String!
+}
+
+type Message {
+  content: String!
+  conversationId: String!
+  createdAt: DateTime!
+  fileName: String
+  fileUrl: String
+  id: ID!
+  mimeType: String
+  sender: MessageSender!
+  status: MessageStatus!
+  type: String!
+  updatedAt: DateTime!
+}
+
+type MessageSender {
+  userId: String!
+}
+
+enum MessageStatus {
+  DELIVERED
+  READ
+  SENT
+}
+
+enum MessageType {
+  DOCUMENT
+  EMOJI
+  IMAGE
+  TEXT
+}
+
+type Mutation {
+  FileReUpload(input: DoctorFileUpdateInput!): Boolean!
+  addRejectionReason(input: RejectionReasonInput!): Boolean!
+  adminLogin(input: LoginInput!): User!
+  cancelAppointment(input: CancelAppointmentInput!): Boolean!
+  cancelAppointmentByDoctor(input: CancelAppointmentByDoctorInput!): Boolean!
+  changeDoctorStatus(input: ChangeDoctorStatusInput!): Boolean!
+  changeStatus(input: ChangeStatusInput!): Boolean!
+  createAppointment(input: CreateAppointmentInput!): String!
+  createConversation(input: CreateConversationInput!): Conversation!
+  createPaymentSession(input: CreatePaymentSessionInput!): PaymentSession!
+  createUser(input: SignUpInput!): User!
+  deleteDoctor(input: DeleteDoctorInput!): Boolean!
+  deleteDoctorAvailabilities: Boolean!
+  deleteUser(input: deleteUserInput!): Boolean!
+  doctorChangePassword(input: ChangePasswordInput!): Boolean!
+  doctorFileUpload(input: DoctorFileUploadInput!): Boolean!
+  doctorOnboard(input: DoctorOnboardingInput!): Boolean!
+  doctorProfileUpdate(input: UpdateDoctorProfileInput!): Boolean!
+  forgotPassword(input: EmailInput!): Boolean!
+  loginUser(input: LoginInput!): User!
+  loginWithGoogle(input: GoogleLoginInput!): User!
+  logout: Boolean!
+  markAllAsRead: Boolean!
+  markAsRead(input: MarkAsReadInput!): Boolean!
+  refreshToken: String!
+  sendAdminNotification(input: SendAdminNotificationInput!): Boolean!
+  sendMessage(input: SendMessageInput!): Message!
+  updateLastMessage(input: UpdateLastMessageInput!): Boolean!
+  updateUserProfile(input: UpdateUserProfileInput!): Boolean!
+  updateUserProfilePhoto(input: UserUpdateProfileInput!): String!
+  uploadMessageFile(input: UploadMessageFileInput!): String!
+  upsertDoctorAvailability(input: [UpsertDoctorAvailabilityInput!]!): Boolean!
+  verifyEmail(input: TokenInput!): User!
+  verifyResetPassword(input: PasswordInput!): User!
+  verifyResetToken(input: TokenInput!): User!
+}
+
+type Notification {
+  content: String!
+  createdAt: DateTime!
+  id: String!
+  isRead: Boolean!
+  receiverId: String!
+  type: NotificationType!
+}
+
+enum NotificationType {
+  ALERT
+  ANNOUNCEMENT
+  APPOINTMENT
+  MESSAGE
+  PAYMENT
+  REMINDER
+  SECURITY
+  SYSTEM
+  VIDEO_CALL
+}
+
+enum OrderBy {
+  ASC
+  DESC
+}
+
+input PaginationInput {
+  limit: Float!
+  page: Float!
+}
+
+input PasswordInput {
+  password: String!
+}
+
+type PaymentSession {
+  url: String!
+}
+
+enum PaymentStatus {
+  FAILED
+  PAID
+  PENDING
+}
+
+type Personal {
+  bio: String
+  country: String
+  experience: Float
+  gender: String
+  languages: [String!]
+  phone: String
+  preferredMode: String
+  profileVisibility: Boolean
+  registrationNumber: String
+  specializations: [String!]
+  state: String
+  username: String
+}
+
+type Query {
+  countDoctors(input: CountDoctorsInput!): Float!
+  countUsers(input: CountUsersInput!): Float!
+  findDoctor: Doctor!
+  findDoctorByUsername(input: FindByUsernameInput!): Doctor!
+  findDoctors(input: FindDoctorsInput!): [Doctor!]!
+  findUser: User!
+  findUserAppointments: [Appointment!]!
+  findUserById(input: FindUserByIdInput!): User!
+  findUserNotifications: [Notification!]!
+  findUsers(input: FindUsersInput!): [User!]!
+  getConversationById(input: GetConversationByIdInput!): Conversation!
+  getConversationByParticipants(input: GetConversationsByParticipantsInput!): [Conversation!]!
+  getDoctor(input: GetDoctorInput!): Doctor!
+  getDoctorSlotsByDate(input: SlotInput!): [Slot!]!
+  getMessages(input: GetMessagesInput!): [Message!]!
+  getUserConversations: [Conversation!]!
+  listAllAppointments(input: ListAllAppointmentsInput!): ListAppointments!
+  listAppointments(input: ListAppointmentsInput!): ListAppointments!
+  listDoctors(input: ListDoctorsInput!): ListDoctors!
+  listUserAppointments(input: ListAppointmentsInput!): ListAppointments!
+}
+
+input RejectionReasonInput {
+  doctorId: String!
+  rejectionReason: String!
+}
+
+enum Role {
+  DOCTOR
+  USER
+}
+
+enum RoleFilter {
+  ADMIN
+  ALL
+  USER
+}
+
+input SendAdminNotificationInput {
+  audience: Audience!
+  content: String!
+  type: NotificationType!
+}
+
+input SendMessageInput {
+  content: String!
+  fileName: String
+  fileUrl: String
+  mimeType: String
+  receiverId: String!
+  senderId: String!
+  status: MessageStatus!
+  type: MessageType
+}
+
+input SignUpInput {
+  email: String!
+  fullName: String!
+  password: String!
+  role: String!
+}
+
+type Slot {
+  endTime: DateTime!
+  startTime: DateTime!
+}
+
+input SlotInput {
+  date: String!
+  doctorId: String!
+}
+
+enum SortField {
+  CREATEDAT
+  EMAIL
+  FULLNAME
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+enum StatusFilter {
+  ACTIVE
+  ALL
+  BLOCKED
+}
+
+input TokenInput {
+  token: String!
+}
+
+input UpdateDoctorProfileInput {
+  bio: String
+  clinic: ClinicInput
+  consultationSettings: ConsulationSettingsInput
+  fullName: String
+  phoneNumber: String
+  registrationNumber: String
+}
+
+input UpdateLastMessageInput {
+  conversationId: String!
+  lastMessage: String!
+  lastMessageAt: DateTime!
+  lastMessageType: MessageType!
+}
+
+input UpdateUserProfileInput {
+  address: String
+  allergies: [String!]
+  currentMedication: [String!]
+  fullName: String
+  gender: Gender
+  phoneNumber: String
+  preferredLanguage: String
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+input UploadMessageFileInput {
+  file: Upload!
+}
+
+input UpsertDoctorAvailabilityInput {
+  dayOfWeek: DayOfWeek!
+  endDate: String!
+  sessions: [AvailabilitySessionInput!]!
+  slotDuration: String!
+  startDate: String!
+  timezone: String!
+}
+
+type User {
+  appointments: [Appointment!]!
+  email: String
+  fullName: String!
+  id: ID
+  isAdmin: Boolean!
+  isBlocked: Boolean!
+  profile: UserProfile
+}
+
+type UserPersonalInfo {
+  address: String
+  gender: String
+  phoneNumber: String
+  profilePhoto: String
+}
+
+type UserProfile {
+  health: Health!
+  personal: UserPersonalInfo!
+}
+
+input UserUpdateProfileInput {
+  profilePhoto: Upload!
+}
+
+enum consultationFilter {
+  ALL
+  BOTH
+  IN_CLINIC
+  ONLINE
+}
+
+input deleteUserInput {
+  userId: String!
+}
