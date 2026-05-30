@@ -21,6 +21,11 @@ import { IListAllAppointmentsRequestDTO } from "src/application/dto/appointment/
 import { ListAllAppointments } from "src/core/entities/appointment/listAllAppointment.entity";
 import { IListUserAppointmentsRequestDTO } from "src/application/dto/appointment/request/listUser.request.dto";
 import { ListUserAppointments } from "src/core/entities/appointment/listUserAppointments.entity";
+import { AppointmentErrorType } from "src/core/enums/appointments/appointment.enums";
+import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface";
+import { DeleteAppointmentsBySession } from "src/core/entities/appointment/deleteAppointmentsBySession.entity";
+import { IsAvailableByStatus } from "src/core/entities/appointment/isAvailableByStatus.entity";
+import { AppointmentDomainService } from "src/core/services/appointment/appointmentDomainService";
 
 @Injectable()
 export class AppointmentUseCase implements IAppointmentUseCase {
@@ -43,11 +48,19 @@ export class AppointmentUseCase implements IAppointmentUseCase {
 
     async createAppointment(input: ICreateAppointmentRequestDTO): Promise<string> {
         if (input.userId == input.doctorId) {
-            throw new BusinessRuleViolationError(UserErrorType.ValidationFailed);
+            throw new BusinessRuleViolationError(AppointmentErrorType.DOCTOR_NOT_ALLOWED_FOR_THIS_OPERATION);
         }
 
-        const entity = AppointmentInputMapper.toAppointmentEntity(input);
-        
+        let appointmentNumber: number;
+        let exists = true;
+        while (exists) {
+            appointmentNumber = AppointmentDomainService.createAppointmentNo();
+            exists = await this._appointmentRepository
+                .existsByAppointmentNo(appointmentNumber);
+        }
+
+        const entity = AppointmentInputMapper.toAppointmentEntity(input, appointmentNumber);
+
         if (entity.ok == false) {
             throw new BusinessRuleViolationError(entity.error);
         }
@@ -59,13 +72,11 @@ export class AppointmentUseCase implements IAppointmentUseCase {
         const existing = await this._appointmentRepository.findOverLapping(overLappingEntity);
 
         if (existing.length > 0) {
-            throw new BusinessRuleViolationError("Slot already booked");
+            throw new BusinessRuleViolationError(AppointmentErrorType.SLOT_ALREADY_BOOKED);
         }
 
         const appointment = await this._appointmentRepository.create(entity.value);
         if (!appointment) throw new BusinessRuleViolationError(UserErrorType.SYSTEM_ERROR)
-
-        console.log('the appointment creation input: ', input)
 
         await this._notificationOrchestrator.notify({
             content: NotificationMessages.NEW_APPOINTMENT_CREATED,
@@ -120,12 +131,12 @@ export class AppointmentUseCase implements IAppointmentUseCase {
         const entities = await this._appointmentRepository.listAppointments(entity)
         const appointments = AppointmentOutputMapper.toAppointmentDtos(entities)
 
-        if (appointments.ok == false)  {
+        if (appointments.ok == false) {
             throw new BusinessRuleViolationError(appointments.error)
         }
 
         const totalCount = await this._appointmentRepository.countByDoctorId(input.doctorId)
-        return { appointments: appointments.value,  appointmentsCount: totalCount }
+        return { appointments: appointments.value, appointmentsCount: totalCount }
     }
 
     async listUserAppointments(input: IListUserAppointmentsRequestDTO): Promise<IListAppointmentsResponseDTO> {
@@ -149,8 +160,18 @@ export class AppointmentUseCase implements IAppointmentUseCase {
         if (appointments.ok == false) {
             throw new BusinessRuleViolationError(appointments.error)
         }
-        
+
         const totalCount = await this._appointmentRepository.countAll()
         return { appointments: appointments.value, appointmentsCount: totalCount }
+    }
+
+    async deleteUnpaidSessionAppointments(input: IAppointmentAvailabilitySession): Promise<boolean> {
+        const entity = DeleteAppointmentsBySession.create(input)
+        return await this._appointmentRepository.deleteUnpaidSessionAppointments(entity)
+    }
+
+    async isAvailableByStatus(input: IAppointmentAvailabilitySession): Promise<boolean> {
+        const entity = IsAvailableByStatus.create(input)
+        return await this._appointmentRepository.isAvailableByStatus(entity)
     }
 }

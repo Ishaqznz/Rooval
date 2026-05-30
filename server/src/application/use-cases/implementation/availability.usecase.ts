@@ -38,12 +38,9 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
     }
 
     async getSlotsBydate(input: IGetSlotsRequestDTO): Promise<ISlotResponseDTO[]> {
-
-        // creating an entity
         const entity = GetAvailability.create(input.doctorId, input.date);
         if (entity.ok == false) throw new BusinessRuleViolationError(entity.error);
 
-        // fetching all the availabilities based on doctorId and day
         const availabilities = await this._availabilityRepository.getByDay(entity.value);
 
         const pureDate = new Date(input.date).toISOString().split("T")[0];
@@ -74,15 +71,14 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
             };
         });
 
-        // creating all the slots using domain service
         const slots = AvailabilityDomainService.toSlots(preparedAvailabilities);
 
         if (slots.length === 0) return []
         const minStart = new Date(Math.min(...slots.map(s => s.startTime.getTime())));
         const maxEnd = new Date(Math.max(...slots.map(s => s.endTime.getTime())));
 
-        // creating an overlapping entity and finding any overlapping exists
         const overlappingEntity = AppointmentOverlap.create(input.doctorId, minStart, maxEnd)
+        console.log('the max end and also start end in the getSlotsByDate method: ', minStart, maxEnd)
         const appointments = await this._appointmentRepository.findOverLapping(overlappingEntity);
         
         const availableSlots = slots.filter(slot => {

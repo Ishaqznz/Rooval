@@ -5,7 +5,7 @@ import { IAppointmentResponseDTO } from "src/application/dto/appointment/respons
 
 export class AppointmentInputMapper {
     static toAppointmentEntity(
-        input: ICreateAppointmentRequestDTO
+        input: ICreateAppointmentRequestDTO, appointmentNo: number
     ): { ok: true, value: Appointment } | { ok: false, error: string } {
 
         const appointmentEntity = Appointment.create(
@@ -18,7 +18,8 @@ export class AppointmentInputMapper {
             input.appointmentType,
             input.amount,
             input.slotDuration,
-            input.bufferTime
+            input.bufferTime,
+            appointmentNo
         )
 
         if (appointmentEntity.ok == false) {
@@ -42,6 +43,7 @@ export class AppointmentInputMapper {
             },
             status: entity.status,
             type: entity.type,
+            appointmentNo: entity.appointmentNo,
             reason: entity.reason,
             notes: entity.notes,
             paymentStatus: entity.paymentStatus,

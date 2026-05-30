@@ -711,9 +711,9 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                 >
                   Book Appointment
                 </button>
-                <button onClick={() => handleChat(doctor.id)} className="px-5 py-2.5 border-2 border-[#9b7ab8] text-[#9b7ab8] rounded-xl font-semibold text-sm hover:bg-purple-50 transition-all active:scale-95">
+                {/* <button onClick={() => handleChat(doctor.id)} className="px-5 py-2.5 border-2 border-[#9b7ab8] text-[#9b7ab8] rounded-xl font-semibold text-sm hover:bg-purple-50 transition-all active:scale-95">
                   Chat
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

@@ -10,6 +10,7 @@ export class ExtendedAppointment {
     public readonly session: IAppointmentAvailabilitySession,
     public readonly status: AppointmentStatus,
     public readonly type: DoctorAppointmentType,
+    public readonly appointmentNo: number,
 
     public readonly reason?: string,
     public readonly notes?: string,
@@ -43,6 +44,7 @@ export class ExtendedAppointment {
 
     status: string;
     type: string;
+    appointmentNo: number
 
     reason?: string;
     notes?: string;
@@ -72,6 +74,7 @@ export class ExtendedAppointment {
 
       data.status as AppointmentStatus, 
       data.type as DoctorAppointmentType,    
+      data.appointmentNo,
 
       data.reason,
       data.notes,

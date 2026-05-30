@@ -72,3 +72,11 @@ export const UPDATE_PROFILE = () => ({
     }
   `
 })
+
+export const IS_CHAT_ENABLED = () => ({
+  query: ` #graphql
+    mutation isChatEnabled($input: IsChatEnabledInput!) {
+      isChatEnabled(input: $input)
+    } 
+  `
+})

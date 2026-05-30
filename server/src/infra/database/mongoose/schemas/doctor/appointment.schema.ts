@@ -34,6 +34,12 @@ export class AppointmentSchema {
   })
   type: DoctorAppointmentType;
 
+  @Prop({
+    type: Number,
+    required: true
+  })
+  appointmentNo: number
+
   @Prop({ required: false })
   reason: string;
 

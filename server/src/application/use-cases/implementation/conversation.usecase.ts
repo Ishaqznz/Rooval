@@ -28,10 +28,8 @@ export class ConversationUseCase implements IConversationUseCase {
     async createConversation(
         input: ICreateConversationRequestDTO
     ): Promise<IConversationResponseDTO> {
-        console.log('create conversation block code input: ', input)
         const participantsWithRole = await Promise.all(
             input.participants.map(async (participant) => {
-
                 const role = await this._userUseCase.findByRole(
                     participant.userId
                 );
@@ -43,8 +41,6 @@ export class ConversationUseCase implements IConversationUseCase {
             })
         );
 
-        console.log('participants with role: ', participantsWithRole)
-        console.log('input in the creating conversation: ', input)
         const entity = CreateConversation.create({
             participants: participantsWithRole,
             lastMessage: input.lastMessage,
@@ -52,12 +48,8 @@ export class ConversationUseCase implements IConversationUseCase {
             lastMessageAt: input.lastMessageAt
         });
 
-        console.log('entity in the creating conversation: ', entity)
-
         const convEntity =
             await this._conversationRepository.createConversation(entity);
-
-        console.log('the conv entity: ', convEntity);
 
         return ConversationOutputMapper.toConversationDto(convEntity);
     }

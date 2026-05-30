@@ -14,6 +14,9 @@ import { ProfilePhotoInputMapper } from 'src/application/mapper/user/profilePhot
 import { IUpdateProfileRequestDTO } from 'src/application/dto/user/request/udpateProfile.input';
 import { UserProfileUpdate } from 'src/core/entities/user/updateProfile.entity';
 import { Role } from 'src/core/enums/user/role.enum';
+import { IChatEnabledRequestDTO } from 'src/application/dto/user/request/isChatEnabled.request.dto';
+import { IsChatEnabled } from 'src/core/entities/user/isChatEnabled.entity';
+import { IDoctorRepository } from 'src/core/repositories/doctor.repository.interface';
 
 @Injectable()
 export class UserUseCase implements IUserUseCase {
@@ -23,6 +26,9 @@ export class UserUseCase implements IUserUseCase {
 
     @Inject('ICloudinaryService')
     private readonly _cloudinaryService: ICloudinaryService,
+
+    @Inject('IDoctorRepository')
+    private readonly _doctorRepository: IDoctorRepository
   ) { }
 
   async findUsers(input: IFindUsersRequestDTO): Promise<IUserResponseDTO[]> {
@@ -85,5 +91,10 @@ export class UserUseCase implements IUserUseCase {
 
   async findAdminId(): Promise<string | null> {
     return await this._userRepository.findAdminId()
+  }
+
+  async isChatEnabled(input: IChatEnabledRequestDTO): Promise<boolean> {
+    const entity = IsChatEnabled.create(input)
+    return await this._doctorRepository.isChatEnabled(entity)
   }
 }

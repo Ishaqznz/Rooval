@@ -40,5 +40,5 @@ export enum UserErrorType {
   ROLE_NOT_FOUND = 'Role Not Found!',
   INVALID_FILE = 'Invalid File',
   SYSTEM_ERROR = 'System Error',
-  USER_HAVE_NO_ACCESS = 'User Have no access with this account!'
+  USER_HAVE_NO_ACCESS = 'User have no access with this account!'
 }

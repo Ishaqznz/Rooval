@@ -1,6 +1,5 @@
 import { Field, ID, ObjectType } from "@nestjs/graphql";
-import { AppointmentStatus, PaymentStatus } from "src/core/enums/user/appointment.enums";
-import { AppointmentType } from "src/core/enums/user/profile.enum";
+import { AppointmentStatus, DoctorAppointmentType, PaymentStatus } from "src/core/enums/user/appointment.enums";
 import { AppointmentAvailability } from "./appointmentAvailability.model";
 
 @ObjectType()
@@ -20,8 +19,11 @@ export class Appointment {
   @Field(() => AppointmentStatus)
   status: AppointmentStatus;
 
-  @Field(() => AppointmentType)
-  type: AppointmentType;
+  @Field(() => DoctorAppointmentType)
+  type: DoctorAppointmentType;
+
+  @Field()
+  appointmentNo: number
 
   @Field({ nullable: true })
   reason?: string;

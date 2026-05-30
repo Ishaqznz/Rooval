@@ -9,6 +9,7 @@ import { IRejectionReasonRequestDTO } from "src/application/dto/doctor/profile/r
 import { IUpdateProfileRequestDTO } from "src/application/dto/doctor/profile/request/updateProfile.request.dto"
 import { IListDoctorsRequestDTO } from "src/application/dto/doctor/profile/request/listDoctors.request.dto"
 import { IListDoctorsResponseDTO } from "src/application/dto/doctor/profile/response/listDoctors.response.dto"
+import { IGrantChatAccessRequestDTO } from "src/application/dto/doctor/profile/request/grantChatAccess.request.dto"
 
 export interface IDoctorUseCase {
     findDoctors(input: IFindDoctorsRequestDTO): Promise<IDoctorResponseDTO[]>
@@ -28,5 +29,6 @@ export interface IDoctorUseCase {
     changePassword(userId: string, input: IChangePasswordRequestDTO): Promise<boolean>
     listDoctors(input: IListDoctorsRequestDTO): Promise<IListDoctorsResponseDTO>
     getById(doctorId: string): Promise<IDoctorResponseDTO>
+    grantChatAccess(input: IGrantChatAccessRequestDTO): Promise<boolean>
 }
 

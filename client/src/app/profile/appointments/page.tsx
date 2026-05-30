@@ -6,6 +6,7 @@ import { AppointmentStatus, IListAppointment } from "@/interfaces/user/appointme
 import { appointmentServiceApi } from "@/services/appointmentApiService";
 import { paymentServiceApi } from "@/services/paymentApiService";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 
@@ -21,6 +22,7 @@ interface Appointment {
   session: { startTime: string; endTime: string };
   status: AppointmentStatusType;
   type: AppointmentType;
+  appointmentNo: number;
   reason?: string | null;
   notes?: string | null;
   paymentStatus: PaymentStatus;
@@ -33,9 +35,10 @@ interface Appointment {
   isCheckedIn?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  doctor: {
+    fullName: string;
+  };
 }
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const STATUS_BADGE: Record<AppointmentStatusType, { label: string; cls: string }> = {
   SCHEDULED: { label: 'Scheduled', cls: 'bg-blue-50 text-blue-700 border border-blue-100' },
@@ -44,11 +47,11 @@ const STATUS_BADGE: Record<AppointmentStatusType, { label: string; cls: string }
   NO_SHOW:   { label: 'No-show',   cls: 'bg-yellow-50 text-yellow-700 border border-yellow-100' },
 };
 
-const PAYMENT_CLS: Record<PaymentStatus, string> = {
-  PENDING:  'text-yellow-600',
-  PAID:     'text-green-600',
-  REFUNDED: 'text-blue-600',
-  FAILED:   'text-red-600',
+const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
+  PENDING:  { label: 'Payment Pending', cls: 'bg-yellow-50 text-yellow-700 border border-yellow-100' },
+  PAID:     { label: 'Paid',            cls: 'bg-green-50 text-green-700 border border-green-100' },
+  REFUNDED: { label: 'Refunded',        cls: 'bg-blue-50 text-blue-700 border border-blue-100' },
+  FAILED:   { label: 'Payment Failed',  cls: 'bg-red-50 text-red-700 border border-red-100' },
 };
 
 const TABS: { label: string; value: FilterTab }[] = [
@@ -60,14 +63,9 @@ const TABS: { label: string; value: FilterTab }[] = [
 
 const PAGE_LIMIT = 8;
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatDateTime(iso?: string | null) {
+function formatDate(iso?: string | null) {
   if (!iso) return '—';
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-    + ' · '
-    + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function formatTime(iso?: string | null) {
@@ -75,8 +73,98 @@ function formatTime(iso?: string | null) {
   return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 
-// ─── Cancel Reason Modal ──────────────────────────────────────────────────────
+function formatDateTime(iso?: string | null) {
+  if (!iso) return '—';
+  return formatDate(iso) + ' · ' + formatTime(iso);
+}
 
+function getDuration(start?: string | null, end?: string | null) {
+  if (!start || !end) return null;
+  const diff = new Date(end).getTime() - new Date(start).getTime();
+  const mins = Math.round(diff / 60000);
+  if (mins < 60) return `${mins} min`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+/* ── Icons ───────────────────────────────────────────────────── */
+function IconVideo({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 10l4.55-2.27A1 1 0 0 1 21 8.72v6.56a1 1 0 0 1-1.45.9L15 14"/>
+      <rect x="2" y="7" width="13" height="10" rx="2"/>
+    </svg>
+  );
+}
+function IconBuilding({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 21h18M6 21V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14"/>
+      <path d="M9 10h2M13 10h2M9 14h2M13 14h2M9 18h2M13 18h2"/>
+    </svg>
+  );
+}
+function IconClock({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
+    </svg>
+  );
+}
+function IconDoc({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/>
+    </svg>
+  );
+}
+function IconUser({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </svg>
+  );
+}
+function IconHash({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/>
+      <line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>
+    </svg>
+  );
+}
+function IconCreditCard({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+    </svg>
+  );
+}
+function IconXCircle({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+    </svg>
+  );
+}
+function IconMessage({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+}
+function IconCheckIn({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  );
+}
+
+/* ── Cancel Modal ────────────────────────────────────────────── */
 function CancelModal({
   onConfirm,
   onClose,
@@ -88,7 +176,6 @@ function CancelModal({
 }) {
   const [reason, setReason] = useState('');
   const ref = useRef<HTMLTextAreaElement>(null);
-
   useEffect(() => { ref.current?.focus(); }, []);
 
   return (
@@ -132,83 +219,164 @@ function CancelModal({
   );
 }
 
-// ─── Detail Modal ─────────────────────────────────────────────────────────────
+/* ── Detail Modal ────────────────────────────────────────────── */
+function DetailModal({ appt, onClose }: { appt: Appointment; onClose: () => void }) {
+  const duration = getDuration(appt.session?.startTime, appt.session?.endTime);
 
-function DetailModal({
-  appt,
-  onClose,
-}: {
-  appt: Appointment;
-  onClose: () => void;
-}) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="bg-background rounded-xl border border-border shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+        className="bg-background rounded-xl border border-border shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
+        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h2 className="text-sm font-semibold text-foreground">Appointment Details</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-lg leading-none">✕</button>
-        </div>
-
-        <div className="px-5 py-4 space-y-4 text-sm">
-          {/* Status row */}
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_BADGE[appt.status].cls}`}>
               {STATUS_BADGE[appt.status].label}
             </span>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border">
+            <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border">
+              {appt.type === 'ONLINE'
+                ? <IconVideo className="w-3 h-3" />
+                : <IconBuilding className="w-3 h-3" />}
               {appt.type === 'IN_PERSON' ? 'In-person' : 'Online'}
             </span>
-            <span className={`text-xs font-medium ${PAYMENT_CLS[appt.paymentStatus]}`}>
-              {appt.paymentStatus.charAt(0) + appt.paymentStatus.slice(1).toLowerCase()}
-              {appt.amount != null ? ` · $${appt.amount}` : ''}
-            </span>
+            {appt.isCheckedIn && (
+              <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-100">
+                <IconCheckIn className="w-3 h-3" /> Checked in
+              </span>
+            )}
           </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-lg leading-none ml-2">✕</button>
+        </div>
 
-          {/* Session */}
-          <div className="rounded-lg bg-muted/40 border border-border p-3 space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Session</p>
-            <div className="grid grid-cols-2 gap-3">
+        <div className="px-5 py-4 space-y-4 text-sm">
+
+          {/* Session card */}
+          <div className="rounded-lg bg-muted/40 border border-border p-3.5 space-y-3">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Session</p>
+            <div className="grid grid-cols-3 gap-3 text-xs">
               <div>
-                <p className="text-xs text-muted-foreground mb-0.5">Start</p>
-                <p className="text-foreground">{formatDateTime(appt.session?.startTime)}</p>
+                <p className="text-muted-foreground mb-0.5">Date</p>
+                <p className="font-medium text-foreground">{formatDate(appt.session?.startTime)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground mb-0.5">End</p>
-                <p className="text-foreground">{formatTime(appt.session?.endTime)}</p>
+                <p className="text-muted-foreground mb-0.5">Time</p>
+                <p className="font-medium text-foreground">
+                  {formatTime(appt.session?.startTime)}
+                  {appt.session?.endTime && <> – {formatTime(appt.session.endTime)}</>}
+                </p>
+              </div>
+              {duration && (
+                <div>
+                  <p className="text-muted-foreground mb-0.5">Duration</p>
+                  <p className="font-medium text-foreground flex items-center gap-1">
+                    <IconClock className="w-3 h-3 text-muted-foreground" /> {duration}
+                  </p>
+                </div>
+              )}
+            </div>
+            {appt.bufferTime != null && appt.bufferTime > 0 && (
+              <p className="text-xs text-muted-foreground">
+                + {appt.bufferTime} min buffer after session
+              </p>
+            )}
+          </div>
+
+          {/* Doctor & IDs */}
+          <div className="rounded-lg bg-muted/40 border border-border p-3.5 space-y-2 text-xs">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Appointment info</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-1.5">
+                <IconUser className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="text-muted-foreground leading-tight">Doctor</p>
+                  <p className="font-medium text-foreground">{appt.doctor.fullName}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <IconHash className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="text-muted-foreground leading-tight">Appt. No.</p>
+                  <p className="font-medium text-foreground">#{appt.appointmentNo}</p>
+                </div>
               </div>
             </div>
+            {appt.createdAt && (
+              <p className="text-muted-foreground pt-1 border-t border-border/60">
+                Booked on {formatDateTime(appt.createdAt)}
+              </p>
+            )}
           </div>
 
-          {/* IDs */}
-          <div className="rounded-lg bg-muted/40 border border-border p-3 space-y-2 text-xs text-muted-foreground">
-            <p><span className="font-medium text-foreground">Appointment ID:</span> {appt.id}</p>
-            <p><span className="font-medium text-foreground">Doctor ID:</span> {appt.doctorId}</p>
-            {appt.paymentId && <p><span className="font-medium text-foreground">Payment ID:</span> {appt.paymentId}</p>}
+          {/* Payment */}
+          <div className="rounded-lg bg-muted/40 border border-border p-3.5 space-y-2 text-xs">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Payment</p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <IconCreditCard className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className={`font-medium px-2 py-0.5 rounded-full ${PAYMENT_BADGE[appt.paymentStatus].cls}`}>
+                  {PAYMENT_BADGE[appt.paymentStatus].label}
+                </span>
+              </div>
+              {appt.amount != null && (
+                <p className="font-semibold text-foreground text-sm">₹{appt.amount.toLocaleString('en-IN')}</p>
+              )}
+            </div>
+            {appt.paymentId && (
+              <p className="text-muted-foreground">Payment ID: <span className="font-mono text-foreground">{appt.paymentId}</span></p>
+            )}
           </div>
 
-          {appt.reason && (
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Reason for Visit</p>
-              <p className="text-foreground">{appt.reason}</p>
+          {/* Reason / Notes */}
+          {(appt.reason || appt.notes) && (
+            <div className="space-y-3">
+              {appt.reason && (
+                <div className="flex gap-2">
+                  <IconDoc className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Reason for Visit</p>
+                    <p className="text-foreground text-xs">{appt.reason}</p>
+                  </div>
+                </div>
+              )}
+              {appt.notes && (
+                <div className="flex gap-2">
+                  <IconDoc className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Doctor's Notes</p>
+                    <p className="text-foreground text-xs">{appt.notes}</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-          {appt.notes && (
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Notes</p>
-              <p className="text-foreground">{appt.notes}</p>
+
+          {/* Cancellation */}
+          {(appt.cancelReason || appt.cancelledBy) && (
+            <div className="rounded-lg border border-red-100 bg-red-50 p-3 space-y-1 text-xs">
+              <div className="flex items-center gap-1.5 mb-1">
+                <IconXCircle className="w-3.5 h-3.5 text-red-500" />
+                <p className="font-semibold text-red-700 text-[10px] uppercase tracking-wider">Cancellation Details</p>
+              </div>
+              {appt.cancelledBy && (
+                <p className="text-red-600">Cancelled by: <span className="font-medium">{appt.cancelledBy}</span></p>
+              )}
+              {appt.cancelReason && (
+                <p className="text-red-700">{appt.cancelReason}</p>
+              )}
             </div>
           )}
-          {appt.cancelReason && (
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Cancellation Reason</p>
-              <p className="text-destructive">{appt.cancelReason}</p>
-            </div>
+
+          {/* Reminder chip */}
+          {appt.reminderSent && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+              Reminder sent
+            </p>
           )}
         </div>
 
@@ -220,8 +388,7 @@ function DetailModal({
   );
 }
 
-// ─── Appointment Row ──────────────────────────────────────────────────────────
-
+/* ── Appointment Row ─────────────────────────────────────────── */
 function AppointmentRow({
   appt,
   onCancel,
@@ -237,47 +404,94 @@ function AppointmentRow({
   onPay: (id: string) => void;
   paying: boolean;
 }) {
+  const router = useRouter();
   const canCancel = appt.status === 'SCHEDULED';
   const canPay    = appt.paymentStatus === 'PENDING' && appt.status !== 'CANCELLED';
+  const duration  = getDuration(appt.session?.startTime, appt.session?.endTime);
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-      {/* Left: date + type */}
-      <div className="sm:w-44 shrink-0">
-        <p className="text-xs font-medium text-foreground leading-tight">
-          {formatDateTime(appt.session?.startTime)}
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3.5 border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+
+      {/* Left: date block */}
+      <div className="sm:w-48 shrink-0">
+        <p className="text-xs font-medium text-foreground leading-snug">
+          {formatDate(appt.session?.startTime)}
         </p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {appt.type === 'IN_PERSON' ? 'In-person' : 'Online'}
-          {appt.amount != null ? ` · $${appt.amount}` : ''}
+          {formatTime(appt.session?.startTime)}
+          {appt.session?.endTime && <> – {formatTime(appt.session.endTime)}</>}
+          {duration && <span className="ml-1 opacity-60">({duration})</span>}
         </p>
       </div>
 
-      {/* Middle: statuses */}
-      <div className="flex items-center gap-2 flex-1 flex-wrap">
-        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[appt.status].cls}`}>
-          {STATUS_BADGE[appt.status].label}
-        </span>
-        <span className={`text-xs font-medium ${PAYMENT_CLS[appt.paymentStatus]}`}>
-          {appt.paymentStatus.charAt(0) + appt.paymentStatus.slice(1).toLowerCase()}
-        </span>
-        {appt.cancelReason && (
-          <span className="text-xs text-muted-foreground truncate max-w-[200px]" title={appt.cancelReason}>
-            — {appt.cancelReason}
+      {/* Middle: info */}
+      <div className="flex-1 min-w-0 space-y-1">
+        {/* Row 1: doctor + appt no */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-medium text-foreground truncate">
+            Dr. {appt.doctor.fullName}
           </span>
-        )}
-        {appt.reason && !appt.cancelReason && (
-          <span className="text-xs text-muted-foreground truncate max-w-[200px]" title={appt.reason}>
+          <span className="text-xs text-muted-foreground">·</span>
+          <span className="text-xs text-muted-foreground">#{appt.appointmentNo}</span>
+        </div>
+
+        {/* Row 2: badges */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[appt.status].cls}`}>
+            {STATUS_BADGE[appt.status].label}
+          </span>
+          <span className="flex items-center gap-0.5 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+            {appt.type === 'ONLINE'
+              ? <IconVideo className="w-2.5 h-2.5" />
+              : <IconBuilding className="w-2.5 h-2.5" />}
+            <span className="ml-0.5">{appt.type === 'IN_PERSON' ? 'In-person' : 'Online'}</span>
+          </span>
+          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PAYMENT_BADGE[appt.paymentStatus].cls}`}>
+            {appt.paymentStatus === 'PAID' ? 'Paid' : PAYMENT_BADGE[appt.paymentStatus].label}
+            {appt.amount != null && appt.paymentStatus === 'PAID' ? ` · ₹${appt.amount.toLocaleString('en-IN')}` : ''}
+          </span>
+          {appt.isCheckedIn && (
+            <span className="flex items-center gap-0.5 text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-100">
+              <IconCheckIn className="w-2.5 h-2.5" /> Checked in
+            </span>
+          )}
+        </div>
+
+        {/* Row 3: reason or cancel reason */}
+        {appt.cancelReason ? (
+          <p className="text-[10px] text-red-500 truncate max-w-xs" title={appt.cancelReason}>
+            Cancelled: {appt.cancelReason}
+          </p>
+        ) : appt.reason ? (
+          <p className="text-[10px] text-muted-foreground truncate max-w-xs" title={appt.reason}>
             {appt.reason}
-          </span>
-        )}
+          </p>
+        ) : null}
       </div>
 
-      {/* Right: actions */}
+      {/* Right: amount + actions */}
       <div className="flex items-center gap-1.5 shrink-0">
+        {appt.amount != null && appt.paymentStatus !== 'PAID' && (
+          <span className="text-xs font-medium text-foreground mr-1">
+            ₹{appt.amount.toLocaleString('en-IN')}
+          </span>
+        )}
+
         <Button variant="outline" size="sm" className="h-7 text-xs px-2.5" onClick={onViewDetails}>
           Details
         </Button>
+
+        {appt.paymentStatus === 'PAID' && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs px-2.5 flex items-center gap-1 text-primary border-primary/30 hover:bg-primary/10"
+            onClick={() => router.push(`/messages?id=${appt.doctorId}`)}
+          >
+            <IconMessage className="w-3 h-3" />
+            Message
+          </Button>
+        )}
 
         {canPay && (
           <Button
@@ -306,18 +520,17 @@ function AppointmentRow({
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
+/* ── Page ────────────────────────────────────────────────────── */
 export default function UserAppointments() {
   const { user } = useAuth();
 
-  const [appointments, setAppointments]   = useState<Appointment[]>([]);
-  const [total, setTotal]                 = useState(0);
-  const [loading, setLoading]             = useState(true);
-  const [activeTab, setActiveTab]         = useState<FilterTab>('ALL');
-  const [search, setSearch]               = useState('');
+  const [appointments, setAppointments]       = useState<Appointment[]>([]);
+  const [total, setTotal]                     = useState(0);
+  const [loading, setLoading]                 = useState(true);
+  const [activeTab, setActiveTab]             = useState<FilterTab>('ALL');
+  const [search, setSearch]                   = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [page, setPage]                   = useState(1);
+  const [page, setPage]                       = useState(1);
   const [cancelTargetId, setCancelTargetId]   = useState<string | null>(null);
   const [cancellingId, setCancellingId]       = useState<string | null>(null);
   const [payingId, setPayingId]               = useState<string | null>(null);
@@ -325,7 +538,6 @@ export default function UserAppointments() {
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounce search input
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
@@ -335,7 +547,6 @@ export default function UserAppointments() {
     return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
   }, [search]);
 
-  // Reset page when tab changes
   useEffect(() => { setPage(1); }, [activeTab]);
 
   const fetchAppointments = useCallback(async () => {
@@ -355,6 +566,7 @@ export default function UserAppointments() {
             session { startTime endTime }
             status
             type
+            appointmentNo
             reason
             notes
             paymentStatus
@@ -367,6 +579,7 @@ export default function UserAppointments() {
             isCheckedIn
             createdAt
             updatedAt
+            doctor { fullName }
           }
           appointmentsCount
         `,
@@ -382,11 +595,8 @@ export default function UserAppointments() {
     }
   }, [page, activeTab, debouncedSearch]);
 
-  useEffect(() => {
-    fetchAppointments();
-  }, [fetchAppointments, user]);
+  useEffect(() => { fetchAppointments(); }, [fetchAppointments, user]);
 
-  // Cancel flow
   const handleCancelClick   = (id: string) => setCancelTargetId(id);
   const handleCancelConfirm = async (reason: string) => {
     if (!cancelTargetId) return;
@@ -413,7 +623,6 @@ export default function UserAppointments() {
     }
   };
 
-  // Payment flow (mirrors doctor/[id])
   const handlePay = async (appointmentId: string) => {
     setPayingId(appointmentId);
     try {
@@ -422,14 +631,11 @@ export default function UserAppointments() {
         fields: `url`,
       });
       if (response?.errors) {
-        toast.error('Failed to create a payment session');
+        toast.error(response?.errors?.[0]?.message || 'Failed to create a payment session');
         return;
       }
       const checkoutUrl = response?.data?.createPaymentSession?.url;
-      if (!checkoutUrl) {
-        toast.error('Invalid checkout session');
-        return;
-      }
+      if (!checkoutUrl) { toast.error('Invalid checkout session'); return; }
       window.location.href = checkoutUrl;
     } catch {
       toast.error('Something went wrong during payment');
@@ -444,7 +650,6 @@ export default function UserAppointments() {
     <div className="flex-1 p-6 sm:p-8">
       <div className="max-w-3xl space-y-5">
 
-        {/* Header */}
         <div>
           <h1 className="text-xl font-bold text-foreground">My Appointments</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -452,7 +657,7 @@ export default function UserAppointments() {
           </p>
         </div>
 
-        {/* Search + Tabs */}
+        {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
           <div className="relative flex-1 w-full sm:max-w-xs">
             <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -464,7 +669,6 @@ export default function UserAppointments() {
               className="w-full pl-8 pr-3 py-1.5 text-xs rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
-
           <div className="flex gap-1 flex-wrap">
             {TABS.map(tab => (
               <button
@@ -482,21 +686,26 @@ export default function UserAppointments() {
           </div>
         </div>
 
-        {/* Table card */}
+        {/* Table */}
         <div className="rounded-lg border border-border bg-background overflow-hidden">
-          {/* Column headers */}
-          <div className="hidden sm:grid grid-cols-[11rem_1fr_auto] gap-3 px-4 py-2 bg-muted/50 border-b border-border">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date & Time</p>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Status</p>
+          <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-muted/50 border-b border-border">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide w-48 shrink-0">Date & Time</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex-1">Doctor / Status</p>
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Actions</p>
           </div>
 
           {loading ? (
-            <div className="space-y-0 divide-y divide-border">
+            <div className="divide-y divide-border">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="px-4 py-3 flex items-center gap-4">
-                  <div className="h-3 w-36 bg-muted animate-pulse rounded" />
-                  <div className="h-3 flex-1 bg-muted animate-pulse rounded" />
+                <div key={i} className="px-4 py-4 flex items-center gap-4">
+                  <div className="space-y-1.5 w-48 shrink-0">
+                    <div className="h-3 w-32 bg-muted animate-pulse rounded" />
+                    <div className="h-2.5 w-24 bg-muted animate-pulse rounded" />
+                  </div>
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3 w-36 bg-muted animate-pulse rounded" />
+                    <div className="h-5 w-52 bg-muted animate-pulse rounded-full" />
+                  </div>
                   <div className="h-6 w-20 bg-muted animate-pulse rounded" />
                 </div>
               ))}
@@ -531,17 +740,9 @@ export default function UserAppointments() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
-              Page {page} of {totalPages}
-            </p>
+            <p className="text-xs text-muted-foreground">Page {page} of {totalPages}</p>
             <div className="flex gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs px-2.5"
-                disabled={page <= 1 || loading}
-                onClick={() => setPage(p => p - 1)}
-              >
+              <Button variant="outline" size="sm" className="h-7 text-xs px-2.5" disabled={page <= 1 || loading} onClick={() => setPage(p => p - 1)}>
                 ← Prev
               </Button>
               {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -553,7 +754,7 @@ export default function UserAppointments() {
                 }, [])
                 .map((p, idx) =>
                   p === '...' ? (
-                    <span key={`ellipsis-${idx}`} className="px-1.5 text-xs text-muted-foreground self-center">…</span>
+                    <span key={`e-${idx}`} className="px-1.5 text-xs text-muted-foreground self-center">…</span>
                   ) : (
                     <Button
                       key={p}
@@ -567,13 +768,7 @@ export default function UserAppointments() {
                     </Button>
                   )
                 )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs px-2.5"
-                disabled={page >= totalPages || loading}
-                onClick={() => setPage(p => p + 1)}
-              >
+              <Button variant="outline" size="sm" className="h-7 text-xs px-2.5" disabled={page >= totalPages || loading} onClick={() => setPage(p => p + 1)}>
                 Next →
               </Button>
             </div>
@@ -581,7 +776,6 @@ export default function UserAppointments() {
         )}
       </div>
 
-      {/* Cancel Modal */}
       {cancelTargetId && (
         <CancelModal
           onConfirm={handleCancelConfirm}
@@ -590,7 +784,6 @@ export default function UserAppointments() {
         />
       )}
 
-      {/* Detail Modal */}
       {selectedAppt && (
         <DetailModal appt={selectedAppt} onClose={() => setSelectedAppt(null)} />
       )}

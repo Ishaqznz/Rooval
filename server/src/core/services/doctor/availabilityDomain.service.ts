@@ -1,7 +1,6 @@
 import { DayOfWeek, SlotDuration } from "src/core/enums/doctor/availability.enums";
 import { IAvailabilitySessions, ISlot } from "src/core/interfaces/doctor/availabilitySessions.interface";
 import { timeToMinutes } from "src/core/helper/timeToMinutes";
-import { Availability } from "src/core/entities/doctor/availability/upsertAvailability.entity";
 
 export class AvailabilityDomainService {
   static hasValidTimeRange(sessions: IAvailabilitySessions): boolean {

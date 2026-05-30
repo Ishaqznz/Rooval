@@ -1,12 +1,13 @@
 import { Appointment } from "../entities/appointment/appointment.entity"
 import { CancelAppointment } from "../entities/appointment/cancelAppointment.entity"
 import { CancelAppointmentByDoctor } from "../entities/appointment/cancelAppointmentByDoctor.entity"
+import { DeleteAppointmentsBySession } from "../entities/appointment/deleteAppointmentsBySession.entity"
 import { ExtendedAppointment } from "../entities/appointment/extendedAppointment.entity"
 import { AppointmentOverlap } from "../entities/appointment/getAppointment.entity"
+import { IsAvailableByStatus } from "../entities/appointment/isAvailableByStatus.entity"
 import { ListAllAppointments } from "../entities/appointment/listAllAppointment.entity"
 import { ListAppointments } from "../entities/appointment/listAppointment.entity"
 import { ListUserAppointments } from "../entities/appointment/listUserAppointments.entity"
-import { ListRole } from "../enums/user/role.enum"
 
 export interface IAppointmentRepository {
     create(entity: Appointment): Promise<string>
@@ -23,4 +24,7 @@ export interface IAppointmentRepository {
     countByDoctorId(doctorId: string): Promise<number>
     countByUserId(userId: string): Promise<number>
     countAll(): Promise<number>
+    deleteUnpaidSessionAppointments(entity: DeleteAppointmentsBySession): Promise<boolean>
+    isAvailableByStatus(entity: IsAvailableByStatus): Promise<boolean>
+    existsByAppointmentNo(appointmentNo: number): Promise<boolean>
 }

@@ -10,11 +10,14 @@ import { IMongoAppointmentDocument } from "../interfaces/documents/mongo.appoint
 import { AppointmentMapper } from "../mapper/appointment.mapper";
 import { AppointmentOverlap } from "src/core/entities/appointment/getAppointment.entity";
 import { CancelAppointment } from "src/core/entities/appointment/cancelAppointment.entity";
-import { AppointmentStatus } from "src/core/enums/user/appointment.enums";
+import { AppointmentStatus, PaymentStatus } from "src/core/enums/user/appointment.enums";
 import { ListAppointments } from "src/core/entities/appointment/listAppointment.entity";
 import { CancelAppointmentByDoctor } from "src/core/entities/appointment/cancelAppointmentByDoctor.entity";
 import { ListAllAppointments } from "src/core/entities/appointment/listAllAppointment.entity";
 import { ListUserAppointments } from "src/core/entities/appointment/listUserAppointments.entity";
+import { DeleteAppointmentsBySession } from "src/core/entities/appointment/deleteAppointmentsBySession.entity";
+import { IsAvailableByStatus } from "src/core/entities/appointment/isAvailableByStatus.entity";
+import { AppointmentErrorType } from "src/core/enums/appointments/appointment.enums";
 
 @Injectable()
 export class MongoAppointmentRepository implements IAppointmentRepository {
@@ -30,6 +33,7 @@ export class MongoAppointmentRepository implements IAppointmentRepository {
             session: entity.session,
             amount: entity.amount,
             type: entity.appointmentType,
+            appointmentNo: entity.appointmentNo,
             slotDuration: entity.slotDuration,
             bufferTime: entity.bufferTime
         })
@@ -39,6 +43,7 @@ export class MongoAppointmentRepository implements IAppointmentRepository {
 
     async findById(appointmentId: string): Promise<ExtendedAppointment> {
         const appointment = await this._appointmentModel.findById(new mongoose.Types.ObjectId(appointmentId)).lean<IMongoAppointmentDocument>();
+        if (!appointment) throw new BusinessRuleViolationError(AppointmentErrorType.APPOINTMENT_NOT_FOUND);
         return AppointmentMapper.toAppointmentEntity(appointment)
     }
 
@@ -49,9 +54,16 @@ export class MongoAppointmentRepository implements IAppointmentRepository {
             "session.endTime": { $gt: entity.minStart }
         }).lean<IMongoAppointmentDocument[]>();
 
-        const availableAppointments = appointments.filter((app: IMongoAppointmentDocument) => app.status !== AppointmentStatus.CANCELLED)
+        const availableAppointments = appointments.filter((app: IMongoAppointmentDocument) => {
+            if (
+                app.status === AppointmentStatus.CANCELLED ||
+                app.paymentStatus === PaymentStatus.PENDING ||
+                app.paymentStatus === PaymentStatus.FAILED
+            ) return false;
+            return true;
+        })
 
-        console.log('all the appointments in the findOverlapping method: ', appointments, 'available appointments: ', availableAppointments)
+        console.log('all the appointments in the findOverlapping method: ', appointments, 'available appointments: ', availableAppointments);
 
         return AppointmentMapper.toAppointmentEntities(availableAppointments);
     }
@@ -264,4 +276,35 @@ export class MongoAppointmentRepository implements IAppointmentRepository {
     async countAll(): Promise<number> {
         return (await this._appointmentModel.find().countDocuments());
     }
+
+    async deleteUnpaidSessionAppointments(entity: DeleteAppointmentsBySession): Promise<boolean> {
+        const deletedAppointments = await this._appointmentModel.deleteMany({
+            "session.startTime": entity.input.startTime,
+            "session.endTime": entity.input.endTime,
+            paymentStatus: {
+                $in: [PaymentStatus.PENDING, PaymentStatus.FAILED]
+            }
+        });
+        return deletedAppointments.deletedCount > 0;
+    }
+
+    async isAvailableByStatus(entity: IsAvailableByStatus): Promise<boolean> {
+        const appointment = await this._appointmentModel.find({
+            "session.startTime": entity.input.startTime,
+            "session.endTime": entity.input.endTime,
+            paymentStatus: {
+                $in: [PaymentStatus.PAID]
+            }
+        })
+
+        return appointment.length > 0;
+    }
+
+    async existsByAppointmentNo(appointmentNo: number): Promise<boolean> {
+        const appointments = await this._appointmentModel.find({
+            appointmentNo: appointmentNo
+        })
+
+        return appointments.length > 0;
+    }   
 }

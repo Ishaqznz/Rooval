@@ -8,6 +8,8 @@ import { FileUpload } from "../entities/doctor/profile/fileupload.entity"
 import { FileReUpload } from "../entities/doctor/profile/file-reupload.entity"
 import { ListDoctors } from "../entities/doctor/profile/listDoctors.entity"
 import { ListDoctorsPayload } from "../entities/doctor/profile/listDoctorsPayload.entity"
+import { IsChatEnabled } from "../entities/user/isChatEnabled.entity"
+import { GrantChatAccess } from "../entities/doctor/profile/grantChatAccess.entity"
 
 export interface IDoctorRepository {
     findDoctors(entity: DoctorQueryParams): Promise<Doctor[]>
@@ -26,4 +28,6 @@ export interface IDoctorRepository {
     updateProfile(userId: string, entity: DoctorProfileUpdate): Promise<boolean>
     changePassword(entitity: ChangeDoctorPassord): Promise<boolean>
     listDoctors(entity: ListDoctors): Promise<ListDoctorsPayload[]>
+    isChatEnabled(entity: IsChatEnabled): Promise<boolean>
+    grantChatAccess(entitity: GrantChatAccess): Promise<boolean>
 }

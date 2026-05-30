@@ -113,7 +113,7 @@ function formatDateShort(iso: string) {
   });
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 const statusConfig: Record<AppointmentStatus, { label: string; className: string; dot: string; bg: string }> = {
   [AppointmentStatus.SCHEDULED]: {

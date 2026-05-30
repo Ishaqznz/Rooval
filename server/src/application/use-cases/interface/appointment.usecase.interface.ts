@@ -6,6 +6,7 @@ import { IAppointmentResponseDTO } from "src/application/dto/appointment/respons
 import { IListAppointmentsResponseDTO } from "src/application/dto/appointment/response/list.response.dto"
 import { IListAllAppointmentsRequestDTO } from "src/application/dto/appointment/request/listAll.request.dto"
 import { IListUserAppointmentsRequestDTO } from "src/application/dto/appointment/request/listUser.request.dto"
+import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface"
 
 export interface IAppointmentUseCase {
     findById(appointmentId: string): Promise<IAppointmentResponseDTO>
@@ -18,4 +19,6 @@ export interface IAppointmentUseCase {
     listAppointments(input: IListAppointmentsRequestDTO): Promise<IListAppointmentsResponseDTO>
     listUserAppointments(input: IListUserAppointmentsRequestDTO): Promise<IListAppointmentsResponseDTO>
     listAllAppointments(input: IListAllAppointmentsRequestDTO): Promise<IListAppointmentsResponseDTO>
+    deleteUnpaidSessionAppointments(input: IAppointmentAvailabilitySession): Promise<boolean>
+    isAvailableByStatus(input: IAppointmentAvailabilitySession): Promise<boolean>
 }

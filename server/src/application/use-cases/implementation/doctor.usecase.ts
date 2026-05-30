@@ -26,6 +26,8 @@ import { ChangeDoctorPassord } from 'src/core/entities/doctor/profile/changeDoct
 import { IListDoctorsRequestDTO } from 'src/application/dto/doctor/profile/request/listDoctors.request.dto';
 import { ListDoctors } from 'src/core/entities/doctor/profile/listDoctors.entity';
 import { IListDoctorsResponseDTO } from 'src/application/dto/doctor/profile/response/listDoctors.response.dto';
+import { IGrantChatAccessRequestDTO } from 'src/application/dto/doctor/profile/request/grantChatAccess.request.dto';
+import { GrantChatAccess } from 'src/core/entities/doctor/profile/grantChatAccess.entity';
 
 @Injectable()
 export class DoctorUseCase implements IDoctorUseCase {
@@ -155,5 +157,10 @@ export class DoctorUseCase implements IDoctorUseCase {
   async getById(doctorId: string): Promise<IDoctorResponseDTO> {
     const entity = await this._doctorRepository.findById(doctorId)
     return DoctorOutputMapper.toDoctorDTO(entity)
+  }
+
+  async grantChatAccess(input: IGrantChatAccessRequestDTO): Promise<boolean> {
+    const entity = GrantChatAccess.create(input)
+    return await this._doctorRepository.grantChatAccess(entity)
   }
 }

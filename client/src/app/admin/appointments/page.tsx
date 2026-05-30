@@ -158,7 +158,7 @@ export default function AppointmentList() {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 

@@ -15,6 +15,7 @@ import { UpdateUserProfileInput } from '../../types/user/input/updateProfile.inp
 import { UppercasePipe } from 'src/common/pipes/uppercase/uppercase.pipe';
 import { Appointment } from '../../types/appointment/model/appointment.model';
 import { FindUserByIdInput } from '../../types/user/input/findUserById.input';
+import { IsChatEnabledInput } from '../../types/user/input/isChatEnabled.input';
 
 @Injectable()
 @Resolver(() => User)
@@ -92,5 +93,16 @@ export class UserResolver {
     ): Promise<boolean> {
         const userId = context.req.user?.userId
         return this.__userUseCase.updateProfile({ userId, ...input })
+    }
+
+    @Mutation(() => Boolean)
+    @UseGuards(JwtAuthGuard)
+    async isChatEnabled(
+        @Context() context: GqlContext,
+        @Args('input') input: IsChatEnabledInput
+    ): Promise<boolean> {
+        const userId = context.req.user.userId;
+        const doctorId = input.doctorId
+        return this.__userUseCase.isChatEnabled({ userId, doctorId });
     }
 }

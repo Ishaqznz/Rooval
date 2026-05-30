@@ -13,7 +13,7 @@ export class Doctor {
     public profile: IDoctorProfile,
     public profilePhoto: string,
     public certificates: string[],
-    public id: string, // changed to optinal to require
+    public id: string,
   ) {}
 
   static create(

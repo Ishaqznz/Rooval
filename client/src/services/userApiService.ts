@@ -8,7 +8,8 @@ import {
   COUNT_USERS_QUERY,
   UPDATE_PROFILE_PHOTO,
   UPDATE_PROFILE,
-  FIND_USER_BY_ID
+  FIND_USER_BY_ID,
+  IS_CHAT_ENABLED
 } from "@/graphql/queries/user";
 import { IFindUsers } from "@/interfaces/user/user.interface";
 
@@ -86,4 +87,8 @@ export const userServiceApi = {
     return apiRequest({...queryObj, variables })
   },
 
+  isChatEnabled: async (variables: { input: { doctorId: string }}) => {
+    const queryObj = IS_CHAT_ENABLED();
+    return apiRequest({ ...queryObj, variables })
+  }
 }

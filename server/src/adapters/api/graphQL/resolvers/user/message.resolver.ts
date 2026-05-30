@@ -57,7 +57,6 @@ export class MessageResolver {
     async uploadMessageFile(
         @Args('input') input: UploadMessageFileInput
     ): Promise<string> {
-        console.log('the input fileUpload in the resolver: ', input)
         return await this._messageUseCase.fileUpload(input)
     }
 }

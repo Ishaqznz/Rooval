@@ -1,4 +1,3 @@
-import { AppointmentType } from "src/core/enums/user/profile.enum";
 import { UserIdVO } from "src/core/valueOfObjects/user/userId.vo";
 import { DoctorIdVO } from "src/core/valueOfObjects/doctor/doctorId.vo";
 import { AppointmentTypeVO } from "src/core/valueOfObjects/appointment/appointmentType.vo";
@@ -6,26 +5,29 @@ import { AppointmentAmountVO } from "src/core/valueOfObjects/appointment/amount.
 import { BufferTimeVO } from "src/core/valueOfObjects/appointment/bufferTime.vo";
 import { AppointmentSlotDurationVO } from "src/core/valueOfObjects/appointment/slotDuration.vo";
 import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface";
+import { DoctorAppointmentType } from "src/core/enums/user/appointment.enums";
 
 export class Appointment {
   constructor(
     public userId: string,
     public doctorId: string,
     public session: IAppointmentAvailabilitySession,
-    public appointmentType: AppointmentType,
+    public appointmentType: DoctorAppointmentType,
     public amount: number,
     public slotDuration: number,
     public bufferTime: number,
+    public appointmentNo: number
   ) {}
 
   public static create(
     userId: string,
     doctorId: string,
     session: IAppointmentAvailabilitySession,
-    appointmentType: AppointmentType,
+    appointmentType: DoctorAppointmentType,
     amount: number,
     slotDuration: number,
     bufferTime: number,
+    appointmentNo: number
   ): { ok: true; value: Appointment } | { ok: false; error: string } {
 
     const userIdResult = UserIdVO.create(userId);
@@ -54,6 +56,7 @@ export class Appointment {
       amountResult.value.value,
       slotResult.value.value,
       bufferResult.value.value,
+      appointmentNo
     );
 
     return { ok: true, value: appointment };

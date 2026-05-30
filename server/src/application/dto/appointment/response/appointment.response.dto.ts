@@ -1,4 +1,4 @@
-import { AppointmentStatus, AppointmentType, PaymentStatus } from "src/core/enums/user/appointment.enums"
+import { AppointmentStatus, DoctorAppointmentType, PaymentStatus } from "src/core/enums/user/appointment.enums"
 import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface"
 
 export interface IAppointmentResponseDTO {
@@ -7,7 +7,8 @@ export interface IAppointmentResponseDTO {
     doctorId: string
     session: IAppointmentAvailabilitySession
     status: AppointmentStatus
-    type: AppointmentType
+    type: DoctorAppointmentType,
+    appointmentNo: number,
     reason?: string
     notes?: string
     paymentStatus: PaymentStatus

@@ -4,6 +4,7 @@
 
 type Appointment {
   amount: Float
+  appointmentNo: Float!
   bufferTime: Float!
   cancelReason: String
   cancelledBy: String
@@ -21,7 +22,7 @@ type Appointment {
   session: AppointmentAvailability!
   slotDuration: Float!
   status: AppointmentStatus!
-  type: AppointmentType!
+  type: DoctorAppointmentType!
   updatedAt: DateTime!
   user: User
 }
@@ -394,6 +395,10 @@ type Health {
   preferredLanguage: String
 }
 
+input IsChatEnabledInput {
+  doctorId: String!
+}
+
 input ListAllAppointmentsInput {
   appointmentStatus: AppointmentStatus
   appointmentType: AppointmentType
@@ -487,6 +492,7 @@ type Mutation {
   doctorOnboard(input: DoctorOnboardingInput!): Boolean!
   doctorProfileUpdate(input: UpdateDoctorProfileInput!): Boolean!
   forgotPassword(input: EmailInput!): Boolean!
+  isChatEnabled(input: IsChatEnabledInput!): Boolean!
   loginUser(input: LoginInput!): User!
   loginWithGoogle(input: GoogleLoginInput!): User!
   logout: Boolean!
