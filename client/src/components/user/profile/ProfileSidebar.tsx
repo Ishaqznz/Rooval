@@ -4,10 +4,10 @@ import {
   User,
   MapPin,
   Video,
-  Calendar,
   Shield,
   CalendarDays,
   MessageCircle,
+  Wallet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -19,7 +19,8 @@ const menuItems = [
   { icon: Video, label: "Preferences", path: "/profile/preferences" },
   { icon: Shield, label: "Account Settings", path: "/profile/account-settings" },
   { icon: CalendarDays, label: 'appointments', path: '/profile/appointments' },
-  { icon: MessageCircle, label: 'messages', path: '/messages' }
+  { icon: MessageCircle, label: 'messages', path: '/messages' },
+  { icon: Wallet, label: 'Wallet', path: '/profile/wallet'}
 ];
 
 export default function ProfileSidebar() {

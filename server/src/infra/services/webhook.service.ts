@@ -19,6 +19,8 @@ export class WebHookService implements IWebHookService {
         switch (event.type) {
             case 'checkout.session.completed': {
                 const session = event.data.object;
+                console.log('even dataaaaaaa object: ', event?.data?.object)
+                console.log(session.metadata.appointmentId)
                 return session.metadata.appointmentId
             }
 

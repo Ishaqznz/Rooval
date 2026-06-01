@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { AppointmentStatus } from 'src/core/enums/user/appointment.enums';
-import { DoctorAppointmentType } from 'src/core/enums/user/appointment.enums';
-import { PaymentStatus } from 'src/core/enums/user/appointment.enums';
+import { AppointmentStatus } from 'src/core/enums/appointments/appointment.enums';
+import { DoctorAppointmentType } from 'src/core/enums/appointments/appointment.enums';
+import { PaymentStatus } from 'src/core/enums/appointments/appointment.enums';
 import { AppointmentAvailability } from './appointmentAvailability.schema';
 
 @Schema({ timestamps: true, collection: 'appointments' })

@@ -1,10 +1,9 @@
 "use client";
 
-import { User, MapPin, Video, Calendar, FileText, Shield, CalendarDays, MessageCircle } from "lucide-react";
+import { User, MapPin, Video, Calendar, FileText, Shield, CalendarDays, MessageCircle, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 const menuItems = [
   { icon: User, label: "General Info", path: "/doctor/profile/info" },
   { icon: MapPin, label: "Clinic & Location", path: "/doctor/profile/clinic-location" },
@@ -12,7 +11,8 @@ const menuItems = [
   { icon: Calendar, label: "Availability", path: "/doctor/profile/availability" },
   { icon: FileText, label: "Certificates & Licenses", path: "/doctor/profile/certificates" },
   { icon: Shield, label: "Account & Security", path: "/doctor/profile/security" },
-  { icon: MessageCircle, label: 'Messages', path: '/doctor/messages'}
+  { icon: MessageCircle, label: 'Messages', path: '/doctor/messages'},
+  { icon: Wallet, label: "Wallet", path: '/doctor/profile/wallet'}
 ];
 
 export default function ProfileSidebar() {

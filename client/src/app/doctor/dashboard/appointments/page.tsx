@@ -48,7 +48,7 @@ interface AppointmentUser {
     personal: {
       profilePhoto: string | null;
     };
-  };
+  } | null;
 }
 
 interface Appointment {
@@ -67,12 +67,12 @@ interface Appointment {
   isCheckedIn: boolean;
   createdAt: string;
   updatedAt: string;
-  user: AppointmentUser;
-  cancelledBy: string
-  cancelReason: string
+  user: AppointmentUser | null;
+  cancelledBy: string;
+  cancelReason: string;
 }
 
-
+/* ── Helpers ────────────────────────────────────────────────── */
 
 const AVATAR_COLORS = [
   "bg-sky-500", "bg-amber-500", "bg-purple-500",
@@ -80,13 +80,15 @@ const AVATAR_COLORS = [
   "bg-teal-500", "bg-orange-500",
 ];
 
-function getAvatarColor(id: string) {
+function getAvatarColor(id?: string | null): string {
+  if (!id) return AVATAR_COLORS[0];
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-function getInitials(name: string) {
+function getInitials(name?: string | null): string {
+  if (!name || typeof name !== "string") return "?";
   return name
     .split(" ")
     .filter(Boolean)
@@ -95,22 +97,25 @@ function getInitials(name: string) {
     .join("");
 }
 
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("en-IN", {
-    hour: "2-digit", minute: "2-digit", hour12: true,
-  });
+function formatTime(iso?: string | null): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-IN", {
-    day: "2-digit", month: "short", year: "numeric",
-  });
+function formatDate(iso?: string | null): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function formatDateShort(iso: string) {
-  return new Date(iso).toLocaleDateString("en-IN", {
-    day: "2-digit", month: "short",
-  });
+function formatDateShort(iso?: string | null): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
 }
 
 const PAGE_SIZE = 5;
@@ -143,11 +148,12 @@ const statusConfig: Record<AppointmentStatus, { label: string; className: string
 };
 
 const paymentConfig: Record<PaymentStatus, { label: string; className: string }> = {
-  [PaymentStatus.PAID]: { label: "Paid", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
+  [PaymentStatus.PAID]:    { label: "Paid",    className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
   [PaymentStatus.PENDING]: { label: "Pending", className: "bg-amber-50 text-amber-700 border border-amber-200" },
-  [PaymentStatus.FAILED]: { label: "Failed", className: "bg-rose-50 text-rose-700 border border-rose-200" },
+  [PaymentStatus.FAILED]:  { label: "Failed",  className: "bg-rose-50 text-rose-700 border border-rose-200" },
 };
 
+/* ── Icons ──────────────────────────────────────────────────── */
 const SearchIcon = () => (
   <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7">
     <circle cx="6.5" cy="6.5" r="4.5" /><path d="M10.5 10.5L14 14" />
@@ -202,9 +208,23 @@ const SpinnerIcon = () => (
   </svg>
 );
 
-function Avatar({ user, size = "md" }: { user: AppointmentUser; size?: "sm" | "md" | "lg" }) {
-  const sizeClass = size === "lg" ? "w-14 h-14 text-base rounded-2xl" : size === "sm" ? "w-8 h-8 text-[10px] rounded-full" : "w-9 h-9 text-[11px] rounded-full";
-  const photo = user.profile?.personal?.profilePhoto;
+/* ── Avatar ─────────────────────────────────────────────────── */
+function Avatar({ user, size = "md" }: { user: AppointmentUser | null | undefined; size?: "sm" | "md" | "lg" }) {
+  const sizeClass =
+    size === "lg" ? "w-14 h-14 text-base rounded-2xl" :
+    size === "sm" ? "w-8 h-8 text-[10px] rounded-full" :
+                    "w-9 h-9 text-[11px] rounded-full";
+
+  // Safe fallback when user is null/undefined
+  if (!user) {
+    return (
+      <div className={`${sizeClass} bg-gray-300 flex items-center justify-center font-semibold text-white flex-shrink-0`}>
+        ?
+      </div>
+    );
+  }
+
+  const photo = user.profile?.personal?.profilePhoto ?? null;
   const color = getAvatarColor(user.id);
   const initials = getInitials(user.fullName);
 
@@ -212,7 +232,7 @@ function Avatar({ user, size = "md" }: { user: AppointmentUser; size?: "sm" | "m
     return (
       <img
         src={photo}
-        alt={user.fullName}
+        alt={user.fullName ?? "Patient"}
         className={`${sizeClass} object-cover flex-shrink-0`}
       />
     );
@@ -224,6 +244,7 @@ function Avatar({ user, size = "md" }: { user: AppointmentUser; size?: "sm" | "m
   );
 }
 
+/* ── Page ───────────────────────────────────────────────────── */
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -240,62 +261,40 @@ export default function AppointmentsPage() {
   const [isCancelling, setIsCancelling] = useState(false);
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      connectSocket();
-    } else {
-      disconnectSocket();
-    }
+    if (user) connectSocket();
+    else disconnectSocket();
   }, [user]);
 
+  /* ── Cancel ── */
   const cancelAppointment = async () => {
     if (!appointmentToCancel) return;
-
+    setIsCancelling(true);
     try {
-      setIsCancelling(true);
-
       const response = await appointmentServiceApi.cancelByDoctor({
-        input: {
-          appointmentId: appointmentToCancel,
-          reason: cancelReason,
-        },
+        input: { appointmentId: appointmentToCancel, reason: cancelReason },
       });
 
       if (response?.data?.cancelAppointmentByDoctor) {
         setAppointments((prev) =>
-          prev.map((appointment) =>
-            appointment.id === appointmentToCancel
-              ? {
-                ...appointment,
-                status: AppointmentStatus.CANCELLED,
-                cancelReason: cancelReason,
-                cancelledBy: "DOCTOR",
-              }
-              : appointment
+          prev.map((a) =>
+            a.id === appointmentToCancel
+              ? { ...a, status: AppointmentStatus.CANCELLED, cancelReason, cancelledBy: "DOCTOR" }
+              : a
           )
         );
-
         setSelectedAppointment((prev) =>
           prev?.id === appointmentToCancel
-            ? {
-              ...prev,
-              status: AppointmentStatus.CANCELLED,
-              cancelReason,
-              cancelledBy: "DOCTOR",
-            }
+            ? { ...prev, status: AppointmentStatus.CANCELLED, cancelReason, cancelledBy: "DOCTOR" }
             : prev
         );
-
         toast.success("Appointment cancelled successfully");
-
         setAppointmentToCancel(null);
         setCancelReason("");
         return;
       }
-
       toast.error("Failed to cancel appointment");
     } catch (error) {
       console.error(error);
@@ -305,6 +304,7 @@ export default function AppointmentsPage() {
     }
   };
 
+  /* ── Debounce search ── */
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
@@ -316,16 +316,17 @@ export default function AppointmentsPage() {
 
   useEffect(() => { setPage(1); }, [statusFilter, typeFilter]);
 
+  /* ── Fetch ── */
   const fetchAppointments = useCallback(async () => {
     setLoading(true);
     try {
       const input: Record<string, unknown> = { page, limit: PAGE_SIZE };
       if (debouncedSearch) input.search = debouncedSearch;
-      if (statusFilter) input.appointmentStatus = statusFilter;
-      if (typeFilter) input.appointmentType = typeFilter;
+      if (statusFilter)    input.appointmentStatus = statusFilter;
+      if (typeFilter)      input.appointmentType   = typeFilter;
 
       const response = await appointmentServiceApi.list({
-        input: (input as unknown) as Parameters<typeof appointmentServiceApi.list>[0]["input"],
+        input: input as unknown as Parameters<typeof appointmentServiceApi.list>[0]["input"],
         fields: `
           appointments {
             id
@@ -343,6 +344,8 @@ export default function AppointmentsPage() {
             isCheckedIn
             createdAt
             updatedAt
+            cancelledBy
+            cancelReason
             user {
               id
               fullName
@@ -353,6 +356,11 @@ export default function AppointmentsPage() {
         `,
       });
 
+      if (response?.errors) {
+        toast.error("Error while loading the appointments!");
+        return;
+      }
+
       const data = response?.data?.listAppointments;
       if (data) {
         setAppointments(data.appointments ?? []);
@@ -360,6 +368,7 @@ export default function AppointmentsPage() {
       }
     } catch (err) {
       console.error("Failed to fetch appointments:", err);
+      toast.error("Failed to load appointments");
     } finally {
       setLoading(false);
     }
@@ -367,45 +376,44 @@ export default function AppointmentsPage() {
 
   useEffect(() => { fetchAppointments(); }, [fetchAppointments]);
 
+  /* ── List View ── */
   const ListView = () => (
     <>
       <header className="h-14 bg-card border-b border-border px-6 flex items-center justify-between flex-shrink-0">
         <div>
           <p className="font-semibold text-base leading-tight">Appointments</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            {totalCount > 0 ? `${totalCount} total appointment${totalCount !== 1 ? "s" : ""}` : "Manage and review all patient appointments"}
+            {totalCount > 0
+              ? `${totalCount} total appointment${totalCount !== 1 ? "s" : ""}`
+              : "Manage and review all patient appointments"}
           </p>
         </div>
-        {/* <button className="relative w-[34px] h-[34px] border border-border rounded-lg bg-card flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
-          <BellIcon />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-primary border-2 border-white" />
-        </button> */}
-
-        {user?.id && (
-          <NotificationBell
-            userId={user.id}
-            variant="user"
-          />
-        )}
+        {user?.id && <NotificationBell userId={user.id} variant="user" />}
       </header>
-      <div className="px-6 py-3 border-b border-border bg-card space-y-3 flex-shrink-0">
 
-        <div className="flex items-center gap-6">
+      {/* Filters */}
+      <div className="px-6 py-3 border-b border-border bg-card space-y-3 flex-shrink-0">
+        <div className="flex items-center gap-6 flex-wrap">
+          {/* Status filter */}
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-muted-foreground font-medium">Status:</span>
-            <div className="flex gap-1">
+            <div className="flex gap-1 flex-wrap">
               {([["", "All"], ...Object.values(AppointmentStatus).map((s) => [s, statusConfig[s].label])] as [string, string][]).map(([val, label]) => (
                 <button
                   key={val}
                   onClick={() => setStatusFilter(val as AppointmentStatus | "")}
                   className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-colors
-                    ${statusFilter === val ? "bg-primary text-white" : "bg-background text-muted-foreground border border-border hover:border-primary/40 hover:text-foreground"}`}
+                    ${statusFilter === val
+                      ? "bg-primary text-white"
+                      : "bg-background text-muted-foreground border border-border hover:border-primary/40 hover:text-foreground"}`}
                 >
                   {label}
                 </button>
               ))}
             </div>
           </div>
+
+          {/* Type filter */}
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-muted-foreground font-medium">Type:</span>
             <div className="flex gap-1">
@@ -414,7 +422,9 @@ export default function AppointmentsPage() {
                   key={val}
                   onClick={() => setTypeFilter(val as AppointmentType | "")}
                   className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-colors
-                    ${typeFilter === val ? "bg-primary text-white" : "bg-background text-muted-foreground border border-border hover:border-primary/40 hover:text-foreground"}`}
+                    ${typeFilter === val
+                      ? "bg-primary text-white"
+                      : "bg-background text-muted-foreground border border-border hover:border-primary/40 hover:text-foreground"}`}
                 >
                   {label}
                 </button>
@@ -448,8 +458,10 @@ export default function AppointmentsPage() {
             </thead>
             <tbody>
               {appointments.map((a) => {
-                const sc = statusConfig[a.status] ?? statusConfig[AppointmentStatus.SCHEDULED];
+                // Safe lookups — fall back to SCHEDULED / PENDING defaults
+                const sc = statusConfig[a.status]         ?? statusConfig[AppointmentStatus.SCHEDULED];
                 const pc = paymentConfig[a.paymentStatus] ?? paymentConfig[PaymentStatus.PENDING];
+
                 return (
                   <tr
                     key={a.id}
@@ -461,30 +473,36 @@ export default function AppointmentsPage() {
                       <div className="flex items-center gap-3">
                         <Avatar user={a.user} size="sm" />
                         <div>
-                          <p className="font-medium text-foreground">{a.user.fullName}</p>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">{a.patientId.slice(-8)}</p>
+                          <p className="font-medium text-foreground">{a.user?.fullName ?? "Unknown"}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            {a.patientId ? a.patientId.slice(-8) : "—"}
+                          </p>
                         </div>
                       </div>
                     </td>
+
                     {/* Date & Time */}
                     <td className="px-5 py-3.5">
-                      <p className="font-medium text-foreground">{formatTime(a.session.startTime)}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{formatDateShort(a.session.startTime)}</p>
+                      <p className="font-medium text-foreground">{formatTime(a.session?.startTime)}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{formatDateShort(a.session?.startTime)}</p>
                     </td>
+
                     {/* Type */}
                     <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium border border-border bg-card`}>
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium border border-border bg-card">
                         {a.type === AppointmentType.ONLINE ? <VideoIcon /> : <PinIcon />}
                         {a.type === AppointmentType.ONLINE ? "Online" : "In-person"}
                       </span>
                     </td>
+
                     {/* Duration */}
                     <td className="px-5 py-3.5">
                       <span className="inline-flex items-center gap-1 text-muted-foreground">
                         <ClockIcon />
-                        {a.slotDuration} min
+                        {a.slotDuration ?? "—"} min
                       </span>
                     </td>
+
                     {/* Status */}
                     <td className="px-5 py-3.5">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium ${sc.className}`}>
@@ -492,6 +510,7 @@ export default function AppointmentsPage() {
                         {sc.label}
                       </span>
                     </td>
+
                     {/* Payment */}
                     <td className="px-5 py-3.5">
                       <div>
@@ -503,6 +522,7 @@ export default function AppointmentsPage() {
                         )}
                       </div>
                     </td>
+
                     {/* Arrow */}
                     <td className="px-4 py-3.5">
                       <span className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
@@ -565,10 +585,11 @@ export default function AppointmentsPage() {
     </>
   );
 
+  /* ── Detail View ── */
   const DetailView = ({ a }: { a: Appointment }) => {
-    const sc = statusConfig[a.status] ?? statusConfig[AppointmentStatus.SCHEDULED];
+    const sc = statusConfig[a.status]         ?? statusConfig[AppointmentStatus.SCHEDULED];
     const pc = paymentConfig[a.paymentStatus] ?? paymentConfig[PaymentStatus.PENDING];
-    const isOnline = a.type === AppointmentType.ONLINE;
+    const isOnline    = a.type === AppointmentType.ONLINE;
     const isScheduled = a.status === AppointmentStatus.SCHEDULED;
 
     return (
@@ -584,7 +605,7 @@ export default function AppointmentsPage() {
               <span>Appointments</span>
             </button>
             <span className="text-border">|</span>
-            <p className="font-semibold text-sm">{a.user.fullName}</p>
+            <p className="font-semibold text-sm">{a.user?.fullName ?? "Unknown Patient"}</p>
           </div>
           <button className="relative w-[34px] h-[34px] border border-border rounded-lg bg-card flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
             <BellIcon />
@@ -602,8 +623,10 @@ export default function AppointmentsPage() {
                 <div className="flex items-center gap-4">
                   <Avatar user={a.user} size="lg" />
                   <div>
-                    <h2 className="text-base font-semibold text-foreground">{a.user.fullName}</h2>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">ID: {a.patientId.slice(-8)}</p>
+                    <h2 className="text-base font-semibold text-foreground">{a.user?.fullName ?? "Unknown Patient"}</h2>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      ID: {a.patientId ? a.patientId.slice(-8) : "—"}
+                    </p>
                     <div className="flex flex-wrap items-center gap-2 mt-2">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium ${sc.className}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
@@ -628,7 +651,10 @@ export default function AppointmentsPage() {
                     <button className="text-[11px] px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-card transition-colors">
                       Reschedule
                     </button>
-                    <button className="text-[11px] px-3 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors" onClick={() => setAppointmentToCancel(a.id)}>
+                    <button
+                      className="text-[11px] px-3 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
+                      onClick={() => setAppointmentToCancel(a.id)}
+                    >
                       Cancel
                     </button>
                     <button className="text-[11px] px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-secondary transition-colors">
@@ -645,18 +671,18 @@ export default function AppointmentsPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-1">Date</p>
-                  <p className="text-[13px] font-semibold">{formatDate(a.session.startTime)}</p>
+                  <p className="text-[13px] font-semibold">{formatDate(a.session?.startTime)}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-1">Time</p>
                   <p className="text-[13px] font-semibold">
-                    {formatTime(a.session.startTime)} – {formatTime(a.session.endTime)}
+                    {formatTime(a.session?.startTime)} – {formatTime(a.session?.endTime)}
                   </p>
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-1">Duration</p>
                   <p className="text-[13px] font-semibold">
-                    {a.slotDuration} min
+                    {a.slotDuration ?? "—"} min
                     {a.bufferTime ? (
                       <span className="text-muted-foreground font-normal text-[11px]"> + {a.bufferTime}m buffer</span>
                     ) : null}
@@ -687,7 +713,9 @@ export default function AppointmentsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-1">Amount</p>
-                  <p className="text-[15px] font-semibold">${a.amount?.toLocaleString("en-IN") ?? "—"}</p>
+                  <p className="text-[15px] font-semibold">
+                    {a.amount != null ? `$${a.amount.toLocaleString("en-IN")}` : "—"}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-1">Status</p>
@@ -705,11 +733,11 @@ export default function AppointmentsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-[10px] text-rose-400 mb-1">Cancelled By</p>
-                    <p className="text-[12px] text-rose-700 capitalize">{a?.cancelledBy ?? "—"}</p>
+                    <p className="text-[12px] text-rose-700 capitalize">{a.cancelledBy ?? "—"}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-rose-400 mb-1">Reason</p>
-                    <p className="text-[12px] text-rose-700">{a?.cancelReason ?? "—"}</p>
+                    <p className="text-[12px] text-rose-700">{a.cancelReason ?? "—"}</p>
                   </div>
                 </div>
               </div>
@@ -746,13 +774,11 @@ export default function AppointmentsPage() {
 
           </div>
         </div>
-
       </>
-
-
     );
   };
 
+  /* ── Render ── */
   return (
     <>
       <AlertDialog
@@ -766,16 +792,11 @@ export default function AppointmentsPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              Cancel Appointment
-            </AlertDialogTitle>
-
+            <AlertDialogTitle>Cancel Appointment</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to cancel this appointment?
-              This action cannot be undone.
+              Are you sure you want to cancel this appointment? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-
           <div className="py-4">
             <Textarea
               placeholder="Reason for cancellation"
@@ -783,18 +804,11 @@ export default function AppointmentsPage() {
               onChange={(e) => setCancelReason(e.target.value)}
             />
           </div>
-
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isCancelling}>
-              Keep Appointment
-            </AlertDialogCancel>
-
+            <AlertDialogCancel disabled={isCancelling}>Keep Appointment</AlertDialogCancel>
             <AlertDialogAction
               disabled={isCancelling || !cancelReason.trim()}
-              onClick={(e) => {
-                e.preventDefault();
-                cancelAppointment();
-              }}
+              onClick={(e) => { e.preventDefault(); cancelAppointment(); }}
             >
               {isCancelling ? "Cancelling..." : "Confirm Cancellation"}
             </AlertDialogAction>
@@ -803,11 +817,7 @@ export default function AppointmentsPage() {
       </AlertDialog>
 
       <div className="flex flex-col h-full overflow-hidden">
-        {selectedAppointment ? (
-          <DetailView a={selectedAppointment} />
-        ) : (
-          <ListView />
-        )}
+        {selectedAppointment ? <DetailView a={selectedAppointment} /> : <ListView />}
       </div>
     </>
   );

@@ -323,7 +323,7 @@ function DetailModal({ appt, onClose }: { appt: Appointment; onClose: () => void
                 </span>
               </div>
               {appt.amount != null && (
-                <p className="font-semibold text-foreground text-sm">₹{appt.amount.toLocaleString('en-IN')}</p>
+                <p className="font-semibold text-foreground text-sm">${appt.amount.toLocaleString('en-IN')}</p>
               )}
             </div>
             {appt.paymentId && (
@@ -448,7 +448,7 @@ function AppointmentRow({
           </span>
           <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PAYMENT_BADGE[appt.paymentStatus].cls}`}>
             {appt.paymentStatus === 'PAID' ? 'Paid' : PAYMENT_BADGE[appt.paymentStatus].label}
-            {appt.amount != null && appt.paymentStatus === 'PAID' ? ` · ₹${appt.amount.toLocaleString('en-IN')}` : ''}
+            {appt.amount != null && appt.paymentStatus === 'PAID' ? ` · $${appt.amount.toLocaleString('en-IN')}` : ''}
           </span>
           {appt.isCheckedIn && (
             <span className="flex items-center gap-0.5 text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-100">
@@ -473,7 +473,7 @@ function AppointmentRow({
       <div className="flex items-center gap-1.5 shrink-0">
         {appt.amount != null && appt.paymentStatus !== 'PAID' && (
           <span className="text-xs font-medium text-foreground mr-1">
-            ₹{appt.amount.toLocaleString('en-IN')}
+            ${appt.amount.toLocaleString('en-IN')}
           </span>
         )}
 
@@ -609,7 +609,7 @@ export default function UserAppointments() {
         toast.success('Appointment cancelled');
         setAppointments(prev =>
           prev.map(a =>
-            a.id === cancelTargetId ? { ...a, status: 'CANCELLED', cancelReason: reason } : a
+            a.id === cancelTargetId ? { ...a, status: 'CANCELLED', cancelReason: reason, paymentStatus: 'FAILED' } : a
           )
         );
         setCancelTargetId(null);

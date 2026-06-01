@@ -16,6 +16,7 @@ export class WebhookController {
     @Headers('Stripe-Signature') signature: string,
   ) {
     try {
+      console.log('the payment request with the signature: ', signature)
       await this._paymentUseCase.handlePaymentEvent(req.body, signature);
       return res.json({ received: true });
     } catch (err) {

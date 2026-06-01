@@ -1,6 +1,6 @@
 import { Field, InputType } from "@nestjs/graphql";
 import { IsEnum, IsNumber, IsString, ValidateNested } from "class-validator";
-import { DoctorAppointmentType } from "src/core/enums/user/appointment.enums";
+import { DoctorAppointmentType } from "src/core/enums/appointments/appointment.enums";
 import { Type } from "class-transformer";
 import { AppointmentAvailabilityInput } from "./appointmentAvailability.input";
 

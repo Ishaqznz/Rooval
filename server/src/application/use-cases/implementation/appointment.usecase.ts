@@ -21,11 +21,17 @@ import { IListAllAppointmentsRequestDTO } from "src/application/dto/appointment/
 import { ListAllAppointments } from "src/core/entities/appointment/listAllAppointment.entity";
 import { IListUserAppointmentsRequestDTO } from "src/application/dto/appointment/request/listUser.request.dto";
 import { ListUserAppointments } from "src/core/entities/appointment/listUserAppointments.entity";
-import { AppointmentErrorType } from "src/core/enums/appointments/appointment.enums";
+import { PaymentStatus } from "src/core/enums/appointments/appointment.enums";
 import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface";
 import { DeleteAppointmentsBySession } from "src/core/entities/appointment/deleteAppointmentsBySession.entity";
 import { IsAvailableByStatus } from "src/core/entities/appointment/isAvailableByStatus.entity";
 import { AppointmentDomainService } from "src/core/services/appointment/appointmentDomainService";
+import { IWalletUseCase } from "../interface/wallet.usecase.interface";
+import { WalletErrorType, WalletTransactionReason, WalletTransactionType } from "src/core/enums/wallet/wallet.enum";
+import { AppointmentErrorType } from "src/core/enums/appointments/appointment.enums";
+import { IDoctorUseCase } from "../interface/doctor.usecase.interface";
+import { IPaymentUseCase } from "../interface/payment.usecase.interface";
+import { forwardRef } from "@nestjs/common";
 
 @Injectable()
 export class AppointmentUseCase implements IAppointmentUseCase {
@@ -34,11 +40,21 @@ export class AppointmentUseCase implements IAppointmentUseCase {
         private readonly _appointmentRepository: IAppointmentRepository,
 
         @Inject('INotificationOrchestrator')
-        private readonly _notificationOrchestrator: INotificationOrchestrator
+        private readonly _notificationOrchestrator: INotificationOrchestrator,
+
+        @Inject('IWalletUseCase')
+        private readonly _walletUseCase: IWalletUseCase,
+
+        @Inject('IDoctorUseCase')
+        private readonly _doctorUseCase: IDoctorUseCase,
+
+        @Inject(forwardRef(() => 'IPaymentUseCase'))
+        private readonly _paymentUseCase: IPaymentUseCase,
     ) { }
 
     async findById(appointmentId: string): Promise<IAppointmentResponseDTO> {
         const entity = await this._appointmentRepository.findById(appointmentId)
+        if (!entity) throw new BusinessRuleViolationError(AppointmentErrorType.APPOINTMENT_NOT_FOUND)
         const dto = AppointmentOutputMapper.toAppoitmentDto(entity)
         if (dto.ok == false) {
             throw new BusinessRuleViolationError(dto.error)
@@ -98,6 +114,35 @@ export class AppointmentUseCase implements IAppointmentUseCase {
 
     async cancelAppointment(input: ICancelAppointmentRequestDTO): Promise<boolean> {
         const entity = CancelAppointment.create(input.appointmentId, input.reason)
+
+        const appointment = await this.findById(entity.appointmentId)
+        const doctorWallet = await this._walletUseCase.getWallet({ ownerId: appointment.doctorId })
+        const userWallet = await this._walletUseCase.getWallet({ ownerId: appointment.patientId })
+
+        if (!userWallet || !doctorWallet) throw new BusinessRuleViolationError(WalletErrorType.WALLET_NOT_FOUND)
+
+        if (appointment.paymentStatus == PaymentStatus.PAID) {
+            await this._walletUseCase.deductMoney({ walletId: doctorWallet.id, amount: appointment.amount })
+            await this._walletUseCase.createTransaction({
+                walletId: doctorWallet.id,
+                amount: appointment.amount,
+                reason: WalletTransactionReason.USER_APPOINTMENT_CANCELLATION,
+                type: WalletTransactionType.DEBIT
+            })
+
+            await this._walletUseCase.addMoney({ walletId: userWallet.id, amount: appointment.amount })
+            await this._walletUseCase.createTransaction({
+                walletId: userWallet.id,
+                amount: appointment.amount,
+                reason: WalletTransactionReason.APPOINTMENT_REFUND,
+                type: WalletTransactionType.CREDIT
+            })
+
+            const appointments = await this._appointmentRepository.findUserAppointments(appointment.patientId)
+            if (appointments.length < 2) await this._doctorUseCase.removeChatAccess({ userId: appointment.patientId, doctorId: appointment.doctorId })
+            await this._paymentUseCase.changePaymentStatus(appointment.id, PaymentStatus.FAILED)
+        }
+
         const cancelAppointment = await this._appointmentRepository.cancelAppointment(entity)
         if (!cancelAppointment) throw new BusinessRuleViolationError(UserErrorType.SYSTEM_ERROR)
         return cancelAppointment
@@ -105,6 +150,32 @@ export class AppointmentUseCase implements IAppointmentUseCase {
 
     async cancelAppointmentByDoctor(input: ICancelAppointmentByDoctorRequestDTO): Promise<boolean> {
         const entity = CancelAppointmentByDoctor.create(input)
+        const appointment = await this._appointmentRepository.findById(entity.input.appointmentId)
+
+        if (appointment.paymentStatus == PaymentStatus.PAID) {
+            const doctorWallet = await this._walletUseCase.getWallet({ ownerId: appointment.doctorId })
+            const userWallet = await this._walletUseCase.getWallet({ ownerId: appointment.patientId })
+
+            await this._walletUseCase.addMoney({ walletId: userWallet.id, amount: appointment.amount })
+            await this._walletUseCase.createTransaction({
+                walletId: userWallet.id,
+                amount: appointment.amount,
+                reason: WalletTransactionReason.APPOINTMENT_REFUND,
+                type: WalletTransactionType.CREDIT
+            })
+
+            await this._walletUseCase.deductMoney({ walletId: doctorWallet.id, amount: appointment.amount })
+            await this._walletUseCase.createTransaction({
+                walletId: doctorWallet.id,
+                amount: appointment.amount,
+                reason: WalletTransactionReason.USER_APPOINTMENT_CANCELLATION,
+                type: WalletTransactionType.DEBIT
+            })
+
+            const appointments = await this._appointmentRepository.findUserAppointments(appointment.patientId)
+            if (appointments.length < 2) await this._doctorUseCase.removeChatAccess({ userId: appointment.patientId, doctorId: appointment.doctorId })
+            await this._paymentUseCase.changePaymentStatus(appointment.id, PaymentStatus.FAILED)
+        }
         return await this._appointmentRepository.cancelAppointmentByDoctor(entity)
     }
 

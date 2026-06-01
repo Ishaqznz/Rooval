@@ -1,4 +1,4 @@
-import { AppointmentStatus } from "src/core/enums/user/appointment.enums";
+import { AppointmentStatus } from "src/core/enums/appointments/appointment.enums";
 import { AppointmentType } from "src/core/enums/user/profile.enum";
 
 export class ListAppointments {

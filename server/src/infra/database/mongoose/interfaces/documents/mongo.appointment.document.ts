@@ -1,4 +1,4 @@
-import { AppointmentStatus, DoctorAppointmentType, PaymentStatus } from "src/core/enums/user/appointment.enums"
+import { AppointmentStatus, DoctorAppointmentType, PaymentStatus } from "src/core/enums/appointments/appointment.enums"
 import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface"
 
 export interface IMongoAppointmentDocument {

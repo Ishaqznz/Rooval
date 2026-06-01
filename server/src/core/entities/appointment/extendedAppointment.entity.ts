@@ -1,5 +1,5 @@
 import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface";
-import { AppointmentStatus, DoctorAppointmentType, PaymentStatus } from "src/core/enums/user/appointment.enums";
+import { AppointmentStatus, DoctorAppointmentType, PaymentStatus } from "src/core/enums/appointments/appointment.enums";
 
 export class ExtendedAppointment {
   private constructor(

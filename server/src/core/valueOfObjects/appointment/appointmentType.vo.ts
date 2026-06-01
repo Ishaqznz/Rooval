@@ -1,6 +1,6 @@
 import { AppointmentType } from "src/core/enums/user/profile.enum";
 import { ValueObject } from "../valueObject";
-import { DoctorAppointmentType } from "src/core/enums/user/appointment.enums";
+import { DoctorAppointmentType } from "src/core/enums/appointments/appointment.enums";
 
 export class AppointmentTypeVO extends ValueObject<{ type: DoctorAppointmentType }> {
   private constructor(props: { type: DoctorAppointmentType }) {

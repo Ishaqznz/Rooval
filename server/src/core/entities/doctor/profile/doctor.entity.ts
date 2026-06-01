@@ -1,3 +1,4 @@
+import { Role } from "src/core/enums/user/role.enum";
 import { IDoctorProfile } from "src/core/interfaces/doctor/profile.interface";
 import { DoctorEmailVO } from "src/core/valueOfObjects/doctor/doctorEmail.vo";
 import { DoctorFullNameVO } from "src/core/valueOfObjects/doctor/doctorName.vo";
@@ -8,7 +9,7 @@ export class Doctor {
     public fullName: string,
     public email: string,
     public status: string,
-    public role: string,
+    public role: Role,
     public password: string,
     public profile: IDoctorProfile,
     public profilePhoto: string,
@@ -20,7 +21,7 @@ export class Doctor {
     fullName: string, 
     email: string, 
     status: string, 
-    role: string, 
+    role: Role, 
     password: string, 
     profile: IDoctorProfile,
     profilePhoto: string,
@@ -40,7 +41,7 @@ export class Doctor {
       fullName,
       email,
       status,
-      role ?? 'doctor',
+      role,
       password,
       profile,
       profilePhoto,

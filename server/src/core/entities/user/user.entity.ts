@@ -2,6 +2,7 @@ import { UserFullNameVO } from "src/core/valueOfObjects/user/userName.vo";
 import { UserEmailVO } from "src/core/valueOfObjects/user/userEmail.vo";
 import { UserPasswordVO } from "src/core/valueOfObjects/user/userPhone";
 import { IUserProfile } from "src/core/interfaces/user/profile.interface";
+import { Role } from "src/core/enums/user/role.enum";
 
 export class User {
   constructor(
@@ -9,7 +10,7 @@ export class User {
     public email: string,
     public password: string,
     public id: string,
-    public role: string,
+    public role: Role,
     public isAdmin: boolean,
     public isBlocked: boolean,
     public profile: IUserProfile,
@@ -20,7 +21,7 @@ export class User {
     email: string,
     password: string,
     id?: string,
-    role?: string,
+    role?: Role,
     isAdmin?: boolean,
     isBlocked?: boolean,
     profile?: IUserProfile
@@ -40,7 +41,7 @@ export class User {
       email,
       password,
       id ?? null,
-      role ?? 'user',
+      role,
       isAdmin ?? false,
       isBlocked ?? false,
       profile

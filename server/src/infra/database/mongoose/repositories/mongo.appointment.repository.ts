@@ -3,14 +3,14 @@ import { Appointment } from "src/core/entities/appointment/appointment.entity";
 import { IAppointmentRepository } from "src/core/repositories/appointment.repository";
 import { AppointmentDocument, AppointmentSchema } from "../schemas/doctor/appointment.schema";
 import { InjectModel } from "@nestjs/mongoose";
-import mongoose, { Model, Mongoose } from "mongoose";
+import mongoose, { Model } from "mongoose";
 import { BusinessRuleViolationError } from "src/core/errors/businessRule.error";
 import { ExtendedAppointment } from "src/core/entities/appointment/extendedAppointment.entity";
 import { IMongoAppointmentDocument } from "../interfaces/documents/mongo.appointment.document";
 import { AppointmentMapper } from "../mapper/appointment.mapper";
 import { AppointmentOverlap } from "src/core/entities/appointment/getAppointment.entity";
 import { CancelAppointment } from "src/core/entities/appointment/cancelAppointment.entity";
-import { AppointmentStatus, PaymentStatus } from "src/core/enums/user/appointment.enums";
+import { AppointmentStatus, PaymentStatus } from "src/core/enums/appointments/appointment.enums";
 import { ListAppointments } from "src/core/entities/appointment/listAppointment.entity";
 import { CancelAppointmentByDoctor } from "src/core/entities/appointment/cancelAppointmentByDoctor.entity";
 import { ListAllAppointments } from "src/core/entities/appointment/listAllAppointment.entity";
@@ -62,8 +62,6 @@ export class MongoAppointmentRepository implements IAppointmentRepository {
             ) return false;
             return true;
         })
-
-        console.log('all the appointments in the findOverlapping method: ', appointments, 'available appointments: ', availableAppointments);
 
         return AppointmentMapper.toAppointmentEntities(availableAppointments);
     }

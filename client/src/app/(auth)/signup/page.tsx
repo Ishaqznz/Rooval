@@ -63,7 +63,7 @@ const Signup = () => {
       input: {
         fullName: data.fullName,
         email: data.email,
-        role: role,
+        role: role == 'user' ? 'USER': 'DOCTOR',
         password: data.password,
       },
     };

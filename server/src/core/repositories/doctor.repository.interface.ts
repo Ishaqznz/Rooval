@@ -10,6 +10,7 @@ import { ListDoctors } from "../entities/doctor/profile/listDoctors.entity"
 import { ListDoctorsPayload } from "../entities/doctor/profile/listDoctorsPayload.entity"
 import { IsChatEnabled } from "../entities/user/isChatEnabled.entity"
 import { GrantChatAccess } from "../entities/doctor/profile/grantChatAccess.entity"
+import { RemoveChatAccess } from "../entities/doctor/profile/removeChatAccess.entity"
 
 export interface IDoctorRepository {
     findDoctors(entity: DoctorQueryParams): Promise<Doctor[]>
@@ -30,4 +31,5 @@ export interface IDoctorRepository {
     listDoctors(entity: ListDoctors): Promise<ListDoctorsPayload[]>
     isChatEnabled(entity: IsChatEnabled): Promise<boolean>
     grantChatAccess(entitity: GrantChatAccess): Promise<boolean>
+    removeChatAccess(entity: RemoveChatAccess): Promise<boolean>
 }

@@ -55,6 +55,13 @@ import { NotificationService } from 'src/infra/services/notification.service';
 import { NotificationOrchestrator } from 'src/application/orchestrators/implementation/notification.orch';
 import { DownloadController } from '../../rest/controllers/download.controller';
 import { SupabaseService } from 'src/infra/services/superbase.service';
+import { MongoWalletSchema } from 'src/infra/database/mongoose/schemas/wallet/wallet.schema';
+import { MongoWalletTransactionSchema, WalletTransactionSchema } from 'src/infra/database/mongoose/schemas/wallet/walletTransaction.schema';
+import { WalletSchema } from 'src/infra/database/mongoose/schemas/wallet/wallet.schema';
+import { WalletResolver } from '../resolvers/user/wallet.resolver';
+import { WalletUseCase } from 'src/application/use-cases/implementation/wallet.usecase';
+import { MongoWalletRepository } from 'src/infra/database/mongoose/repositories/mongo.wallet.repository';
+import { MongoWithdrawalRequestSchema, WithdrawalRequestSchema } from 'src/infra/database/mongoose/schemas/wallet/withdrawalRequest.schema';
 
 @Module({
   imports: [
@@ -65,7 +72,10 @@ import { SupabaseService } from 'src/infra/services/superbase.service';
       { name: AppointmentSchema.name, schema: AppointmentModel },
       { name: MongoNotificationSchema.name, schema: NotificationSchema },
       { name: MongoMessageSchema.name, schema: MessageSchema }, 
-      { name: MongoConversationSchema.name, schema: ConversationSchema }
+      { name: MongoConversationSchema.name, schema: ConversationSchema },
+      { name: MongoWalletSchema.name, schema: WalletSchema }, 
+      { name: MongoWalletTransactionSchema.name, schema: WalletTransactionSchema },
+      { name: MongoWithdrawalRequestSchema.name, schema: WithdrawalRequestSchema }
     ]),
     JwtSharedModule,
     LoggerModule
@@ -101,6 +111,9 @@ import { SupabaseService } from 'src/infra/services/superbase.service';
     ConversationUseCase,
     MessageResolver,
     ConversationResolver,
+    WalletResolver,
+    WalletUseCase,
+
     {
       provide: 'IAuthRepository',
       useClass: MongoAuthRepository,
@@ -220,6 +233,14 @@ import { SupabaseService } from 'src/infra/services/superbase.service';
     {
       provide: 'INotificationOrchestrator',
       useClass: NotificationOrchestrator
+    },
+    {
+      provide: 'IWalletUseCase',
+      useClass: WalletUseCase
+    }, 
+    {
+      provide: 'IWalletRepository',
+      useClass: MongoWalletRepository
     }
   ],
   exports: [

@@ -1,6 +1,6 @@
 import { Field, InputType } from "@nestjs/graphql";
 import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
-import { AppointmentStatus } from "src/core/enums/user/appointment.enums";
+import { AppointmentStatus } from "src/core/enums/appointments/appointment.enums";
 import { AppointmentType } from "src/core/enums/user/profile.enum";
 
 @InputType()

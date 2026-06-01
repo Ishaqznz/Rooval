@@ -9,7 +9,6 @@ export class PaymentService implements IPaymentService {
     async createCheckoutSession(
         appointment: IAppointmentResponseDTO
     ): Promise<ICreateCheckoutSessionResponse> {
-
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
             payment_method_types: ["card"],

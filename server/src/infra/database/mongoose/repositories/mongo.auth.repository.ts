@@ -30,12 +30,16 @@ export class MongoAuthRepository implements IAuthRepository {
   constructor(
     @InjectModel(MongoUserSchema.name) 
     private readonly _userModel: Model<UserDocument>,
+
     @InjectModel(MongoDoctorSchema.name) 
     private readonly _doctorModel: Model<DoctorDocument>,
+
     @InjectRedis() 
     private readonly _redis: Redis,
+
     @Inject('IMailService') 
     private readonly _mailService: IMailService,
+    
     @Inject('IAuthService') 
     private readonly _authService: IAuthService
   ) { }

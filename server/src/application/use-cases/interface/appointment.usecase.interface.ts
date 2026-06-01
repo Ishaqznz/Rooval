@@ -7,6 +7,7 @@ import { IListAppointmentsResponseDTO } from "src/application/dto/appointment/re
 import { IListAllAppointmentsRequestDTO } from "src/application/dto/appointment/request/listAll.request.dto"
 import { IListUserAppointmentsRequestDTO } from "src/application/dto/appointment/request/listUser.request.dto"
 import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface"
+import { PaymentStatus } from "src/core/enums/appointments/appointment.enums"
 
 export interface IAppointmentUseCase {
     findById(appointmentId: string): Promise<IAppointmentResponseDTO>

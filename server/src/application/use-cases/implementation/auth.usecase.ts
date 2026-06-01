@@ -20,6 +20,8 @@ import { IGoogleLoginRequestDTO } from 'src/application/dto/auth/request/googleL
 import { GoogleLogin } from 'src/core/entities/user/googleLogin.entity';
 import { INotificationOrchestrator } from 'src/application/orchestrators/interface/notification.orch.interface';
 import { NotificationMessages, NotificationType } from 'src/core/enums/notifications/notification.enum';
+import { IWalletUseCase } from '../interface/wallet.usecase.interface';
+import { Role } from 'src/core/enums/user/role.enum';
 
 @Injectable()
 export class AuthUseCase implements IAuthUseCase {
@@ -38,6 +40,9 @@ export class AuthUseCase implements IAuthUseCase {
 
     @Inject('INotificationOrchestrator')
     private readonly _notificationOrchestrator: INotificationOrchestrator,
+
+    @Inject('IWalletUseCase')
+    private readonly _walletUseCase: IWalletUseCase
   ) { }
 
   async signUp(input: ICreateUserRequestDTO): Promise<IUserResponseDTO> {
@@ -52,10 +57,20 @@ export class AuthUseCase implements IAuthUseCase {
     if (typeof inputUserEntity == 'string') throw new BusinessRuleViolationError(inputUserEntity)
 
     const outputUserEntity = await this._authRepository.createUser(inputUserEntity);
-    const userOutputDto = UserOutputMapper.toUserDTO(outputUserEntity)
+    const userOutputDto = UserOutputMapper.toUserDTO(outputUserEntity);
+    return userOutputDto
+  }
 
+  async verifyEmail(token: string): Promise<IUserResponseDTO | IDoctorResponseDTO> {
+    const entity = await this._authRepository.verifyEmail(token)
+
+    await this._walletUseCase.createWallet({
+      userId: entity.id,
+      role: entity.role
+    })
+    
     const adminId = await this._userRepository.findAdminId();
-
+    
     await this._notificationOrchestrator.notify({
       receiverId: adminId,
       content: NotificationMessages.NEW_USER_CREATED,
@@ -63,11 +78,6 @@ export class AuthUseCase implements IAuthUseCase {
       type: NotificationType.SYSTEM
     })
 
-    return userOutputDto
-  }
-
-  async verifyEmail(token: string): Promise<IUserResponseDTO | IDoctorResponseDTO> {
-    const entity = await this._authRepository.verifyEmail(token)
     if (entity.role == 'user') {
       return UserOutputMapper.toUserDTO(entity as User)
     }
@@ -108,7 +118,6 @@ export class AuthUseCase implements IAuthUseCase {
     if (!checkPassword) {
       throw new BusinessRuleViolationError(UserErrorType.PasswordMismatch);
     }
-
     if (isDoctor) {
       return DoctorOutputMapper.toDoctorDTO(doctor)
     }
@@ -167,9 +176,9 @@ export class AuthUseCase implements IAuthUseCase {
     }
     const userEntity = await this._authRepository.googleLogin(entitity.value);
     if (userEntity)
-    if (userEntity.role == 'user') {
-      return UserOutputMapper.toUserDTO(userEntity as User)
-    }
+      if (userEntity.role == 'user') {
+        return UserOutputMapper.toUserDTO(userEntity as User)
+      }
 
     return DoctorOutputMapper.toDoctorDTO(userEntity as Doctor)
   }

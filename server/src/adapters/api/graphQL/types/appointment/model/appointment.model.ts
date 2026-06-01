@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from "@nestjs/graphql";
-import { AppointmentStatus, DoctorAppointmentType, PaymentStatus } from "src/core/enums/user/appointment.enums";
+import { AppointmentStatus, DoctorAppointmentType, PaymentStatus } from "src/core/enums/appointments/appointment.enums";
 import { AppointmentAvailability } from "./appointmentAvailability.model";
 
 @ObjectType()

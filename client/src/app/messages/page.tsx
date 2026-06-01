@@ -19,15 +19,7 @@ import { conversationApiService } from "@/services/conversationApiService";
 import { messageApiService } from "@/services/messageApiService";
 import { userServiceApi } from "@/services/userApiService";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-/**
- * Max file size shown to the user in the error banner.
- * The actual binary limit is enforced by your upload API / storage provider.
- * We keep a client-side guard here only for a fast UX rejection of obviously
- * oversized files before hitting the network.
- */
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB client-side pre-check
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; 
 
 const MY_ROLE = "USER";
 
@@ -1111,7 +1103,7 @@ const PatientChatPage = () => {
             <p className="text-sm font-medium text-foreground truncate">You</p>
             <p className="text-xs text-muted-foreground">Patient</p>
           </div>
-          <Button variant="ghost" size="icon" className="w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent" onClick={() => router.push('/')}>
+          <Button variant="ghost" size="icon" className="w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent" onClick={() => router.push('/profile/appointments')}>
             <LogOut className="w-3.5 h-3.5" />
           </Button>
         </div>

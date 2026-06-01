@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddMoneyInput {
+  amount: Float!
+  walletId: String!
+}
+
 type Appointment {
   amount: Float
   appointmentNo: Float!
@@ -186,6 +191,18 @@ input CreatePaymentSessionInput {
   appointmentId: String!
 }
 
+input CreateTransactionInput {
+  amount: Float!
+  reason: WalletTransactionReason!
+  type: WalletTransactionType!
+  walletId: String!
+}
+
+input CreateWalletInput {
+  role: Role!
+  userId: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -199,6 +216,11 @@ enum DayOfWeek {
   THURSDAY
   TUESDAY
   WEDNESDAY
+}
+
+input DeductMoneyInput {
+  amount: Float!
+  walletId: String!
 }
 
 input DeleteDoctorInput {
@@ -382,6 +404,13 @@ input GetMessagesInput {
   conversationId: String!
 }
 
+input GetTransactionsInput {
+  limit: Int!
+  page: Int!
+  type: ListTransactionType!
+  walletId: String!
+}
+
 input GoogleLoginInput {
   email: String!
   fullName: String!
@@ -431,6 +460,17 @@ input ListDoctorsInput {
   sorting: DoctorSortInput!
 }
 
+enum ListTransactionType {
+  ALL
+  CREDIT
+  DEBIT
+}
+
+type ListTransactions {
+  totalTransactions: Int!
+  transactions: [Transaction!]!
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -474,6 +514,7 @@ enum MessageType {
 
 type Mutation {
   FileReUpload(input: DoctorFileUpdateInput!): Boolean!
+  addMoney(input: AddMoneyInput!): Boolean!
   addRejectionReason(input: RejectionReasonInput!): Boolean!
   adminLogin(input: LoginInput!): User!
   cancelAppointment(input: CancelAppointmentInput!): Boolean!
@@ -483,7 +524,10 @@ type Mutation {
   createAppointment(input: CreateAppointmentInput!): String!
   createConversation(input: CreateConversationInput!): Conversation!
   createPaymentSession(input: CreatePaymentSessionInput!): PaymentSession!
+  createTransaction(input: CreateTransactionInput!): Transaction!
   createUser(input: SignUpInput!): User!
+  createWallet(input: CreateWalletInput!): Wallet!
+  deductMoney(input: DeductMoneyInput!): Boolean!
   deleteDoctor(input: DeleteDoctorInput!): Boolean!
   deleteDoctorAvailabilities: Boolean!
   deleteUser(input: deleteUserInput!): Boolean!
@@ -509,6 +553,8 @@ type Mutation {
   verifyEmail(input: TokenInput!): User!
   verifyResetPassword(input: PasswordInput!): User!
   verifyResetToken(input: TokenInput!): User!
+  withdrawDoctorMoney(input: WithdrawDoctorMoneyInput!): Boolean!
+  withdrawUserMoney(input: WithdrawUserMoneyInput!): Boolean!
 }
 
 type Notification {
@@ -582,15 +628,18 @@ type Query {
   findUserById(input: FindUserByIdInput!): User!
   findUserNotifications: [Notification!]!
   findUsers(input: FindUsersInput!): [User!]!
+  getBalance: Float!
   getConversationById(input: GetConversationByIdInput!): Conversation!
   getConversationByParticipants(input: GetConversationsByParticipantsInput!): [Conversation!]!
   getDoctor(input: GetDoctorInput!): Doctor!
   getDoctorSlotsByDate(input: SlotInput!): [Slot!]!
   getMessages(input: GetMessagesInput!): [Message!]!
   getUserConversations: [Conversation!]!
+  getWallet: Wallet!
   listAllAppointments(input: ListAllAppointmentsInput!): ListAppointments!
   listAppointments(input: ListAppointmentsInput!): ListAppointments!
   listDoctors(input: ListDoctorsInput!): ListDoctors!
+  listTransactions(input: GetTransactionsInput!): ListTransactions!
   listUserAppointments(input: ListAppointmentsInput!): ListAppointments!
 }
 
@@ -631,7 +680,7 @@ input SignUpInput {
   email: String!
   fullName: String!
   password: String!
-  role: String!
+  role: Role!
 }
 
 type Slot {
@@ -663,6 +712,15 @@ enum StatusFilter {
 
 input TokenInput {
   token: String!
+}
+
+type Transaction {
+  amount: Float!
+  createdAt: DateTime!
+  id: ID!
+  reason: WalletTransactionReason!
+  type: WalletTransactionType!
+  walletId: String!
 }
 
 input UpdateDoctorProfileInput {
@@ -731,6 +789,48 @@ type UserProfile {
 
 input UserUpdateProfileInput {
   profilePhoto: Upload!
+}
+
+type Wallet {
+  balance: Float!
+  currency: String!
+  id: ID!
+  isActive: Boolean!
+  ownerId: String!
+  ownerType: Role!
+}
+
+enum WalletTransactionReason {
+  APPOINTMENT_PAYMENT
+  APPOINTMENT_REFUND
+  DOCTOR_PAYOUT
+  MANUAL_ADJUSTMENT
+  PLATFORM_COMMISSION
+  USER_APPOINTMENT_CANCELLATION
+  WITHDRAWAL
+}
+
+enum WalletTransactionType {
+  CREDIT
+  DEBIT
+}
+
+input WithdrawDoctorMoneyInput {
+  accountHolderName: String!
+  accountNumber: Float!
+  amount: Float!
+  bankName: String!
+  ifscCode: String!
+  notes: String!
+}
+
+input WithdrawUserMoneyInput {
+  accountHolderName: String!
+  accountNumber: Float!
+  amount: Float!
+  bankName: String!
+  ifscCode: String!
+  notes: String!
 }
 
 enum consultationFilter {

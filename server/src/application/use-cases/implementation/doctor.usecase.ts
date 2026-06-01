@@ -28,6 +28,8 @@ import { ListDoctors } from 'src/core/entities/doctor/profile/listDoctors.entity
 import { IListDoctorsResponseDTO } from 'src/application/dto/doctor/profile/response/listDoctors.response.dto';
 import { IGrantChatAccessRequestDTO } from 'src/application/dto/doctor/profile/request/grantChatAccess.request.dto';
 import { GrantChatAccess } from 'src/core/entities/doctor/profile/grantChatAccess.entity';
+import { IRemoveChatAccessRequestDTO } from 'src/application/dto/doctor/profile/request/removeChatAccess.request.dto';
+import { RemoveChatAccess } from 'src/core/entities/doctor/profile/removeChatAccess.entity';
 
 @Injectable()
 export class DoctorUseCase implements IDoctorUseCase {
@@ -162,5 +164,10 @@ export class DoctorUseCase implements IDoctorUseCase {
   async grantChatAccess(input: IGrantChatAccessRequestDTO): Promise<boolean> {
     const entity = GrantChatAccess.create(input)
     return await this._doctorRepository.grantChatAccess(entity)
+  }
+
+  async removeChatAccess(input: IRemoveChatAccessRequestDTO): Promise<boolean> {
+    const entity = RemoveChatAccess.create(input)
+    return this._doctorRepository.removeChatAccess(entity)
   }
 }

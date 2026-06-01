@@ -5,7 +5,7 @@ import { AppointmentAmountVO } from "src/core/valueOfObjects/appointment/amount.
 import { BufferTimeVO } from "src/core/valueOfObjects/appointment/bufferTime.vo";
 import { AppointmentSlotDurationVO } from "src/core/valueOfObjects/appointment/slotDuration.vo";
 import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface";
-import { DoctorAppointmentType } from "src/core/enums/user/appointment.enums";
+import { DoctorAppointmentType } from "src/core/enums/appointments/appointment.enums";
 
 export class Appointment {
   constructor(

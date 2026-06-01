@@ -26,6 +26,7 @@ import { LoggerService } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
 import { IsChatEnabled } from 'src/core/entities/user/isChatEnabled.entity';
 import { GrantChatAccess } from 'src/core/entities/doctor/profile/grantChatAccess.entity';
+import { RemoveChatAccess } from 'src/core/entities/doctor/profile/removeChatAccess.entity';
 
 @Injectable()
 export class MongoDoctorRepository implements IDoctorRepository {
@@ -429,11 +430,24 @@ export class MongoDoctorRepository implements IDoctorRepository {
         const doctorObjectId = new mongoose.Types.ObjectId(entitity.input.doctorId)
         const update = await this._doctorModel.updateOne(
             { _id: doctorObjectId }, {
-                $push: {
-                    'profile.personal.chatEnabledUsers': userObjectId
-                }
+            $push: {
+                'profile.personal.chatEnabledUsers': userObjectId
+            }
         })
-        
+
+        return update.modifiedCount > 0;
+    }
+
+    async removeChatAccess(entity: RemoveChatAccess): Promise<boolean> {
+        const userObjectId = new mongoose.Types.ObjectId(entity.input.userId)
+        const doctorObjectId = new mongoose.Types.ObjectId(entity.input.doctorId)
+        const update = await this._doctorModel.updateOne(
+            { _id: doctorObjectId }, {
+            $pull: {
+                'profile.personal.chatEnabledUsers': userObjectId
+            }
+        })
+
         return update.modifiedCount > 0;
     }
 }
