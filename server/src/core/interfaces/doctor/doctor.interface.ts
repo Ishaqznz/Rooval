@@ -12,3 +12,23 @@ export interface IDoctorQueryParams {
     sortBy?: DoctorSortField
     sortOrder?: DoctorSortOrder
 }
+
+export interface DashboardStats {
+    totalPatients: number
+    totalAppointments: number
+    upcomingAppointments: number
+    completedAppointments: number
+    cancelledAppointments: number
+}
+
+export interface RatingOverview {
+    averageRating: number
+    totalReviews: number
+}
+
+export interface RevenueOverview {
+    availableBalance: number
+    todayRevenue: number
+    monthlyRevenue: number
+    totalRevenue: number
+}

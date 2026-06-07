@@ -1,5 +1,5 @@
 import { Inject, Injectable, LoggerService } from '@nestjs/common';
-import { Query, Mutation, Args, Context, ResolveField, Parent } from '@nestjs/graphql';
+import { Query, Mutation, Args, Context, ResolveField, Parent, Float } from '@nestjs/graphql';
 import { Resolver } from '@nestjs/graphql';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { ChangeDoctorStatusInput } from 'src/adapters/api/graphQL/types/doctor/input/changeStatus.input';
@@ -24,6 +24,8 @@ import { ListDoctorsInput } from '../../types/doctor/input/listDoctors.input';
 import { GetDoctorInput } from '../../types/doctor/input/getDoctor.input';
 import { ListDoctors } from '../../types/doctor/model/listDoctors.model';
 import { Appointment } from '../../types/appointment/model/appointment.model';
+import { GetAverageRatingInput } from '../../types/doctor/input/getAverageRating.input';
+import { DoctorDashboard } from '../../types/doctor/model/doctorDashboard.model';
 
 @Injectable()
 @Resolver(() => Doctor)
@@ -115,7 +117,7 @@ export class DoctorResolver {
     @Context() context: GqlContext
   ): Promise<boolean> {
     const doctorId = context.req.user.userId;
-    return this._doctorUseCase.doctorFileUpload(input, doctorId)
+    return await this._doctorUseCase.doctorFileUpload(input, doctorId)
   }
 
   @Mutation(() => Boolean)
@@ -125,14 +127,14 @@ export class DoctorResolver {
     @Context() context: GqlContext
   ): Promise<boolean> {
     const userId = context.req.user.userId
-    return this._doctorUseCase.fileReUpload(input, userId)
+    return await this._doctorUseCase.fileReUpload(input, userId)
   }
 
   @Mutation(() => Boolean)
   async addRejectionReason(
     @Args('input') input: RejectionReasonInput
   ): Promise<boolean> {
-    return this._doctorUseCase.addRejectionReason(input)
+    return await this._doctorUseCase.addRejectionReason(input)
   }
 
   @Mutation(() => Boolean)
@@ -168,5 +170,22 @@ export class DoctorResolver {
     @Args('input') input: GetDoctorInput
   ): Promise<Doctor> {
     return this._doctorUseCase.getById(input.doctorId)
+  }
+
+  @Query(() => Float)
+  async getAverageRating(
+    @Args('input') input: GetAverageRatingInput
+  ): Promise<number> {
+    return await this._doctorUseCase.getAverageRating(input.doctorId)
+  }
+
+  @Query(() => DoctorDashboard)
+  @UseGuards(JwtAuthGuard)
+  async getDoctorDashboardStats(
+    @Context() context: GqlContext
+  ): Promise<DoctorDashboard> {
+    const doctorId = context.req.user.userId;
+    const dashboardData = await this._doctorUseCase.getDoctorDashboard(doctorId)
+    return dashboardData;
   }
 } 

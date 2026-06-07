@@ -6,7 +6,7 @@ import { GraphQLError } from 'graphql';
 
 import { AvailabilityLoader } from 'src/adapters/api/graphQL/loaders/availability.loader';
 import { AppointmentLoader } from 'src/adapters/api/graphQL/loaders/appointment.loader';
-import { GraphqlAdaptersModule } from 'src/adapters/api/graphQL/modules/graphql.module';
+import { GraphqlConfigModule } from '../modules/graphql.module';
 import { DoctorLoader } from 'src/adapters/api/graphQL/loaders/doctor.loader';
 import { UserLoader } from 'src/adapters/api/graphQL/loaders/user.loader';
 
@@ -14,7 +14,7 @@ import { UserLoader } from 'src/adapters/api/graphQL/loaders/user.loader';
   imports: [
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      imports: [GraphqlAdaptersModule],
+      imports: [GraphqlConfigModule],
 
       inject: [AvailabilityLoader, AppointmentLoader, DoctorLoader, UserLoader],
 

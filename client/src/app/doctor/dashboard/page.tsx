@@ -1,322 +1,709 @@
-// "use client";
+'use client';
 
-// interface EarningRow {
-//   label: string;
-//   amount: string;
-//   isTotal?: boolean;
-// }
+import { doctorServiceApi } from "@/services/doctorApiService";
+import { useEffect, useState } from "react";
 
-// interface NotificationItem {
-//   text: React.ReactNode;
-//   time: string;
-//   unread?: boolean;
-//   variant?: "default" | "danger";
-// }
+type AppointmentStatusType = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
+type AppointmentType       = 'IN_PERSON' | 'ONLINE';
+type PaymentStatus         = 'PENDING' | 'PAID' | 'REFUNDED' | 'FAILED';
 
-// interface RecentPatient {
-//   name: string;
-//   initials: string;
-//   avatarColor: string;
-//   condition: string;
-//   when: string;
-// }
+interface DashboardStats {
+  totalPatients: number;
+  totalAppointments: number;
+  upcomingAppointments: number;
+  completedAppointments: number;
+  cancelledAppointments: number;
+}
 
-// const SearchIcon = () => (
-//   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7">
-//     <circle cx="6.5" cy="6.5" r="4.5" /><path d="M10.5 10.5L14 14" />
-//   </svg>
-// );
-// const BellIcon = () => (
-//   <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
-//     <path d="M8 2a4 4 0 014 4v3l1 2H3l1-2V6a4 4 0 014-4z" /><path d="M6 13a2 2 0 004 0" />
-//   </svg>
-// );
-// const CalendarIcon = () => (
-//   <svg className="w-[15px] h-[15px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
-//     <rect x="1" y="3" width="14" height="11" rx="1.5" /><path d="M5 1v4M11 1v4M1 7h14" />
-//   </svg>
-// );
-// const PatientsIcon = () => (
-//   <svg className="w-[15px] h-[15px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
-//     <circle cx="6" cy="5" r="3" /><path d="M1 14c0-3 2-5 5-5s5 2 5 5" />
-//     <circle cx="12" cy="4" r="2" /><path d="M12 8c2 0 3 1.5 3 3.5" />
-//   </svg>
-// );
-// const ClockIcon = () => (
-//   <svg className="w-[15px] h-[15px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
-//     <circle cx="8" cy="8" r="6" /><path d="M8 5v3l2 2" />
-//   </svg>
-// );
-// const EarningsIcon = () => (
-//   <svg className="w-[15px] h-[15px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
-//     <circle cx="8" cy="8" r="6" /><path d="M8 5v1.5M8 10.5V12" />
-//     <path d="M5.8 6.5a2.2 1.5 0 104.4 0 2.2 1.5 0 00-4.4 0" />
-//     <path d="M5.8 9.5a2.2 1.5 0 104.4 0" />
-//   </svg>
-// );
-// const AvailabilityIcon = () => (
-//   <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2">
-//     <rect x="1" y="3" width="14" height="11" rx="1.5" /><path d="M5 1v4M11 1v4M1 7h14" />
-//     <path d="M5 10l2 2 4-4" />
-//   </svg>
-// );
+interface DashboardRatings {
+  averageRating: number;
+  totalReviews: number;
+}
 
-// const todayAppointments = [
-//   { id: "#PT-0041", name: "Priya Krishnan", initials: "PK", avatarColor: "bg-sky-400", time: "9:00 AM", type: "Consultation", status: "confirmed" as const },
-//   { id: "#PT-0088", name: "Ravi Shankar", initials: "RS", avatarColor: "bg-amber-400", time: "10:15 AM", type: "Follow-up", status: "confirmed" as const },
-//   { id: "#PT-0102", name: "Anita Menon", initials: "AM", avatarColor: "bg-purple-500", time: "11:30 AM", type: "ECG Review", status: "pending" as const },
-//   { id: "#PT-0057", name: "Suresh Kumar", initials: "SK", avatarColor: "bg-emerald-500", time: "2:00 PM", type: "Video Call", status: "live" as const },
-//   { id: "#PT-0073", name: "Nalini Patel", initials: "NP", avatarColor: "bg-rose-400", time: "3:45 PM", type: "Consultation", status: "cancelled" as const },
-// ];
+interface DashboardRevenue {
+  availableBalance: number;
+  todayRevenue: number;
+  monthlyRevenue: number;
+  totalRevenue: number;
+}
 
-// const recentPatients: RecentPatient[] = [
-//   { name: "Vijaya Ramesh", initials: "VR", avatarColor: "bg-sky-400", condition: "Hypertension · Stage 2", when: "Today" },
-//   { name: "Mahesh Gupta", initials: "MG", avatarColor: "bg-amber-400", condition: "Arrhythmia · Under monitoring", when: "Yesterday" },
-//   { name: "Saranya Thiyagarajan", initials: "ST", avatarColor: "bg-purple-500", condition: "Post-surgery · Recovery", when: "Apr 18" },
-// ];
+interface TodayAppointment {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  session: { startTime: string; endTime: string };
+  status: AppointmentStatusType;
+  type: AppointmentType;
+  appointmentNo: number;
+  reason?: string | null;
+  notes?: string | null;
+  paymentStatus: PaymentStatus;
+  paymentId?: string | null;
+  cancelledBy?: string | null;
+  cancelReason?: string | null;
+  slotDuration?: number;
+  bufferTime?: number;
+  reminderSent?: boolean;
+  isCheckedIn?: boolean;
+  hasReviewed?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
-// const earningRows: EarningRow[] = [
-//   { label: "Consultations (18)", amount: "₹27,000" },
-//   { label: "Live Sessions (3)", amount: "₹12,600" },
-//   { label: "Medical Reports (7)", amount: "₹8,600" },
-//   { label: "Total this month", amount: "₹48,200", isTotal: true },
-// ];
+interface Review {
+  id: string;
+  doctorId: string;
+  patientId: string;
+  appointmentId: string;
+  rating: number;
+  review: string;
+  isVisible: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
-// const notifications: NotificationItem[] = [
-//   { text: <><strong>Priya Krishnan</strong> confirmed her 9:00 AM appointment</>, time: "2 min ago", unread: true },
-//   { text: <>New message from <strong>Mahesh Gupta</strong> about his medication</>, time: "18 min ago", unread: true },
-//   { text: <>Lab report for <strong>Anita Menon</strong> is ready for review</>, time: "1 hr ago", unread: true },
-//   { text: <>Nalini Patel cancelled her 3:45 PM appointment</>, time: "2 hr ago", variant: "danger" },
-// ];
+interface DashboardData {
+  stats: DashboardStats;
+  ratings: DashboardRatings;
+  revenue: DashboardRevenue;
+  todayAppointments: TodayAppointment[];
+  recentReviews: Review[];
+}
 
-// const barHeights = [45, 60, 50, 75, 55, 90, 40];
-// const barDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+/* ── Badge configs ───────────────────────────────────────────── */
+const STATUS_BADGE: Record<AppointmentStatusType, { label: string; cls: string }> = {
+  SCHEDULED: { label: 'Scheduled', cls: 'bg-blue-50 text-blue-700 border border-blue-100' },
+  COMPLETED: { label: 'Completed', cls: 'bg-green-50 text-green-700 border border-green-100' },
+  CANCELLED: { label: 'Cancelled', cls: 'bg-red-50 text-red-700 border border-red-100' },
+  NO_SHOW:   { label: 'No-show',   cls: 'bg-yellow-50 text-yellow-700 border border-yellow-100' },
+};
 
-// const statusMap = {
-//   confirmed: "bg-emerald-100 text-emerald-700",
-//   pending: "bg-amber-100 text-amber-700",
-//   cancelled: "bg-rose-100 text-rose-700",
-//   live: "bg-purple-100 text-purple-700",
-// };
+const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
+  PENDING:  { label: 'Payment Pending', cls: 'bg-yellow-50 text-yellow-700 border border-yellow-100' },
+  PAID:     { label: 'Paid',            cls: 'bg-green-50 text-green-700 border border-green-100' },
+  REFUNDED: { label: 'Refunded',        cls: 'bg-blue-50 text-blue-700 border border-blue-100' },
+  FAILED:   { label: 'Payment Failed',  cls: 'bg-red-50 text-red-700 border border-red-100' },
+};
 
-// export default function DoctorDashboardPage() {
+/* ── Helpers ─────────────────────────────────────────────────── */
+function formatDate(iso?: string | null) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+function formatTime(iso?: string | null) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+function formatCurrency(amount: number) {
+  return `$${amount.toLocaleString('en-IN')}`;
+}
+function getDuration(start?: string | null, end?: string | null) {
+  if (!start || !end) return null;
+  const diff = new Date(end).getTime() - new Date(start).getTime();
+  const mins = Math.round(diff / 60000);
+  if (mins < 60) return `${mins} min`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+function timeAgo(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
 
-//   return (
-//     <>
-//       {/* Topbar */}
-//       <header className="h-14 bg-card border-b border-border px-6 flex items-center justify-between flex-shrink-0">
-//         <div>
-//           <p className="font-semibold text-base leading-tight">Good morning, Dr. Mehta 👋</p>
-//           <p className="text-[11px] text-muted-foreground mt-0.5">Monday, 20 April 2026 · Cardiology Wing</p>
-//         </div>
-//         <div className="flex items-center gap-2.5">
-//           <button className="w-[34px] h-[34px] border border-border rounded-lg bg-card flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
-//             <SearchIcon />
-//           </button>
-//           <button className="relative w-[34px] h-[34px] border border-border rounded-lg bg-card flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
-//             <BellIcon />
-//             <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-primary border-2 border-white" />
-//           </button>
-//           <button className="flex items-center gap-1.5 bg-primary hover:bg-secondary text-white text-xs font-medium px-3.5 py-2 rounded-lg transition-colors">
-//             <AvailabilityIcon />
-//             Set Availability
-//           </button>
-//         </div>
-//       </header>
-
-//       {/* Scrollable Content */}
-//       <main className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
-
-//         {/* Stat Cards */}
-//         <div className="grid grid-cols-4 gap-3">
-//           {[
-//             { num: "24", label: "Today's Appointments", change: "↑ 3 more than yesterday", changeColor: "text-emerald-600", accent: "bg-primary", iconColor: "text-secondary", iconBg: "bg-purple-100", icon: <CalendarIcon /> },
-//             { num: "182", label: "Active Patients", change: "↑ 7 new this week", changeColor: "text-emerald-600", accent: "bg-emerald-500", iconColor: "text-emerald-700", iconBg: "bg-emerald-100", icon: <PatientsIcon /> },
-//             { num: "6", label: "Pending Reviews", change: "2 urgent", changeColor: "text-amber-600", accent: "bg-amber-400", iconColor: "text-amber-700", iconBg: "bg-amber-100", icon: <ClockIcon /> },
-//           ].map((stat) => (
-//             <div key={stat.label} className="bg-card border border-border rounded-xl p-4 relative overflow-hidden">
-//               <div className={`absolute top-0 left-0 right-0 h-[3px] ${stat.accent} opacity-60`} />
-//               <div className={`w-8 h-8 rounded-lg ${stat.iconBg} flex items-center justify-center mb-2.5 ${stat.iconColor}`}>
-//                 {stat.icon}
-//               </div>
-//               <p className="text-[22px] font-semibold leading-tight text-foreground">{stat.num}</p>
-//               <p className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</p>
-//               <p className={`text-[10px] mt-1.5 ${stat.changeColor}`}>{stat.change}</p>
-//             </div>
-//           ))}
-//         </div>
-
-//         {/* Two-column */}
-//         <div className="grid grid-cols-[1fr_320px] gap-3.5">
-
-//           {/* Appointments Table */}
-//           <div className="bg-card border border-border rounded-xl overflow-hidden">
-//             <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
-//               <p className="font-semibold text-[13px]">Today&apos;s Appointments</p>
-//               <div className="flex items-center gap-2.5">
-//                 <span className="text-[11px] text-muted-foreground">Mon, 20 Apr</span>
-//                 <a href="/doctor/dashboard/appointments" className="text-[11px] text-primary hover:text-secondary transition-colors">View all →</a>
-//               </div>
-//             </div>
-//             <table className="w-full">
-//               <thead>
-//                 <tr className="bg-purple-50/60">
-//                   {["Patient", "Time", "Type", "Status"].map((h) => (
-//                     <th key={h} className="px-4 py-2.5 text-left text-[10px] uppercase tracking-wide text-muted-foreground font-medium">{h}</th>
-//                   ))}
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 {todayAppointments.map((a) => (
-//                   <tr key={a.id} className="border-b border-purple-50 last:border-b-0 hover:bg-purple-50/30 transition-colors">
-//                     <td className="px-4 py-2.5">
-//                       <div className="flex items-center gap-2.5">
-//                         <div className={`w-8 h-8 ${a.avatarColor} rounded-full flex items-center justify-center text-[11px] font-semibold text-white flex-shrink-0`}>
-//                           {a.initials}
-//                         </div>
-//                         <div>
-//                           <p className="text-[12px] font-medium">{a.name}</p>
-//                           <p className="text-[10px] text-muted-foreground">{a.id}</p>
-//                         </div>
-//                       </div>
-//                     </td>
-//                     <td className="px-4 py-2.5 text-[12px]">{a.time}</td>
-//                     <td className="px-4 py-2.5 text-[11px] text-muted-foreground">{a.type}</td>
-//                     <td className="px-4 py-2.5">
-//                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium capitalize ${statusMap[a.status]}`}>
-//                         {a.status}
-//                       </span>
-//                     </td>
-//                   </tr>
-//                 ))}
-//               </tbody>
-//             </table>
-//           </div>
-
-//           {/* Right Column */}
-//           <div className="flex flex-col gap-3.5">
-//             {/* Live Session */}
-//             {/* <div className="rounded-xl p-4 text-white relative overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(277,44%,39%) 0%, hsl(277,50%,28%) 100%)" }}>
-//               <div className="absolute bottom-[-20px] right-[-20px] w-24 h-24 rounded-full bg-white/5" />
-//               <div className="inline-flex items-center gap-1.5 bg-white/15 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide mb-3">
-//                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-//                 Live Now
-//               </div>
-//               <p className="font-semibold text-sm mb-0.5">Cardiology Community Session</p>
-//               <p className="text-[11px] opacity-70 mb-3.5">Heart Failure — New Treatment Pathways</p>
-//               <div className="flex items-center justify-between">
-//                 <div className="text-center"><p className="text-lg font-semibold">47</p><p className="text-[10px] opacity-60 mt-0.5">Attendees</p></div>
-//                 <div className="w-px h-8 bg-white/15" />
-//                 <div className="text-center"><p className="text-lg font-semibold">32m</p><p className="text-[10px] opacity-60 mt-0.5">Elapsed</p></div>
-//                 <button className="bg-white/15 border border-white/25 text-white text-[11px] font-medium px-3.5 py-1.5 rounded-lg hover:bg-white/25 transition-colors">
-//                   Join Session
-//                 </button>
-//               </div>
-//             </div> */}
-
-//             {/* Recent Patients */}
-//             {/* <div className="bg-card border border-border rounded-xl overflow-hidden">
-//               <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-//                 <p className="font-semibold text-[13px]">Recent Patients</p>
-//                 <a href="/doctor/dashboard/patients" className="text-[11px] text-primary hover:text-secondary transition-colors">All patients →</a>
-//               </div>
-//               {recentPatients.map((p) => (
-//                 <div key={p.name} className="flex items-center gap-2.5 px-4 py-3 border-b border-purple-50 last:border-b-0 hover:bg-purple-50/30 transition-colors cursor-pointer">
-//                   <div className={`w-8 h-8 ${p.avatarColor} rounded-full flex items-center justify-center text-[11px] font-semibold text-white flex-shrink-0`}>
-//                     {p.initials}
-//                   </div>
-//                   <div className="flex-1 min-w-0">
-//                     <p className="text-[12px] font-medium truncate">{p.name}</p>
-//                     <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{p.condition}</p>
-//                   </div>
-//                   <p className="text-[10px] text-muted-foreground flex-shrink-0">{p.when}</p>
-//                 </div>
-//               ))}
-//             </div> */}
-//           </div>
-//         </div>
-
-//         {/* Bottom Row */}
-//         <div className="grid grid-cols-2 gap-3.5">
-
-//           {/* Earnings */}
-//           {/* <div className="bg-card border border-border rounded-xl overflow-hidden">
-//             <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
-//               <p className="font-semibold text-[13px]">Earnings Overview</p>
-//               <a href="/doctor/dashboard/earnings" className="text-[11px] text-primary hover:text-secondary transition-colors">Full report →</a>
-//             </div>
-//             <div className="px-4 pt-3.5 pb-2">
-//               <p className="text-[11px] text-muted-foreground mb-2">Weekly consultation revenue</p>
-//               <div className="flex items-end gap-1.5 h-12">
-//                 {barHeights.map((h, i) => (
-//                   <div key={i} className={`flex-1 rounded-t-sm ${i === 5 ? "bg-primary" : "bg-muted"} ${i === 6 ? "opacity-40" : ""}`} style={{ height: `${h}%` }} />
-//                 ))}
-//               </div>
-//               <div className="flex gap-1.5 mt-1">
-//                 {barDays.map((d) => (<p key={d} className="flex-1 text-center text-[9px] text-muted-foreground">{d}</p>))}
-//               </div>
-//             </div>
-//             {earningRows.map((row) => (
-//               <div key={row.label} className={`flex items-center justify-between px-4 py-2.5 border-b border-purple-50 last:border-b-0 ${row.isTotal ? "bg-purple-50/60" : ""}`}>
-//                 <span className={`text-[12px] ${row.isTotal ? "font-medium" : ""}`}>{row.label}</span>
-//                 <span className={`text-[13px] font-semibold ${row.isTotal ? "text-primary" : "text-secondary"}`}>{row.amount}</span>
-//               </div>
-//             ))}
-//           </div> */}
-
-//           {/* Notifications */}
-//           <div className="bg-card border border-border rounded-xl overflow-hidden">
-//             <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
-//               <p className="font-semibold text-[13px]">Notifications</p>
-//               <span className="text-[10px] text-white bg-primary px-2 py-0.5 rounded-full font-semibold">3 new</span>
-//             </div>
-//             {notifications.map((n, i) => (
-//               <div key={i} className="flex items-start gap-2.5 px-4 py-3 border-b border-purple-50 last:border-b-0">
-//                 <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${n.variant === "danger" ? "bg-rose-100 text-rose-600" : "bg-purple-100 text-secondary"}`}>
-//                   <BellIcon />
-//                 </div>
-//                 <div className="flex-1 min-w-0">
-//                   <p className="text-[11px] leading-relaxed text-foreground">{n.text}</p>
-//                   <p className="text-[10px] text-muted-foreground mt-0.5">{n.time}</p>
-//                 </div>
-//                 {n.unread && <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />}
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       </main>
-//     </>
-//   );
-// }
-
-
-
-export default function DoctorDashboardPage() {
+/* ── Icons ───────────────────────────────────────────────────── */
+function IconUsers({ className = '' }: { className?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center h-full min-h-[80vh] px-6 text-center">
-      <div className="max-w-md">
-        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-          <svg
-            className="w-10 h-10 text-primary"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M3 3h18v18H3z" />
-            <path d="M8 12h8" />
-            <path d="M12 8v8" />
-          </svg>
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  );
+}
+function IconCalendar({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <path d="M16 2v4M8 2v4M3 10h18"/>
+    </svg>
+  );
+}
+function IconCheckCircle({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+      <polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>
+  );
+}
+function IconXCircle({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+    </svg>
+  );
+}
+function IconClock({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
+    </svg>
+  );
+}
+function IconDollar({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="1" x2="12" y2="23"/>
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    </svg>
+  );
+}
+function IconTrendUp({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+      <polyline points="17 6 23 6 23 12"/>
+    </svg>
+  );
+}
+function IconStar({ className = '', filled = false }: { className?: string; filled?: boolean }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+  );
+}
+function IconVideo({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 10l4.55-2.27A1 1 0 0 1 21 8.72v6.56a1 1 0 0 1-1.45.9L15 14"/>
+      <rect x="2" y="7" width="13" height="10" rx="2"/>
+    </svg>
+  );
+}
+function IconBuilding({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 21h18M6 21V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14"/>
+      <path d="M9 10h2M13 10h2M9 14h2M13 14h2M9 18h2M13 18h2"/>
+    </svg>
+  );
+}
+function IconWallet({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+      <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/>
+      <circle cx="17" cy="13" r="1" fill="currentColor"/>
+    </svg>
+  );
+}
+function IconCheckIn({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  );
+}
+
+/* ── Stat Card ───────────────────────────────────────────────── */
+function StatCard({
+  label,
+  value,
+  icon,
+  iconCls,
+  sub,
+}: {
+  label: string;
+  value: string | number;
+  icon: React.ReactNode;
+  iconCls: string;
+  sub?: string;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-background p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconCls}`}>
+          {icon}
+        </div>
+      </div>
+      <div>
+        <p className="text-2xl font-bold text-foreground leading-none">{value}</p>
+        {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
+      </div>
+    </div>
+  );
+}
+
+function StatCardSkeleton() {
+  return (
+    <div className="rounded-lg border border-border bg-background p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="h-3 w-24 bg-muted animate-pulse rounded" />
+        <div className="w-8 h-8 bg-muted animate-pulse rounded-lg" />
+      </div>
+      <div className="space-y-1.5">
+        <div className="h-7 w-20 bg-muted animate-pulse rounded" />
+        <div className="h-2.5 w-32 bg-muted animate-pulse rounded" />
+      </div>
+    </div>
+  );
+}
+
+/* ── Today's Appointment Row ─────────────────────────────────── */
+function TodayAppointmentRow({ appt }: { appt: TodayAppointment }) {
+  const duration = getDuration(appt.session?.startTime, appt.session?.endTime);
+
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3.5 border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+      {/* Left: time block */}
+      <div className="sm:w-36 shrink-0">
+        <p className="text-xs font-medium text-foreground leading-snug">
+          {formatTime(appt.session?.startTime)}
+          {appt.session?.endTime && <> – {formatTime(appt.session.endTime)}</>}
+        </p>
+        {duration && (
+          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+            <IconClock className="w-3 h-3" /> {duration}
+          </p>
+        )}
+      </div>
+
+      {/* Middle: info */}
+      <div className="flex-1 min-w-0 space-y-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-medium text-foreground">#{appt.appointmentNo}</span>
+          <span className="text-xs text-muted-foreground">·</span>
+          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${STATUS_BADGE[appt.status].cls}`}>
+            {STATUS_BADGE[appt.status].label}
+          </span>
+          <span className="flex items-center gap-0.5 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+            {appt.type === 'ONLINE'
+              ? <IconVideo className="w-2.5 h-2.5" />
+              : <IconBuilding className="w-2.5 h-2.5" />}
+            <span className="ml-0.5">{appt.type === 'IN_PERSON' ? 'In-person' : 'Online'}</span>
+          </span>
+          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PAYMENT_BADGE[appt.paymentStatus].cls}`}>
+            {PAYMENT_BADGE[appt.paymentStatus].label}
+          </span>
+          {appt.isCheckedIn && (
+            <span className="flex items-center gap-0.5 text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-100">
+              <IconCheckIn className="w-2.5 h-2.5" /> Checked in
+            </span>
+          )}
+        </div>
+        {appt.reason && (
+          <p className="text-[10px] text-muted-foreground truncate max-w-xs" title={appt.reason}>
+            {appt.reason}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Review Row ──────────────────────────────────────────────── */
+function ReviewRow({ review }: { review: Review }) {
+  return (
+    <div className="flex gap-3 px-4 py-3.5 border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+      {/* Avatar placeholder */}
+      <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5">
+        <svg className="w-3.5 h-3.5 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+
+      <div className="flex-1 min-w-0 space-y-1">
+        {/* Stars + time */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map(star => (
+              <IconStar
+                key={star}
+                className={`w-3 h-3 ${star <= review.rating ? 'text-yellow-400' : 'text-muted-foreground/30'}`}
+                filled={star <= review.rating}
+              />
+            ))}
+            <span className="text-[10px] text-muted-foreground ml-1">{review.rating}/5</span>
+          </div>
+          <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo(review.createdAt)}</span>
         </div>
 
-        <h1 className="text-3xl font-bold mb-3">
-          Dashboard Coming Soon
-        </h1>
+        {review.review && (
+          <p className="text-xs text-foreground line-clamp-2">{review.review}</p>
+        )}
 
-        <p className="text-muted-foreground text-sm">
-          We're working on a powerful dashboard experience for doctors.
-          Stay tuned for upcoming updates.
+        <p className="text-[10px] text-muted-foreground">
+          Appointment #{review.appointmentId.slice(-6).toUpperCase()}
+          {!review.isVisible && (
+            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+              Hidden
+            </span>
+          )}
         </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── Skeleton rows ───────────────────────────────────────────── */
+function RowSkeleton() {
+  return (
+    <div className="px-4 py-4 flex items-center gap-4 border-b border-border last:border-0">
+      <div className="space-y-1.5 w-36 shrink-0">
+        <div className="h-3 w-24 bg-muted animate-pulse rounded" />
+        <div className="h-2.5 w-16 bg-muted animate-pulse rounded" />
+      </div>
+      <div className="flex-1 space-y-1.5">
+        <div className="h-3 w-32 bg-muted animate-pulse rounded" />
+        <div className="h-5 w-48 bg-muted animate-pulse rounded-full" />
+      </div>
+    </div>
+  );
+}
+
+function ReviewRowSkeleton() {
+  return (
+    <div className="px-4 py-4 flex gap-3 border-b border-border last:border-0">
+      <div className="w-7 h-7 bg-muted animate-pulse rounded-full shrink-0" />
+      <div className="flex-1 space-y-1.5">
+        <div className="h-3 w-20 bg-muted animate-pulse rounded" />
+        <div className="h-3 w-full bg-muted animate-pulse rounded" />
+        <div className="h-2.5 w-28 bg-muted animate-pulse rounded" />
+      </div>
+    </div>
+  );
+}
+
+/* ── Empty state ─────────────────────────────────────────────── */
+function EmptyState({ icon, message, sub }: { icon: React.ReactNode; message: string; sub?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+      <div className="mb-3 opacity-30">{icon}</div>
+      <p className="text-sm font-medium">{message}</p>
+      {sub && <p className="text-xs mt-1">{sub}</p>}
+    </div>
+  );
+}
+
+/* ── Page ────────────────────────────────────────────────────── */
+export default function DoctorDashboardPage() {
+  const [data, setData]       = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDoctorsDashboard = async () => {
+      setLoading(true);
+      try {
+        const response = await doctorServiceApi.getDashboardData(`
+          stats {
+            totalPatients
+            totalAppointments
+            upcomingAppointments
+            completedAppointments
+            cancelledAppointments
+          }
+          ratings {
+            averageRating
+            totalReviews
+          }
+          revenue {
+            availableBalance
+            todayRevenue
+            monthlyRevenue
+            totalRevenue
+          }
+          todayAppointments {
+            id
+            patientId
+            doctorId
+            session { startTime endTime }
+            status
+            type
+            appointmentNo
+            reason
+            notes
+            paymentStatus
+            paymentId
+            cancelledBy
+            cancelReason
+            slotDuration
+            bufferTime
+            reminderSent
+            isCheckedIn
+            hasReviewed
+            createdAt
+            updatedAt
+          }
+          recentReviews {
+            id
+            doctorId
+            patientId
+            appointmentId
+            rating
+            review
+            isVisible
+            createdAt
+            updatedAt
+          }
+        `);
+        const d = response?.data?.getDoctorDashboardStats;
+        if (d) setData(d);
+      } catch {
+        // silently fail — UI handles empty state
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctorsDashboard();
+  }, []);
+
+  const stats   = data?.stats;
+  const ratings = data?.ratings;
+  const revenue = data?.revenue;
+
+  /* ── derived values ── */
+  const appointmentCompletionRate =
+    stats && stats.totalAppointments > 0
+      ? Math.round((stats.completedAppointments / stats.totalAppointments) * 100)
+      : 0;
+
+  return (
+    <div className="flex-1 p-6 sm:p-8">
+      <div className="max-w-5xl space-y-6">
+
+        {/* ── Header ── */}
+        <div>
+          <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+
+        {/* ── Stat Cards ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {loading ? (
+            Array.from({ length: 8 }).map((_, i) => <StatCardSkeleton key={i} />)
+          ) : (
+            <>
+              <StatCard
+                label="Total Patients"
+                value={stats?.totalPatients ?? 0}
+                icon={<IconUsers className="w-4 h-4 text-blue-600" />}
+                iconCls="bg-blue-50"
+                sub="All time"
+              />
+              <StatCard
+                label="Total Appointments"
+                value={stats?.totalAppointments ?? 0}
+                icon={<IconCalendar className="w-4 h-4 text-violet-600" />}
+                iconCls="bg-violet-50"
+                sub="All time"
+              />
+              <StatCard
+                label="Upcoming"
+                value={stats?.upcomingAppointments ?? 0}
+                icon={<IconClock className="w-4 h-4 text-orange-600" />}
+                iconCls="bg-orange-50"
+                sub="Scheduled"
+              />
+              <StatCard
+                label="Completed"
+                value={stats?.completedAppointments ?? 0}
+                icon={<IconCheckCircle className="w-4 h-4 text-green-600" />}
+                iconCls="bg-green-50"
+                sub={`${appointmentCompletionRate}% completion rate`}
+              />
+              <StatCard
+                label="Cancelled"
+                value={stats?.cancelledAppointments ?? 0}
+                icon={<IconXCircle className="w-4 h-4 text-red-500" />}
+                iconCls="bg-red-50"
+                sub="All time"
+              />
+              <StatCard
+                label="Available Balance"
+                value={formatCurrency(revenue?.availableBalance ?? 0)}
+                icon={<IconWallet className="w-4 h-4 text-emerald-600" />}
+                iconCls="bg-emerald-50"
+                sub="Ready to withdraw"
+              />
+              <StatCard
+                label="Monthly Revenue"
+                value={formatCurrency(revenue?.monthlyRevenue ?? 0)}
+                icon={<IconTrendUp className="w-4 h-4 text-sky-600" />}
+                iconCls="bg-sky-50"
+                sub={`Today: ${formatCurrency(revenue?.todayRevenue ?? 0)}`}
+              />
+              <StatCard
+                label="Total Revenue"
+                value={formatCurrency(revenue?.totalRevenue ?? 0)}
+                icon={<IconDollar className="w-4 h-4 text-indigo-600" />}
+                iconCls="bg-indigo-50"
+                sub="All time earnings"
+              />
+            </>
+          )}
+        </div>
+
+        {/* ── Ratings bar ── */}
+        {!loading && ratings && (
+          <div className="rounded-lg border border-border bg-background px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <IconStar
+                    key={star}
+                    className={`w-4 h-4 ${star <= Math.round(ratings.averageRating) ? 'text-yellow-400' : 'text-muted-foreground/30'}`}
+                    filled={star <= Math.round(ratings.averageRating)}
+                  />
+                ))}
+              </div>
+              <span className="text-sm font-bold text-foreground">{ratings.averageRating.toFixed(1)}</span>
+              <span className="text-xs text-muted-foreground">average rating</span>
+            </div>
+            <div className="h-px sm:h-5 w-full sm:w-px bg-border" />
+            <p className="text-xs text-muted-foreground">
+              Based on <span className="font-medium text-foreground">{ratings.totalReviews}</span> review{ratings.totalReviews !== 1 ? 's' : ''}
+            </p>
+            {/* Simple rating bar */}
+            <div className="flex-1 flex items-center gap-2">
+              <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-yellow-400 transition-all duration-500"
+                  style={{ width: `${(ratings.averageRating / 5) * 100}%` }}
+                />
+              </div>
+              <span className="text-[10px] text-muted-foreground shrink-0">{ratings.totalReviews} total</span>
+            </div>
+          </div>
+        )}
+
+        {/* ── Bottom two-column grid ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+          {/* Today's Appointments */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden">
+            {/* Section header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50">
+              <div>
+                <p className="text-xs font-semibold text-foreground">Today's Appointments</p>
+                {!loading && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    {data?.todayAppointments?.length
+                      ? `${data.todayAppointments.length} appointment${data.todayAppointments.length !== 1 ? 's' : ''} today`
+                      : 'No appointments scheduled'}
+                  </p>
+                )}
+              </div>
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                {new Date().toLocaleDateString('en-IN', { month: 'short', day: '2-digit' })}
+              </span>
+            </div>
+
+            {/* Column header */}
+            <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-muted/30 border-b border-border">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide w-36 shrink-0">Time</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex-1">Status / Type</p>
+            </div>
+
+            {loading ? (
+              <div className="divide-y divide-border">
+                {Array.from({ length: 4 }).map((_, i) => <RowSkeleton key={i} />)}
+              </div>
+            ) : !data?.todayAppointments?.length ? (
+              <EmptyState
+                icon={<IconCalendar className="w-10 h-10" />}
+                message="No appointments today"
+                sub="Enjoy your free day!"
+              />
+            ) : (
+              data.todayAppointments.map(appt => (
+                <TodayAppointmentRow key={appt.id} appt={appt} />
+              ))
+            )}
+          </div>
+
+          {/* Recent Reviews */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden">
+            {/* Section header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50">
+              <div>
+                <p className="text-xs font-semibold text-foreground">Recent Reviews</p>
+                {!loading && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    {data?.recentReviews?.length
+                      ? `${data.recentReviews.length} recent review${data.recentReviews.length !== 1 ? 's' : ''}`
+                      : 'No reviews yet'}
+                  </p>
+                )}
+              </div>
+              {!loading && ratings && (
+                <div className="flex items-center gap-1">
+                  <IconStar className="w-3.5 h-3.5 text-yellow-400" filled />
+                  <span className="text-xs font-semibold text-foreground">{ratings.averageRating.toFixed(1)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Column header */}
+            <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-muted/30 border-b border-border">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex-1">Review</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Time</p>
+            </div>
+
+            {loading ? (
+              <div className="divide-y divide-border">
+                {Array.from({ length: 4 }).map((_, i) => <ReviewRowSkeleton key={i} />)}
+              </div>
+            ) : !data?.recentReviews?.length ? (
+              <EmptyState
+                icon={<IconStar className="w-10 h-10" />}
+                message="No reviews yet"
+                sub="Reviews from patients will appear here"
+              />
+            ) : (
+              data.recentReviews.map(review => (
+                <ReviewRow key={review.id} review={review} />
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* ── Revenue summary strip ── */}
+        {!loading && revenue && (
+          <div className="rounded-lg border border-border bg-background overflow-hidden">
+            <div className="px-4 py-3 border-b border-border bg-muted/50">
+              <p className="text-xs font-semibold text-foreground">Revenue Overview</p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-border">
+              {[
+                { label: 'Available Balance', value: formatCurrency(revenue.availableBalance), highlight: true },
+                { label: "Today's Revenue",   value: formatCurrency(revenue.todayRevenue),    highlight: false },
+                { label: 'This Month',        value: formatCurrency(revenue.monthlyRevenue),  highlight: false },
+                { label: 'Total Earned',      value: formatCurrency(revenue.totalRevenue),    highlight: false },
+              ].map(item => (
+                <div key={item.label} className="px-4 py-4 space-y-1">
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{item.label}</p>
+                  <p className={`text-lg font-bold ${item.highlight ? 'text-emerald-600' : 'text-foreground'}`}>
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

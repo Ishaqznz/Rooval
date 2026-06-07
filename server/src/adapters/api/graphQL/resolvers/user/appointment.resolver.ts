@@ -14,6 +14,7 @@ import { User } from "../../types/user/model/user.model";
 import { CancelAppointmentByDoctorInput } from "../../types/appointment/input/cancelAppointmentByDoctor.input";
 import { JwtAdminGuard } from "src/common/guards/admin.guard";
 import { ListAllAppointmentsInput } from "../../types/appointment/input/listAllAppointments.input";
+import { ChangeAppointmentStatusInput } from "../../types/appointment/input/changeAppointmentStatus.input";
 
 @Injectable()
 @Resolver(() => Appointment)
@@ -103,5 +104,13 @@ export class DoctorAppointmentResolver {
         @Args('input') input: ListAllAppointmentsInput,
     ): Promise<ListAppointments> {
         return this._appointmentUseCase.listAllAppointments(input)
+    }
+
+    @Mutation(() => Boolean) 
+    @UseGuards(JwtAuthGuard)
+    async changeAppointmentStatus(
+        @Args('input') input: ChangeAppointmentStatusInput
+    ): Promise<boolean> {
+        return await this._appointmentUseCase.changeAppointmentStatus(input)
     }
 }

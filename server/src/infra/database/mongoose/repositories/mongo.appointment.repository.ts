@@ -18,6 +18,7 @@ import { ListUserAppointments } from "src/core/entities/appointment/listUserAppo
 import { DeleteAppointmentsBySession } from "src/core/entities/appointment/deleteAppointmentsBySession.entity";
 import { IsAvailableByStatus } from "src/core/entities/appointment/isAvailableByStatus.entity";
 import { AppointmentErrorType } from "src/core/enums/appointments/appointment.enums";
+import { ChangeAppointmentStatus } from "src/core/entities/appointment/changeAppointmentStatus.entity";
 
 @Injectable()
 export class MongoAppointmentRepository implements IAppointmentRepository {
@@ -185,6 +186,8 @@ export class MongoAppointmentRepository implements IAppointmentRepository {
             .lean<IMongoAppointmentDocument[]>()
             .exec();
 
+        console.log('heeeeeeeee: ', appointments)
+
         return AppointmentMapper.toAppointmentEntities(appointments)
     }
 
@@ -305,4 +308,45 @@ export class MongoAppointmentRepository implements IAppointmentRepository {
 
         return appointments.length > 0;
     }   
+
+
+    async changeAppointmentStatus(entity: ChangeAppointmentStatus): Promise<boolean> {
+        const update = await this._appointmentModel.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(entity.input.appointmentId), 
+            {
+                $set: {
+                    status: entity.input.status
+                }
+            },
+            { new: true }
+        )
+
+        return !!update
+    }
+
+    async changeReviewStatus(appointmentId: string, value: boolean): Promise<boolean> {
+        const update = await this._appointmentModel.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(appointmentId), {
+                $set: {
+                    hasReviewed: value
+                }
+            }, {
+                new: true
+            }
+        )
+
+        return !!update
+    }
+
+    async findDoctorAppointments(doctorId: string): Promise<ExtendedAppointment[]> {
+        const appointments = await this._appointmentModel.find({ doctorId: new mongoose.Types.ObjectId(doctorId) })
+            .lean<IMongoAppointmentDocument[]>();
+        return AppointmentMapper.toAppointmentEntities(appointments)
+    }
+
+    async findAllAppointments(): Promise<ExtendedAppointment[]> {
+        const appointments = await this._appointmentModel.find()
+            .lean<IMongoAppointmentDocument[]>();
+        return AppointmentMapper.toAppointmentEntities(appointments)
+    }
 }

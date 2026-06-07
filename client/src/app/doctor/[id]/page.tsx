@@ -23,7 +23,10 @@ import {
   Stethoscope,
   Globe,
   Image as ImageIcon,
-  Download
+  Download,
+  Star,
+  MessageSquare,
+  ThumbsUp
 } from 'lucide-react';
 import Navigation from '@/components/user/Navigation';
 import { IDoctorResponseDTO } from '@/interfaces/api/doctor/doctor.api.interface';
@@ -35,6 +38,21 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { paymentServiceApi } from '@/services/paymentApiService';
 import { appointmentServiceApi } from '@/services/appointmentApiService';
+import { reviewApiService } from '@/services/reviewApiService';
+
+// ── Interfaces ─────────────────────────────────────────────────────────────────
+
+interface IReview {
+  id: string;
+  doctorId: string;
+  patientId: string;
+  appointmentId: string;
+  rating: number;
+  review: string;
+  isVisible: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface IDoctorUI {
   id: string;
@@ -43,7 +61,6 @@ interface IDoctorUI {
   email: string;
   status: string;
   certificates: string[];
-  // personal
   username: string;
   gender: string;
   phone: string;
@@ -56,13 +73,11 @@ interface IDoctorUI {
   registrationNumber: string;
   preferredMode: string;
   profileVisibility: boolean;
-  // clinic
   clinicName: string;
   clinicAddress: string;
   clinicPhone: string;
   clinicCountry: string;
   workingDays: string;
-  // consultation
   consultationType: string;
   consultationModes: string[];
   consultationFee: number;
@@ -85,119 +100,65 @@ interface TimeSlot {
 }
 
 interface PageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
 }
+
+// ── Timezone helpers ───────────────────────────────────────────────────────────
 
 const getTimezoneForCountry = async (country: string): Promise<string> => {
   try {
     const countryTimezoneMap: { [key: string]: string } = {
-      'United States': 'America/New_York',
-      'USA': 'America/New_York',
-      'United Kingdom': 'Europe/London',
-      'UK': 'Europe/London',
-      'India': 'Asia/Kolkata',
-      'Australia': 'Australia/Sydney',
-      'Canada': 'America/Toronto',
-      'Germany': 'Europe/Berlin',
-      'France': 'Europe/Paris',
-      'Japan': 'Asia/Tokyo',
-      'China': 'Asia/Shanghai',
-      'Brazil': 'America/Sao_Paulo',
-      'Mexico': 'America/Mexico_City',
-      'Singapore': 'Asia/Singapore',
-      'UAE': 'Asia/Dubai',
-      'South Africa': 'Africa/Johannesburg',
+      'United States': 'America/New_York', 'USA': 'America/New_York',
+      'United Kingdom': 'Europe/London', 'UK': 'Europe/London',
+      'India': 'Asia/Kolkata', 'Australia': 'Australia/Sydney',
+      'Canada': 'America/Toronto', 'Germany': 'Europe/Berlin',
+      'France': 'Europe/Paris', 'Japan': 'Asia/Tokyo',
+      'China': 'Asia/Shanghai', 'Brazil': 'America/Sao_Paulo',
+      'Mexico': 'America/Mexico_City', 'Singapore': 'Asia/Singapore',
+      'UAE': 'Asia/Dubai', 'South Africa': 'Africa/Johannesburg',
     };
-
     const timezone = countryTimezoneMap[country];
     if (timezone) return timezone;
-
     const response = await fetch(`https://worldtimeapi.org/api/timezone`);
     const timezones = await response.json();
-
-    const matchingTimezone = timezones.find((tz: string) =>
-      tz.toLowerCase().includes(country.toLowerCase())
-    );
-
+    const matchingTimezone = timezones.find((tz: string) => tz.toLowerCase().includes(country.toLowerCase()));
     return matchingTimezone || 'UTC';
-  } catch (error) {
-    console.error('Error fetching timezone:', error);
-    return 'UTC';
-  }
+  } catch { return 'UTC'; }
 };
 
-const getUserTimezone = (): string => {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone;
-};
+const getUserTimezone = (): string => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const convertToUserTime = (date: Date, timezone: string): Date => {
   const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
+    timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
   }).formatToParts(date);
-
-  const get = (type: string) =>
-    parts.find((p) => p.type === type)?.value || "0";
-
-  return new Date(
-    Number(get("year")),
-    Number(get("month")) - 1,
-    Number(get("day")),
-    Number(get("hour")),
-    Number(get("minute")),
-    Number(get("second"))
-  );
+  const get = (type: string) => parts.find((p) => p.type === type)?.value || "0";
+  return new Date(Number(get("year")), Number(get("month")) - 1, Number(get("day")),
+    Number(get("hour")), Number(get("minute")), Number(get("second")));
 };
 
 const formatTimeWithTimezone = (date: Date, timezone: string): string => {
   try {
     return new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+      timeZone: timezone, hour: 'numeric', minute: '2-digit', hour12: true
     }).format(date);
-  } catch (error) {
-    console.error('Error formatting time:', error);
-    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-  }
+  } catch { return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }); }
 };
 
 const getTimezoneAbbreviation = (timezone: string): string => {
   try {
     const date = new Date();
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      timeZoneName: 'short'
-    });
+    const formatter = new Intl.DateTimeFormat('en-US', { timeZone: timezone, timeZoneName: 'short' });
     const parts = formatter.formatToParts(date);
-    const timeZonePart = parts.find(part => part.type === 'timeZoneName');
-    return timeZonePart?.value || timezone;
-  } catch (error) {
-    return timezone;
-  }
+    return parts.find(part => part.type === 'timeZoneName')?.value || timezone;
+  } catch { return timezone; }
 };
 
-// ─── Safe date-only parser ────────────────────────────────────────────────────
-// Parses both plain date strings ("2025-06-01") and full ISO timestamps
-// ("2025-06-01T00:00:00.000Z") always as a LOCAL midnight date so there is
-// never a timezone-induced day shift when comparing against selectedDate.
 const parseDateOnly = (value: string | null | undefined): Date | null => {
   if (!value) return null;
-
-  // Extract just the YYYY-MM-DD portion regardless of whether a time/tz is present
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (!match) return null;
-
-  // Construct as local midnight — avoids UTC-to-local day shift
   return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 0, 0, 0, 0);
 };
 
@@ -206,42 +167,30 @@ const transformDoctor = (d: IDoctorResponseDTO): IDoctorUI => {
   const c = d.profile?.clinic;
   const s = d.profile?.consultationSettings;
   return {
-    id: d.id,
-    name: d.fullName,
+    id: d.id, name: d.fullName,
     avatar: d.profilePhoto || `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.fullName}`,
-    email: d.email || '',
-    status: d.status || '',
-    certificates: d.certificates || [],
-    username: p?.username || '',
-    gender: p?.gender || '',
-    phone: p?.phone || '',
-    country: p?.country || '',
-    state: p?.state || '',
-    experience: parseInt(p?.experience, 10) || 0,
-    bio: p?.bio || '',
-    specializations: p?.specializations || [],
-    languages: p?.languages || ['English'],
-    registrationNumber: p?.registrationNumber || '',
-    preferredMode: p?.preferredMode || '',
+    email: d.email || '', status: d.status || '', certificates: d.certificates || [],
+    username: p?.username || '', gender: p?.gender || '', phone: p?.phone || '',
+    country: p?.country || '', state: p?.state || '',
+    experience: parseInt(p?.experience, 10) || 0, bio: p?.bio || '',
+    specializations: p?.specializations || [], languages: p?.languages || ['English'],
+    registrationNumber: p?.registrationNumber || '', preferredMode: p?.preferredMode || '',
     profileVisibility: p?.profileVisibility ?? true,
-    clinicName: c?.name || '',
-    clinicAddress: c?.address || '',
-    clinicPhone: c?.phoneNumber || '',
-    clinicCountry: c?.country || '',
+    clinicName: c?.name || '', clinicAddress: c?.address || '',
+    clinicPhone: c?.phoneNumber || '', clinicCountry: c?.country || '',
     workingDays: c?.workingDays || '',
-    consultationType: s?.type || '',
-    consultationModes: s?.consultationModes || [],
+    consultationType: s?.type || '', consultationModes: s?.consultationModes || [],
     consultationFee: parseFloat(s?.consultationFee) || 0,
     inPersonFee: parseFloat(s?.inPersonFee) || 0,
     videoFee: parseFloat(s?.videoFee) || 0,
     duration: parseInt(s?.duration, 10) || 30,
-    sessionBufferTime: s?.sessionBufferTime || '',
-    cancellationPolicy: s?.cancellationPolicy || '',
+    sessionBufferTime: s?.sessionBufferTime || '', cancellationPolicy: s?.cancellationPolicy || '',
   };
 };
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
 
 const getMondayOfWeek = (d: Date): Date => {
   const date = new Date(d);
@@ -252,25 +201,121 @@ const getMondayOfWeek = (d: Date): Date => {
   return date;
 };
 
-const formatTime12 = (time24: string): string => {
-  const [hStr, mStr] = time24.split(':');
-  let h = parseInt(hStr, 10);
-  const m = mStr;
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  if (h === 0) h = 12;
-  else if (h > 12) h -= 12;
-  return `${h}:${m} ${ampm}`;
+const isSameDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+// ── Star Rating Component ──────────────────────────────────────────────────────
+
+const StarRating = ({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md' | 'lg' }) => {
+  const sizeClass = size === 'lg' ? 'w-5 h-5' : size === 'md' ? 'w-4 h-4' : 'w-3.5 h-3.5';
+  return (
+    <span className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`${sizeClass} ${
+            star <= Math.floor(rating)
+              ? 'fill-amber-400 text-amber-400'
+              : star - 0.5 <= rating
+              ? 'fill-amber-200 text-amber-300'
+              : 'fill-gray-200 text-gray-200'
+          }`}
+        />
+      ))}
+    </span>
+  );
 };
 
-const isSameDay = (a: Date, b: Date) =>
-  a.getFullYear() === b.getFullYear() &&
-  a.getMonth() === b.getMonth() &&
-  a.getDate() === b.getDate();
+// ── Review Card Component ─────────────────────────────────────────────────────
 
+const ReviewCard = ({ review }: { review: IReview }) => {
+  const date = new Date(review.createdAt);
+  const formattedDate = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric'
+  }).format(date);
+
+  return (
+    <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          {/* Anonymous avatar */}
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#9b7ab8] to-[#7d5d9a] flex items-center justify-center flex-shrink-0">
+            <User className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-800">Verified Patient</p>
+            <p className="text-xs text-gray-400">{formattedDate}</p>
+          </div>
+        </div>
+        <StarRating rating={review.rating} size="sm" />
+      </div>
+
+      {review.review && (
+        <p className="text-sm text-gray-600 leading-relaxed pl-[52px]">
+          "{review.review}"
+        </p>
+      )}
+
+      <div className="flex items-center gap-1 mt-3 pl-[52px]">
+        <ThumbsUp className="w-3 h-3 text-gray-300" />
+        <span className="text-xs text-gray-400">Verified appointment</span>
+      </div>
+    </div>
+  );
+};
+
+// ── Rating Summary Component ──────────────────────────────────────────────────
+
+const RatingsSummary = ({ reviews, averageRating }: { reviews: IReview[]; averageRating: number }) => {
+  const ratingCounts = [5, 4, 3, 2, 1].map(star => ({
+    star,
+    count: reviews.filter(r => r.rating === star).length
+  }));
+  const total = reviews.length;
+
+  return (
+    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-5">
+      <h2 className="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
+        <Star className="w-5 h-5 text-amber-400 fill-amber-400" /> Patient Reviews
+      </h2>
+
+      <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+        {/* Big average */}
+        <div className="text-center flex-shrink-0">
+          <div className="text-5xl font-bold text-gray-800 leading-none mb-1">
+            {averageRating > 0 ? averageRating.toFixed(1) : '—'}
+          </div>
+          <StarRating rating={averageRating} size="md" />
+          <p className="text-xs text-gray-400 mt-1.5">{total} {total === 1 ? 'review' : 'reviews'}</p>
+        </div>
+
+        {/* Breakdown bars */}
+        <div className="flex-1 w-full space-y-1.5">
+          {ratingCounts.map(({ star, count }) => (
+            <div key={star} className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 w-3 flex-shrink-0">{star}</span>
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400 flex-shrink-0" />
+              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-amber-400 rounded-full transition-all duration-500"
+                  style={{ width: total > 0 ? `${(count / total) * 100}%` : '0%' }}
+                />
+              </div>
+              <span className="text-xs text-gray-400 w-4 text-right flex-shrink-0">{count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Main Page ──────────────────────────────────────────────────────────────────
 
 const DoctorProfilePage = ({ params }: PageProps) => {
   const resolvedParams = use(params);
   const doctorId = resolvedParams.id;
+
   const [rawDoctor, setRawDoctor] = useState<IDoctorResponseDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [doctorTimezone, setDoctorTimezone] = useState<string>('UTC');
@@ -280,50 +325,55 @@ const DoctorProfilePage = ({ params }: PageProps) => {
   const [selectedCertificate, setSelectedCertificate] = useState<string | null>(null);
   const [certificateModalOpen, setCertificateModalOpen] = useState(false);
 
-  const router = useRouter()
+  // ── Review state ────────────────────────────────────────────────────────────
+  const [reviews, setReviews] = useState<IReview[]>([]);
+  const [averageRating, setAverageRating] = useState<number>(0);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+
+  const router = useRouter();
+
+  // Fetch reviews + average rating together
+  useEffect(() => {
+    const fetchReviewData = async () => {
+      setReviewsLoading(true);
+      try {
+        const [reviewsRes, avgRes] = await Promise.all([
+          reviewApiService.findReviewsByDoctorId(
+            { input: { doctorId } },
+            `id doctorId patientId appointmentId rating review isVisible createdAt updatedAt`
+          ),
+          reviewApiService.getAverageRating({ input: { doctorId } })
+        ]);
+
+        const fetchedReviews: IReview[] = reviewsRes?.data?.findReviewsByDoctorId ?? [];
+        // Only show visible reviews
+        setReviews(fetchedReviews.filter(r => r.isVisible));
+        setAverageRating(avgRes?.data?.getAverageRating ?? 0);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
+    fetchReviewData();
+  }, [doctorId]);
 
   useEffect(() => {
     const fetch = async () => {
       setIsLoading(true);
       try {
         const response = await doctorServiceApi.get({ input: { doctorId } }, `
-          id
-          fullName
-          email
-          status
-          profilePhoto
-          certificates
+          id fullName email status profilePhoto certificates
           profile {
             personal {
-              username
-              gender
-              phone
-              country
-              state
-              experience
-              bio
-              specializations
-              languages
-              registrationNumber
-              preferredMode
-              profileVisibility
+              username gender phone country state experience bio
+              specializations languages registrationNumber preferredMode profileVisibility
             }
-            clinic {
-              name
-              address
-              phoneNumber
-              country
-              workingDays
-            }
+            clinic { name address phoneNumber country workingDays }
             consultationSettings {
-              type
-              consultationModes
-              consultationFee
-              inPersonFee
-              videoFee
-              duration
-              sessionBufferTime
-              cancellationPolicy
+              type consultationModes consultationFee inPersonFee videoFee
+              duration sessionBufferTime cancellationPolicy
             }
           }
         `);
@@ -342,24 +392,19 @@ const DoctorProfilePage = ({ params }: PageProps) => {
   useEffect(() => {
     const fetchTimezones = async () => {
       if (!doctor) return;
-
       setTimezoneLoading(true);
       try {
         const userTz = getUserTimezone();
         setUserTimezone(userTz);
         const doctorTz = await getTimezoneForCountry(doctor.country || doctor.clinicCountry);
         setDoctorTimezone(doctorTz);
-      } catch (error) {
-        console.error('Error setting timezones:', error);
-      } finally {
-        setTimezoneLoading(false);
-      }
+      } catch (error) { console.error('Error setting timezones:', error); }
+      finally { setTimezoneLoading(false); }
     };
-
     fetchTimezones();
   }, [doctor]);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'appointment'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'appointment' | 'reviews'>('overview');
   const [currentMonday, setCurrentMonday] = useState<Date>(() => getMondayOfWeek(new Date()));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -372,87 +417,45 @@ const DoctorProfilePage = ({ params }: PageProps) => {
   useEffect(() => {
     const fetchSlots = async () => {
       if (!selectedDate || !doctor) return;
-
       setSlotsLoading(true);
-
       try {
-        const response = await availabilityApiService.getSlotsBydate({
-          input: { doctorId, date: selectedDate },
-        });
-
+        const response = await availabilityApiService.getSlotsBydate({ input: { doctorId, date: selectedDate } });
         const slots: TimeSlot[] = response?.data?.getDoctorSlotsByDate || [];
 
         const availabilityResponse = await doctorServiceApi.get(
           { input: { doctorId } },
-          `
-        availabilities {
-          startDate
-          endDate
-          timezone
-        }
-      `
+          `availabilities { startDate endDate timezone }`
         );
 
         const availability = availabilityResponse?.data?.getDoctor?.availabilities?.[0];
-
-        // ─── FIX: Use parseDateOnly so "2025-06-01T00:00:00.000Z" or "2025-06-01"
-        // are both treated as local-midnight dates, preventing a UTC→local day shift
-        // that caused dates on the boundary to be incorrectly rejected.
-        // When endDate is null/undefined the availability is open-ended (infinite).
         const startDate = parseDateOnly(availability?.startDate);
-        const endDate   = parseDateOnly(availability?.endDate); // null when open-ended
+        const endDate = parseDateOnly(availability?.endDate);
 
         const isDateWithinRange = (date: Date): boolean => {
-          // Normalise the selected date to local midnight for a pure date comparison
           const d = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-
-          // Must be on or after the start date
           if (startDate && d < startDate.getTime()) return false;
-
-          // No endDate → open-ended availability, always in range
           if (!endDate) return true;
-
-          // Must be on or before the end date
           return d <= endDate.getTime();
         };
 
-        if (!isDateWithinRange(selectedDate)) {
-          setAvailableSlots([]);
-          setSlotsLoading(false);
-          return;
-        }
+        if (!isDateWithinRange(selectedDate)) { setAvailableSlots([]); setSlotsLoading(false); return; }
 
         const now = new Date();
-
         const convertedSlots = slots
-          .map((slot) => {
-            const start = convertToUserTime(new Date(slot.startTime), userTimezone);
-            const end = convertToUserTime(new Date(slot.endTime), userTimezone);
-
-            return {
-              startTime: start,
-              endTime: end,
-            };
-          })
+          .map((slot) => ({
+            startTime: convertToUserTime(new Date(slot.startTime), userTimezone),
+            endTime: convertToUserTime(new Date(slot.endTime), userTimezone),
+          }))
           .filter((slot) => {
-            const toDateString = (date: Date) => {
-              return date.toISOString().split("T")[0];
-            };
-            const sameDay =
-              toDateString(slot.startTime) === toDateString(selectedDate);
-            const notExpired = slot.startTime.getTime() > now.getTime();
-            return sameDay && notExpired;
+            const toDateString = (date: Date) => date.toISOString().split("T")[0];
+            return toDateString(slot.startTime) === toDateString(selectedDate) &&
+              slot.startTime.getTime() > now.getTime();
           });
 
         setAvailableSlots(convertedSlots);
-      } catch (error) {
-        console.error("Error fetching slots:", error);
-        setAvailableSlots([]);
-      } finally {
-        setSlotsLoading(false);
-      }
+      } catch (error) { console.error("Error fetching slots:", error); setAvailableSlots([]); }
+      finally { setSlotsLoading(false); }
     };
-
     fetchSlots();
   }, [selectedDate, doctorId, userTimezone]);
 
@@ -467,57 +470,33 @@ const DoctorProfilePage = ({ params }: PageProps) => {
   }, [currentMonday]);
 
   const navigateWeek = (dir: -1 | 1) => {
-    setCurrentMonday(prev => {
-      const next = new Date(prev);
-      next.setDate(next.getDate() + dir * 7);
-      return next;
-    });
+    setCurrentMonday(prev => { const next = new Date(prev); next.setDate(next.getDate() + dir * 7); return next; });
     setSelectedDate(null);
     setSelectedSlot(null);
   };
 
   const handleBooking = async () => {
     try {
-      if (!selectedSlot || !selectedDate || !selectedMode) {
-        toast.error("Please select all booking details");
-        return;
-      }
+      if (!selectedSlot || !selectedDate || !selectedMode) { toast.error("Please select all booking details"); return; }
 
       const now = new Date();
       const slotStart = new Date(selectedSlot.startTime);
       const slotEnd = new Date(selectedSlot.endTime);
 
-      const BUFFER_MINUTES = 0;
-      const bufferMs = BUFFER_MINUTES * 60 * 1000;
-
-      if (slotStart.getTime() <= now.getTime() + bufferMs) {
+      if (slotStart.getTime() <= now.getTime()) {
         toast.error("This time slot has already passed.");
-
         setShowConfirmModal(false);
         setSelectedSlot(null);
-
-        const refreshedSlots = availableSlots.filter(
-          slot => new Date(slot.startTime).getTime() > now.getTime()
-        );
-
-        setAvailableSlots(refreshedSlots);
+        setAvailableSlots(availableSlots.filter(slot => new Date(slot.startTime).getTime() > now.getTime()));
         return;
       }
 
-      const durationInMinutes =
-        (slotEnd.getTime() - slotStart.getTime()) / (1000 * 60);
-
-      const appointmentType =
-        selectedMode === "ONLINE"
-          ? AppointmentType.ONLINE
-          : AppointmentType.OFFLINE;
+      const durationInMinutes = (slotEnd.getTime() - slotStart.getTime()) / (1000 * 60);
+      const appointmentType = selectedMode === "ONLINE" ? AppointmentType.ONLINE : AppointmentType.OFFLINE;
 
       const payload = {
         doctorId: doctor?.id as string,
-        session: {
-          startTime: slotStart.toISOString(),
-          endTime: slotEnd.toISOString(),
-        },
+        session: { startTime: slotStart.toISOString(), endTime: slotEnd.toISOString() },
         appointmentType,
         amount: activeFee,
         slotDuration: durationInMinutes || 15,
@@ -526,59 +505,25 @@ const DoctorProfilePage = ({ params }: PageProps) => {
 
       const result = await appointmentServiceApi.create({ input: payload });
 
-      if (result?.errors?.[0]?.message === "Forbidden resource") {
-        toast.error("Please log in...");
-        router.push("/login");
-        return;
-      }
+      if (result?.errors?.[0]?.message === "Forbidden resource") { toast.error("Please log in..."); router.push("/login"); return; }
+      if (result?.errors) { toast.error(result?.errors?.[0]?.message || "Internal Error"); return; }
 
-      if (result?.errors) {
-        toast.error(result?.errors?.[0]?.message || "Internal Error");
-        return;
-      }
+      const appointmentId = result?.data?.createAppointment;
+      const response = await paymentServiceApi.createCheckoutSession({ input: { appointmentId }, fields: `url` });
 
-      const appointmentId = result?.data?.createAppointment
-      console.log('the appointment id: ', appointmentId)
+      if (response?.errors) { toast.error('Failed to create a payment session!'); return; }
 
-      const response = await paymentServiceApi.createCheckoutSession({
-        input: { appointmentId }, fields: `
-          url
-        `})
-
-      if (response?.errors) {
-        toast.error('Failed to create a payment session!')
-        return;
-      }
-
-      const checkoutUrl = response?.data?.createPaymentSession?.url
-      console.log('the checkout url from the server: ', checkoutUrl)
-
-      if (!checkoutUrl) {
-        toast.error("Invalid checkout session");
-        return;
-      }
+      const checkoutUrl = response?.data?.createPaymentSession?.url;
+      if (!checkoutUrl) { toast.error("Invalid checkout session"); return; }
 
       window.location.href = checkoutUrl;
-
       setAppointmentBooked(true);
-
       setTimeout(() => {
-        setShowConfirmModal(false);
-        setAppointmentBooked(false);
-        setSelectedSlot(null);
-        setSelectedDate(null);
-        setSelectedMode(null);
+        setShowConfirmModal(false); setAppointmentBooked(false);
+        setSelectedSlot(null); setSelectedDate(null); setSelectedMode(null);
       }, 2800);
-
-    } catch (err) {
-      console.error("Booking error:", err);
-      toast.error("Something went wrong while booking.");
-    }
+    } catch (err) { console.error("Booking error:", err); toast.error("Something went wrong while booking."); }
   };
-
-  const handleChat = async (doctorId: string) => {
-    router.push(`/messages?id=${doctorId}`)
-  }
 
   const activeFee = useMemo(() => {
     if (!doctor) return 0;
@@ -586,11 +531,6 @@ const DoctorProfilePage = ({ params }: PageProps) => {
     if (selectedMode === 'IN_CLINIC' && doctor.inPersonFee > 0) return doctor.inPersonFee;
     return doctor.consultationFee;
   }, [doctor, selectedMode]);
-
-  const handleCertificateClick = (certificateUrl: string) => {
-    setSelectedCertificate(certificateUrl);
-    setCertificateModalOpen(true);
-  };
 
   if (isLoading || !doctor) {
     return (
@@ -612,34 +552,19 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                 </div>
               </div>
             </div>
-            <div className="flex gap-4">
-              <div className="h-10 bg-gray-200 rounded-lg w-28" />
-              <div className="h-10 bg-gray-200 rounded-lg w-40" />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
-                <div className="h-5 bg-gray-200 rounded w-1/4" />
-                <div className="h-4 bg-gray-200 rounded" />
-                <div className="h-4 bg-gray-200 rounded w-5/6" />
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-              </div>
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
-                <div className="h-5 bg-gray-200 rounded w-1/3" />
-                <div className="h-4 bg-gray-200 rounded" />
-                <div className="h-4 bg-gray-200 rounded w-4/5" />
-              </div>
-            </div>
           </div>
         </div>
       </div>
     );
   }
 
+  const visibleReviews = reviews.filter(r => r.isVisible);
+
   return (
     <div className="min-h-screen bg-[#f8f6fb]">
       <Navigation />
 
-      {/* ── Back Bar ── */}
+      {/* Back Bar */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-3">
           <button
@@ -656,17 +581,16 @@ const DoctorProfilePage = ({ params }: PageProps) => {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
+        {/* ── Doctor Hero Card ── */}
         <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-          {/* gradient banner */}
           <div className="h-36 bg-gradient-to-r from-[#9b7ab8] via-[#b399c9] to-[#7d5d9a] relative">
             <div className="absolute inset-0 opacity-10"
-              style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23fff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z" /%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}
+              style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23fff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}
             />
           </div>
 
           <div className="px-6 pb-6 -mt-16 relative">
             <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-end">
-              {/* avatar */}
               <div className="relative flex-shrink-0">
                 <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-purple-100">
                   <img src={doctor.avatar} alt={doctor.name} className="w-full h-full object-cover" />
@@ -676,7 +600,6 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                 )}
               </div>
 
-              {/* name + meta */}
               <div className="flex-1 min-w-0 pb-1">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">{doctor.name}</h1>
@@ -700,10 +623,25 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                     <Languages className="w-4 h-4 text-gray-400" />
                     {doctor.languages.join(', ')}
                   </span>
+                  {/* ── Average rating in header ── */}
+                  {!reviewsLoading && averageRating > 0 && (
+                    <button
+                      onClick={() => setActiveTab('reviews')}
+                      className="flex items-center gap-1.5 hover:text-amber-600 transition-colors cursor-pointer"
+                    >
+                      <StarRating rating={averageRating} size="sm" />
+                      <span className="font-semibold text-amber-600">{averageRating.toFixed(1)}</span>
+                      <span className="text-gray-400">
+                        ({visibleReviews.length} {visibleReviews.length === 1 ? 'review' : 'reviews'})
+                      </span>
+                    </button>
+                  )}
+                  {!reviewsLoading && averageRating === 0 && (
+                    <span className="text-gray-400 text-xs italic">No reviews yet</span>
+                  )}
                 </div>
               </div>
 
-              {/* CTA buttons */}
               <div className="flex gap-3 flex-shrink-0 mt-2 sm:mt-0">
                 <button
                   onClick={() => setActiveTab('appointment')}
@@ -711,9 +649,6 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                 >
                   Book Appointment
                 </button>
-                {/* <button onClick={() => handleChat(doctor.id)} className="px-5 py-2.5 border-2 border-[#9b7ab8] text-[#9b7ab8] rounded-xl font-semibold text-sm hover:bg-purple-50 transition-all active:scale-95">
-                  Chat
-                </button> */}
               </div>
             </div>
           </div>
@@ -736,40 +671,46 @@ const DoctorProfilePage = ({ params }: PageProps) => {
           </div>
         )}
 
-        <div className="flex gap-2">
-          {(['overview', 'appointment'] as const).map(tab => (
+        {/* ── Tabs ── */}
+        <div className="flex gap-2 flex-wrap">
+          {(['overview', 'appointment', 'reviews'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={[
-                'px-5 py-2.5 rounded-xl font-semibold text-sm capitalize transition-all',
+                'px-5 py-2.5 rounded-xl font-semibold text-sm capitalize transition-all flex items-center gap-2',
                 activeTab === tab
                   ? 'bg-[#9b7ab8] text-white shadow-md'
                   : 'bg-white text-gray-600 border border-gray-200 hover:border-[#9b7ab8] hover:text-[#9b7ab8]'
               ].join(' ')}
             >
-              {tab === 'appointment' ? 'Book Appointment' : tab}
+              {tab === 'appointment' ? 'Book Appointment' : tab === 'reviews' ? (
+                <>
+                  Reviews
+                  {visibleReviews.length > 0 && (
+                    <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
+                      activeTab === 'reviews' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {visibleReviews.length}
+                    </span>
+                  )}
+                </>
+              ) : tab}
             </button>
           ))}
         </div>
 
+        {/* ── Overview Tab ── */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            {/* ── Left / Main ── */}
             <div className="lg:col-span-2 space-y-5">
-
-              {/* About */}
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                 <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
                   <User className="w-5 h-5 text-[#9b7ab8]" /> About
                 </h2>
-                <p className="text-gray-600 leading-relaxed text-sm">
-                  {doctor.bio || 'No bio available at this time.'}
-                </p>
+                <p className="text-gray-600 leading-relaxed text-sm">{doctor.bio || 'No bio available at this time.'}</p>
               </div>
 
-              {/* Specializations */}
               {doctor.specializations.length > 0 && (
                 <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                   <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -777,15 +718,12 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {doctor.specializations.map(s => (
-                      <span key={s} className="px-3 py-1.5 bg-purple-50 text-[#9b7ab8] text-sm font-medium rounded-full border border-purple-200">
-                        {s}
-                      </span>
+                      <span key={s} className="px-3 py-1.5 bg-purple-50 text-[#9b7ab8] text-sm font-medium rounded-full border border-purple-200">{s}</span>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Certificates */}
               {doctor.certificates.length > 0 && (
                 <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                   <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -795,7 +733,7 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                     {doctor.certificates.map((cert, i) => (
                       <button
                         key={i}
-                        onClick={() => handleCertificateClick(cert)}
+                        onClick={() => { setSelectedCertificate(cert); setCertificateModalOpen(true); }}
                         className="flex items-start gap-3 p-3 bg-purple-50 rounded-xl border border-purple-100 hover:bg-purple-100 hover:shadow-md transition-all group text-left"
                       >
                         <div className="w-8 h-8 bg-[#9b7ab8] rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
@@ -819,10 +757,31 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                   <p className="text-gray-600 text-sm leading-relaxed">{doctor.cancellationPolicy}</p>
                 </div>
               )}
+
+              {/* Quick reviews preview */}
+              {!reviewsLoading && visibleReviews.length > 0 && (
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                      <Star className="w-5 h-5 text-amber-400 fill-amber-400" /> Recent Reviews
+                    </h2>
+                    <button
+                      onClick={() => setActiveTab('reviews')}
+                      className="text-sm text-[#9b7ab8] hover:text-[#7d5d9a] font-semibold transition-colors"
+                    >
+                      See all ({visibleReviews.length})
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {visibleReviews.slice(0, 2).map(review => (
+                      <ReviewCard key={review.id} review={review} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-5">
-
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                 <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                   <Stethoscope className="w-5 h-5 text-[#9b7ab8]" /> Consultation Details
@@ -860,7 +819,6 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                 </div>
               </div>
 
-              {/* Clinic Info card */}
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                 <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-[#9b7ab8]" /> Clinic Info
@@ -893,7 +851,6 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                 </div>
               </div>
 
-              {/* Contact card */}
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                 <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                   <Mail className="w-5 h-5 text-[#9b7ab8]" /> Contact
@@ -923,6 +880,48 @@ const DoctorProfilePage = ({ params }: PageProps) => {
           </div>
         )}
 
+        {/* ── Reviews Tab ── */}
+        {activeTab === 'reviews' && (
+          <div className="max-w-3xl">
+            {reviewsLoading ? (
+              <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-1/3" />
+                  <div className="flex gap-4">
+                    <div className="w-20 h-20 bg-gray-200 rounded-lg" />
+                    <div className="flex-1 space-y-2">
+                      {[...Array(5)].map((_, i) => <div key={i} className="h-3 bg-gray-200 rounded" />)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : visibleReviews.length === 0 ? (
+              <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-sm text-center">
+                <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="w-8 h-8 text-amber-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">No reviews yet</h3>
+                <p className="text-gray-500 text-sm">
+                  Be the first to share your experience with {doctor.name}.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Summary */}
+                <RatingsSummary reviews={visibleReviews} averageRating={averageRating} />
+
+                {/* Review list */}
+                <div className="space-y-4">
+                  {visibleReviews.map(review => (
+                    <ReviewCard key={review.id} review={review} />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── Appointment Tab ── */}
         {activeTab === 'appointment' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-5">
@@ -941,9 +940,7 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                         onClick={() => setSelectedMode(mode as 'ONLINE' | 'IN_CLINIC')}
                         className={[
                           'flex-1 min-w-0 flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left',
-                          active
-                            ? 'border-[#9b7ab8] bg-purple-50 shadow-sm'
-                            : 'border-gray-200 hover:border-purple-300'
+                          active ? 'border-[#9b7ab8] bg-purple-50 shadow-sm' : 'border-gray-200 hover:border-purple-300'
                         ].join(' ')}
                       >
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${active ? 'bg-[#9b7ab8]' : 'bg-gray-100'}`}>
@@ -968,19 +965,13 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="text-base font-bold text-gray-800">Select a Date</h2>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => navigateWeek(-1)}
-                      className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
+                    <button onClick={() => navigateWeek(-1)} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
                       <ChevronLeft className="w-5 h-5 text-gray-600" />
                     </button>
                     <span className="text-sm font-semibold text-gray-700 w-40 text-center">
                       {MONTHS[currentMonday.getMonth()]} {currentMonday.getFullYear()}
                     </span>
-                    <button
-                      onClick={() => navigateWeek(1)}
-                      className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
+                    <button onClick={() => navigateWeek(1)} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
                       <ChevronRight className="w-5 h-5 text-gray-600" />
                     </button>
                   </div>
@@ -998,17 +989,12 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                       <button
                         key={i}
                         disabled={!isAvailable}
-                        onClick={() => {
-                          setSelectedDate(date);
-                          setSelectedSlot(null);
-                        }}
+                        onClick={() => { setSelectedDate(date); setSelectedSlot(null); }}
                         className={[
                           'flex flex-col items-center p-2 rounded-xl transition-all',
-                          isSelected
-                            ? 'bg-[#9b7ab8] text-white shadow-md'
-                            : isAvailable
-                              ? 'hover:bg-purple-50 border border-gray-100'
-                              : 'opacity-35 cursor-not-allowed'
+                          isSelected ? 'bg-[#9b7ab8] text-white shadow-md'
+                            : isAvailable ? 'hover:bg-purple-50 border border-gray-100'
+                            : 'opacity-35 cursor-not-allowed'
                         ].join(' ')}
                       >
                         <span className={`text-xs font-semibold mb-1 ${isSelected ? 'text-purple-200' : 'text-gray-400'}`}>
@@ -1017,9 +1003,7 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                         <span className={`text-base font-bold ${isSelected ? 'text-white' : 'text-gray-800'}`}>
                           {date.getDate()}
                         </span>
-                        {isToday && !isSelected && (
-                          <span className="w-1.5 h-1.5 bg-[#9b7ab8] rounded-full mt-0.5" />
-                        )}
+                        {isToday && !isSelected && <span className="w-1.5 h-1.5 bg-[#9b7ab8] rounded-full mt-0.5" />}
                       </button>
                     );
                   })}
@@ -1030,13 +1014,10 @@ const DoctorProfilePage = ({ params }: PageProps) => {
               {selectedDate && (
                 <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                   <div className="flex items-center justify-between mb-1">
-                    <h2 className="text-base font-bold text-gray-800">
-                      Available Time Slots
-                    </h2>
+                    <h2 className="text-base font-bold text-gray-800">Available Time Slots</h2>
                     {!timezoneLoading && doctorTimezone !== userTimezone && (
                       <span className="text-xs text-gray-500 flex items-center gap-1">
-                        <Globe className="w-3 h-3" />
-                        {getTimezoneAbbreviation(userTimezone)}
+                        <Globe className="w-3 h-3" />{getTimezoneAbbreviation(userTimezone)}
                       </span>
                     )}
                   </div>
@@ -1058,8 +1039,7 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                             onClick={() => setSelectedSlot(slot)}
                             className={[
                               'p-3 rounded-xl text-left transition-all border',
-                              active
-                                ? 'bg-[#9b7ab8] border-[#9b7ab8] text-white shadow-md'
+                              active ? 'bg-[#9b7ab8] border-[#9b7ab8] text-white shadow-md'
                                 : 'border-gray-200 hover:border-[#9b7ab8] hover:bg-purple-50'
                             ].join(' ')}
                           >
@@ -1084,13 +1064,11 @@ const DoctorProfilePage = ({ params }: PageProps) => {
               )}
             </div>
 
-            {/* ── Right: Booking summary ── */}
+            {/* Booking summary */}
             <div>
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm sticky top-24">
                 <h2 className="text-base font-bold text-gray-800 mb-4">Booking Summary</h2>
-
                 <div className="space-y-3">
-                  {/* Doctor mini */}
                   <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
                     <img src={doctor.avatar} alt={doctor.name} className="w-10 h-10 rounded-full object-cover border-2 border-purple-200" />
                     <div>
@@ -1109,17 +1087,13 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-400 uppercase tracking-wide">Date</span>
                       <span className={`text-sm font-semibold ${selectedDate ? 'text-gray-800' : 'text-gray-300 italic'}`}>
-                        {selectedDate
-                          ? `${DAYS[selectedDate.getDay()]}, ${MONTHS[selectedDate.getMonth()]} ${selectedDate.getDate()}`
-                          : '—'}
+                        {selectedDate ? `${DAYS[selectedDate.getDay()]}, ${MONTHS[selectedDate.getMonth()]} ${selectedDate.getDate()}` : '—'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-400 uppercase tracking-wide">Time</span>
                       <span className={`text-sm font-semibold ${selectedSlot ? 'text-gray-800' : 'text-gray-300 italic'}`}>
-                        {selectedSlot
-                          ? `${formatTimeWithTimezone(selectedSlot.startTime, userTimezone)} – ${formatTimeWithTimezone(selectedSlot.endTime, userTimezone)}`
-                          : '—'}
+                        {selectedSlot ? `${formatTimeWithTimezone(selectedSlot.startTime, userTimezone)} – ${formatTimeWithTimezone(selectedSlot.endTime, userTimezone)}` : '—'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -1161,43 +1135,25 @@ const DoctorProfilePage = ({ params }: PageProps) => {
       {/* CERTIFICATE MODAL */}
       {certificateModalOpen && selectedCertificate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setCertificateModalOpen(false)}
-          />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setCertificateModalOpen(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <Award className="w-5 h-5 text-[#9b7ab8]" />
-                Certificate
+                <Award className="w-5 h-5 text-[#9b7ab8]" /> Certificate
               </h3>
               <div className="flex items-center gap-2">
-                <a
-                  href={selectedCertificate}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-                  title="Download certificate"
-                >
+                <a href={selectedCertificate} download target="_blank" rel="noopener noreferrer"
+                  className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Download certificate">
                   <Download className="w-5 h-5 text-gray-600" />
                 </a>
-                <button
-                  onClick={() => setCertificateModalOpen(false)}
-                  className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-                >
+                <button onClick={() => setCertificateModalOpen(false)} className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
                   <X className="w-5 h-5 text-gray-600" />
                 </button>
               </div>
             </div>
             <div className="p-6 overflow-auto max-h-[calc(90vh-80px)]">
-              <img
-                src={selectedCertificate}
-                alt="Certificate"
-                className="w-full h-auto rounded-lg shadow-lg"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3Ctext fill="%239ca3af" font-family="sans-serif" font-size="18" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EImage not available%3C/text%3E%3C/svg%3E';
-                }}
+              <img src={selectedCertificate} alt="Certificate" className="w-full h-auto rounded-lg shadow-lg"
+                onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3Ctext fill="%239ca3af" font-family="sans-serif" font-size="18" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EImage not available%3C/text%3E%3C/svg%3E'; }}
               />
             </div>
           </div>
@@ -1209,16 +1165,13 @@ const DoctorProfilePage = ({ params }: PageProps) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !appointmentBooked && setShowConfirmModal(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 overflow-hidden">
-
             {appointmentBooked ? (
               <div className="text-center py-6">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Check className="w-8 h-8 text-green-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-1">Appointment Confirmed!</h3>
-                <p className="text-sm text-gray-500">
-                  Your appointment with {doctor.name} has been booked successfully.
-                </p>
+                <p className="text-sm text-gray-500">Your appointment with {doctor.name} has been booked successfully.</p>
                 <div className="mt-4 p-3 bg-purple-50 rounded-xl text-left text-sm text-gray-600 space-y-1">
                   <p><span className="font-semibold text-gray-800">Date:</span> {selectedDate && `${DAYS[selectedDate.getDay()]}, ${MONTHS[selectedDate.getMonth()]} ${selectedDate.getDate()}`}</p>
                   <p><span className="font-semibold text-gray-800">Time:</span> {formatTimeWithTimezone(selectedSlot.startTime, userTimezone)} – {formatTimeWithTimezone(selectedSlot.endTime, userTimezone)}</p>
@@ -1231,10 +1184,8 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                 <button onClick={() => setShowConfirmModal(false)} className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-lg transition-colors">
                   <X className="w-5 h-5 text-gray-400" />
                 </button>
-
                 <h3 className="text-lg font-bold text-gray-800 mb-1">Confirm Your Appointment</h3>
                 <p className="text-sm text-gray-500 mb-5">Please review the details below before confirming.</p>
-
                 <div className="bg-gray-50 rounded-xl p-4 space-y-2.5">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-500">Doctor</span>
@@ -1259,9 +1210,7 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                   {doctorTimezone !== userTimezone && (
                     <div className="flex items-start gap-2 pt-2 border-t border-gray-200">
                       <Globe className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-xs text-gray-500">
-                        Time shown in your timezone ({getTimezoneAbbreviation(userTimezone)})
-                      </span>
+                      <span className="text-xs text-gray-500">Time shown in your timezone ({getTimezoneAbbreviation(userTimezone)})</span>
                     </div>
                   )}
                   <div className="flex justify-between pt-2 border-t border-gray-200">
@@ -1269,18 +1218,13 @@ const DoctorProfilePage = ({ params }: PageProps) => {
                     <span className="text-base font-bold text-[#9b7ab8]">${activeFee}</span>
                   </div>
                 </div>
-
                 <div className="flex gap-3 mt-5">
-                  <button
-                    onClick={() => setShowConfirmModal(false)}
-                    className="flex-1 px-4 py-2.5 border-2 border-gray-200 text-gray-600 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-all"
-                  >
+                  <button onClick={() => setShowConfirmModal(false)}
+                    className="flex-1 px-4 py-2.5 border-2 border-gray-200 text-gray-600 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-all">
                     Cancel
                   </button>
-                  <button
-                    onClick={handleBooking}
-                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#9b7ab8] to-[#7d5d9a] text-white rounded-xl font-semibold text-sm hover:shadow-lg transition-all active:scale-95"
-                  >
+                  <button onClick={handleBooking}
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#9b7ab8] to-[#7d5d9a] text-white rounded-xl font-semibold text-sm hover:shadow-lg transition-all active:scale-95">
                     Pay & Book
                   </button>
                 </div>

@@ -56,10 +56,7 @@ export class ChatGateway
 
     client.join(userId)
 
-    console.log('the time in handle connection: ', new Date().toISOString())
-
     this.userSocketMap.set(userId, client.id);
-    console.log(`User connected: ${userId} -> ${client.id}`);
     client.broadcast.emit('user_online', { userId });
   }
 
@@ -69,8 +66,6 @@ export class ChatGateway
 
     if (userId && this.userSocketMap.has(userId)) {
       this.userSocketMap.delete(userId);
-      console.log(`User disconnected: ${userId}`);
-
       this.server.emit('user_offline', { userId });
     }
   }
@@ -131,9 +126,7 @@ export class ChatGateway
     }
 
     const userId = client.data.user?.userId
-    console.log('the userId in the receiving notifications gateway: ', userId)
     const notifications = await this._notificationUseCase.findByUserId(userId)
-    console.log('the notifications in the receiving notifications: ', notifications)
     this.server.to(client.id).emit('receive_notifications', notifications)
   }
 
@@ -149,8 +142,6 @@ export class ChatGateway
     const sender = client.data.user;
     const senderId = sender?.userId;
     if (!senderId) return;
-
-    console.log("the typing socket data: ", data)
 
     const receiverSocketId = this.userSocketMap.get(data.receiverId);
     if (receiverSocketId) {

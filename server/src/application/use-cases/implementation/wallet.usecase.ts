@@ -69,4 +69,14 @@ export class WalletUseCase implements IWalletUseCase {
         if (!wallet) throw new BusinessRuleViolationError(WalletErrorType.WALLET_NOT_FOUND)
         return WalletOutputMapper.toDto(wallet)
     }
+
+    async findAllWallets(): Promise<IWalletResponseDTO[]> {
+        const entities = await this._walletRepository.findAllWallets()
+        return WalletOutputMapper.toDtos(entities)
+    }
+
+    async findAllTransactions(): Promise<ITransactionResponseDTO[]> {
+        const entities = await this._walletRepository.findAllTransactions()
+        return TransactionOutputMapper.toDtos(entities)
+    }
 }

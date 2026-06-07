@@ -1,7 +1,10 @@
+
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/global.css";
 import { AppProvider } from "@/providers/AppProvider";
+import IncomingCallNotification from "@/components/sessions/IncomingCallNotification";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +29,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <AppProvider>{children}</AppProvider>
+        <AppProvider>
+          {children}
+          <IncomingCallNotification />
+        </AppProvider>
       </body>
       <script src="https://accounts.google.com/gsi/client" async defer></script>
     </html>

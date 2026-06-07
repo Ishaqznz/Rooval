@@ -12,6 +12,9 @@ import { Audience, NotificationErrorType } from "src/core/enums/notifications/no
 import { INotificationOrchestrator } from "src/application/orchestrators/interface/notification.orch.interface";
 import { IDoctorUseCase } from "../interface/doctor.usecase.interface";
 import { BusinessRuleViolationError } from "src/core/errors/businessRule.error";
+import { IAppointmentUseCase } from "../interface/appointment.usecase.interface";
+import { INotificationService } from "src/application/services/notification.service.interface";
+import { ISendCallNotificationRequest } from "src/application/dto/notification/request/sendCallNotification.request.dto";
 
 @Injectable()
 export class NotificationUseCase implements INotificationUseCase {
@@ -26,7 +29,13 @@ export class NotificationUseCase implements INotificationUseCase {
         private readonly _userUseCase: IUserUseCase,
 
         @Inject('IDoctorUseCase')
-        private readonly _doctorUseCase: IDoctorUseCase
+        private readonly _doctorUseCase: IDoctorUseCase,
+
+        @Inject('IAppointmentUseCase')
+        private readonly _appointmentUseCase: IAppointmentUseCase,
+
+        @Inject('INotificationService')
+        private readonly _notificationService: INotificationService
     ) { }
 
     async create(input: ICreateNotificationRequestDTO): Promise<INotificationResponseDTO> {
@@ -102,5 +111,17 @@ export class NotificationUseCase implements INotificationUseCase {
         }
 
         throw new BusinessRuleViolationError(NotificationErrorType.GIVE_VALID_AUDIENCE_TYPE)
+    }
+
+    async sendCallNotification(input: ISendCallNotificationRequest): Promise<void> {
+        const appointment = await this._appointmentUseCase.findById(input.appointmentId)
+        const doctor = await this._doctorUseCase.findById(appointment.doctorId)
+        console.log('theeeeeeeeeeeee: ', input, appointment, doctor)
+        await this._notificationService.sendCallNotification(appointment.patientId,
+            {
+                appointmentId: input.appointmentId,
+                callType: input.callerType,
+                doctorName: doctor.fullName
+            })
     }
 }

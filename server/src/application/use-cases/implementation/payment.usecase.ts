@@ -16,6 +16,7 @@ import { IWithdrawUserMoneyRequestDTO } from "src/application/dto/payment/reques
 import { WithdrawUserMoney } from "src/core/entities/payment/withdrawUserMoney.entity";
 import { WithdrawDoctorMoney } from "src/core/entities/payment/withdrawDoctorMoney.entity";
 import { IWithdrawDoctorMoneyRequestDTO } from "src/application/dto/payment/request/withdrawDoctorMoney.request.dto";
+import { PaymentDomainService } from "src/core/services/payment/payment.service.core";
 
 @Injectable()
 export class PaymentUseCase implements IPaymentUseCase {
@@ -75,10 +76,12 @@ export class PaymentUseCase implements IPaymentUseCase {
             })
 
             const doctorWallet = await this._walletUseCase.getWallet({ ownerId: appointment.doctorId })
-            await this._walletUseCase.addMoney({ walletId: doctorWallet.id, amount: appointment.amount })
+            const finalAmount = PaymentDomainService.deductPlatformCommission(appointment.amount)
+            
+            await this._walletUseCase.addMoney({ walletId: doctorWallet.id, amount: finalAmount })
             await this._walletUseCase.createTransaction({ 
                 walletId: doctorWallet.id,
-                amount: appointment.amount,
+                amount: finalAmount,
                 reason: WalletTransactionReason.APPOINTMENT_PAYMENT,
                 type: WalletTransactionType.CREDIT
             })

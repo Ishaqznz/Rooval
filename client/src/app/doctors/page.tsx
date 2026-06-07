@@ -29,6 +29,7 @@ import { IListDoctorsRequestDTO } from '@/interfaces/api/doctor/doctor.api.inter
 import { doctorServiceApi } from '@/services/doctorApiService';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from '@/hooks/use-debounced';
+import { reviewApiService } from '@/services/reviewApiService';
 
 interface IDoctorUI {
   id: string;
@@ -89,6 +90,34 @@ const SPECIALIZATIONS = [
 
 const ITEMS_PER_PAGE = 4;
 
+// ── Star Rating Display ────────────────────────────────────────────────────────
+const StarRating = ({ rating, reviewCount }: { rating: number; reviewCount?: number }) => {
+  if (!rating || rating === 0) return null;
+
+  return (
+    <span className="flex items-center gap-1">
+      <span className="flex items-center">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-3 h-3 ${
+              star <= Math.round(rating)
+                ? 'fill-amber-400 text-amber-400'
+                : star - 0.5 <= rating
+                ? 'fill-amber-200 text-amber-300'
+                : 'text-gray-300'
+            }`}
+          />
+        ))}
+      </span>
+      <span className="text-xs font-semibold text-amber-600">{rating.toFixed(1)}</span>
+      {reviewCount !== undefined && reviewCount > 0 && (
+        <span className="text-xs text-gray-400">({reviewCount})</span>
+      )}
+    </span>
+  );
+};
+
 const DoctorListingPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -107,7 +136,9 @@ const DoctorListingPage = () => {
   const [totalDoctors, setTotalDoctors] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const router = useRouter()
+  // Map of doctorId → { averageRating, reviewCount }
+  const [doctorRatings, setDoctorRatings] = useState<Record<string, { avg: number; count: number }>>({});
+  const router = useRouter();
 
   const debouncedFeeRange = useDebounce(feeRange, 800);
 
@@ -120,14 +151,11 @@ const DoctorListingPage = () => {
   }, [searchQuery]);
 
   const fetchDoctors = async () => {
-    const scrollY = window.scrollY
+    const scrollY = window.scrollY;
     setIsLoading(true);
     try {
       const requestBody: IListDoctorsRequestDTO = {
-        pagination: {
-          page: currentPage,
-          limit: ITEMS_PER_PAGE
-        },
+        pagination: { page: currentPage, limit: ITEMS_PER_PAGE },
         sorting: {
           sortBy: sortBy === 'RELEVANCE' ? 'EXPERIENCE' : sortBy,
           order: sortOrder
@@ -193,13 +221,43 @@ const DoctorListingPage = () => {
               endTime
             }
           }
-      }
-      doctorsCount
+        }
+        doctorsCount
       `);
 
-      setDoctors(response?.data?.listDoctors?.doctors ?? []);
-      setTotalDoctors(response?.data?.listDoctors?.doctorsCount || 0)
-      setTotalPages(Math.ceil(response?.data?.listDoctors?.doctorsCount / ITEMS_PER_PAGE))
+      const fetchedDoctors: IDoctorResponseDTO[] = response?.data?.listDoctors?.doctors ?? [];
+      setDoctors(fetchedDoctors);
+      setTotalDoctors(response?.data?.listDoctors?.doctorsCount || 0);
+      setTotalPages(Math.ceil(response?.data?.listDoctors?.doctorsCount / ITEMS_PER_PAGE));
+
+      // Fetch average ratings for all doctors in parallel
+      if (fetchedDoctors.length > 0) {
+        const ratingPromises = fetchedDoctors.map(async (doc) => {
+          try {
+            const [avgRes, reviewsRes] = await Promise.all([
+              reviewApiService.getAverageRating({ input: { doctorId: doc.id } }),
+              reviewApiService.findReviewsByDoctorId(
+                { input: { doctorId: doc.id } },
+                `id rating`
+              )
+            ]);
+            return {
+              doctorId: doc.id,
+              avg: avgRes?.data?.getAverageRating ?? 0,
+              count: reviewsRes?.data?.findReviewsByDoctorId?.length ?? 0
+            };
+          } catch {
+            return { doctorId: doc.id, avg: 0, count: 0 };
+          }
+        });
+
+        const ratings = await Promise.all(ratingPromises);
+        const ratingsMap: Record<string, { avg: number; count: number }> = {};
+        ratings.forEach(({ doctorId, avg, count }) => {
+          ratingsMap[doctorId] = { avg, count };
+        });
+        setDoctorRatings(ratingsMap);
+      }
     } catch (error) {
       console.error('Error fetching doctors:', error);
     } finally {
@@ -224,7 +282,6 @@ const DoctorListingPage = () => {
     sortOrder
   ]);
 
-  // --- helpers ----------------------------------------------------------------
   const clearFilters = () => {
     setSelectedSpecializations([]);
     setSelectedCity('');
@@ -240,28 +297,21 @@ const DoctorListingPage = () => {
   };
 
   const toggleSpecialization = (spec: string) => {
-    setSelectedSpecializations(prev => {
-      if (prev.includes(spec)) {
-        const newSpecs = prev.filter((sp) => sp !== spec)
-        return newSpecs;
-      }
-      return [...prev, spec]
-    }
+    setSelectedSpecializations(prev =>
+      prev.includes(spec) ? prev.filter((sp) => sp !== spec) : [...prev, spec]
     );
     setCurrentPage(1);
   };
 
   const handleSortChange = (value: string) => {
-    const [sortBy, sortOrder] = value.split('-');
-
-    setSortBy(sortBy);
-    setSortOrder(sortOrder);
+    const [newSortBy, newSortOrder] = value.split('-');
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
     setCurrentPage(1);
   };
 
   const FilterSection = () => (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="w-5 h-5 text-[#9b7ab8]" />
@@ -287,9 +337,7 @@ const DoctorListingPage = () => {
                 onChange={() => toggleSpecialization(spec)}
                 className="w-4 h-4 rounded border-gray-300 text-[#9b7ab8] focus:ring-[#9b7ab8] focus:ring-offset-0 cursor-pointer"
               />
-              <span className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
-                {spec}
-              </span>
+              <span className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">{spec}</span>
             </label>
           ))}
         </div>
@@ -305,10 +353,7 @@ const DoctorListingPage = () => {
                 type="radio"
                 name="consultationType"
                 checked={consultationType === mode}
-                onChange={() => {
-                  setConsultationType(mode);
-                  setCurrentPage(1);
-                }}
+                onChange={() => { setConsultationType(mode); setCurrentPage(1); }}
                 className="w-4 h-4 border-gray-300 text-[#9b7ab8] focus:ring-[#9b7ab8] focus:ring-offset-0 cursor-pointer"
               />
               {mode === 'ONLINE' && <Video className="w-4 h-4 text-gray-400" />}
@@ -321,40 +366,13 @@ const DoctorListingPage = () => {
         </div>
       </div>
 
-      {/* Available Today */}
-
-      {/*<div className="pt-4 border-t border-gray-200">
-        <label className="flex items-center gap-2 cursor-pointer group">
-          <input
-            type="checkbox"
-            checked={availableToday}
-            onChange={(e) => {
-              setAvailableToday(e.target.checked);
-              setCurrentPage(1);
-            }}
-            className="w-4 h-4 rounded border-gray-300 text-[#9b7ab8] focus:ring-[#9b7ab8] focus:ring-offset-0 cursor-pointer"
-          />
-          <Clock className="w-4 h-4 text-gray-400" />
-          <span className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
-            Available Today
-          </span>
-        </label>
-      </div>
-      */}
-
       {/* Experience */}
       <div className="pt-4 border-t border-gray-200">
         <h4 className="font-medium text-gray-800 mb-3 text-sm">Minimum Experience (Years)</h4>
         <div className="space-y-2">
           <input
-            type="range"
-            min="0"
-            max="30"
-            value={experienceRange[0]}
-            onChange={(e) => {
-              setExperienceRange([parseInt(e.target.value), 30]);
-              setCurrentPage(1);
-            }}
+            type="range" min="0" max="30" value={experienceRange[0]}
+            onChange={(e) => { setExperienceRange([parseInt(e.target.value), 30]); setCurrentPage(1); }}
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#9b7ab8]"
           />
           <div className="flex justify-between text-xs text-gray-500">
@@ -370,28 +388,14 @@ const DoctorListingPage = () => {
         <div className="space-y-2">
           <div className="flex gap-2">
             <input
-              type="number"
-              min="0"
-              max="1000"
-              value={feeRange[0]}
-              onChange={(e) => {
-                setFeeRange([parseInt(e.target.value) || 0, feeRange[1]]);
-                setCurrentPage(1);
-              }}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
-              placeholder="Min"
+              type="number" min="0" max="1000" value={feeRange[0]}
+              onChange={(e) => { setFeeRange([parseInt(e.target.value) || 0, feeRange[1]]); setCurrentPage(1); }}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg" placeholder="Min"
             />
             <input
-              type="number"
-              min="0"
-              max="200"
-              value={feeRange[1]}
-              onChange={(e) => {
-                setFeeRange([feeRange[0], parseInt(e.target.value) || 1000]);
-                // setCurrentPage(1);
-              }}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
-              placeholder="Max"
+              type="number" min="0" max="200" value={feeRange[1]}
+              onChange={(e) => setFeeRange([feeRange[0], parseInt(e.target.value) || 1000])}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg" placeholder="Max"
             />
           </div>
           <div className="flex justify-between text-xs text-gray-500">
@@ -402,19 +406,14 @@ const DoctorListingPage = () => {
       </div>
 
       {/* Rating */}
-      <div className="pt-4 border-t border-gray-200">
+      {/* <div className="pt-4 border-t border-gray-200">
         <h4 className="font-medium text-gray-800 mb-3 text-sm">Minimum Rating</h4>
         <div className="space-y-2">
           {[4, 3, 0].map(rating => (
             <label key={rating} className="flex items-center gap-2 cursor-pointer group">
               <input
-                type="radio"
-                name="rating"
-                checked={minRating === rating}
-                onChange={() => {
-                  setMinRating(rating);
-                  setCurrentPage(1);
-                }}
+                type="radio" name="rating" checked={minRating === rating}
+                onChange={() => { setMinRating(rating); setCurrentPage(1); }}
                 className="w-4 h-4 border-gray-300 text-[#9b7ab8] focus:ring-[#9b7ab8] focus:ring-offset-0 cursor-pointer"
               />
               <div className="flex items-center gap-1">
@@ -430,7 +429,7 @@ const DoctorListingPage = () => {
             </label>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Sort By */}
       <div className="pt-4 border-t border-gray-200">
@@ -444,7 +443,6 @@ const DoctorListingPage = () => {
           <option value="EXPERIENCE-DESC">Experience (High to Low)</option>
           <option value="FEE-ASC">Fee (Low to High)</option>
           <option value="FEE-DESC">Fee (High to Low)</option>
-          <option value="RATING-DESC">Rating (High to Low)</option>
         </select>
       </div>
     </div>
@@ -452,6 +450,9 @@ const DoctorListingPage = () => {
 
   const DoctorCard = ({ doctor: backendDoctor }: { doctor: IDoctorResponseDTO }) => {
     const doctor = transformDoctor(backendDoctor);
+    const ratingData = doctorRatings[doctor.id];
+    const avgRating = ratingData?.avg ?? 0;
+    const reviewCount = ratingData?.count ?? 0;
 
     return (
       <div className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group">
@@ -479,16 +480,16 @@ const DoctorListingPage = () => {
                   </span>
                 ))}
               </div>
-              <div className="flex items-center gap-3 text-xs text-gray-500">
+              <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5" />
                   {doctor.experience} {doctor.experience === 1 ? 'year' : 'years'}
                 </span>
-                {doctor.rating > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    {doctor.rating} ({doctor.reviewCount})
-                  </span>
+                {/* ── Live average rating ── */}
+                {avgRating > 0 ? (
+                  <StarRating rating={avgRating} reviewCount={reviewCount} />
+                ) : (
+                  <span className="text-xs text-gray-400 italic">No reviews yet</span>
                 )}
               </div>
             </div>
@@ -496,7 +497,6 @@ const DoctorListingPage = () => {
 
           {/* Info Section */}
           <div className="space-y-2.5 mb-4 pb-4 border-b border-gray-100">
-            {/* Clinic name + address */}
             {doctor.clinicName && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Building2 className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -505,28 +505,22 @@ const DoctorListingPage = () => {
                 </span>
               </div>
             )}
-
-            {/* Languages */}
             {doctor.languages.length > 0 && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Languages className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 <span className="truncate">{doctor.languages.join(', ')}</span>
               </div>
             )}
-
-            {/* Working days */}
             {doctor.workingDays && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 <span>{doctor.workingDays}</span>
               </div>
             )}
-
-            {/* Session duration */}
             {doctor.duration && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                <span>Session: {doctor.duration} min </span>
+                <span>Session: {doctor.duration} min</span>
               </div>
             )}
           </div>
@@ -538,23 +532,17 @@ const DoctorListingPage = () => {
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 text-[#9b7ab8] text-xs font-medium rounded-full">
                   <Video className="w-3 h-3" />
                   Online
-                  {doctor.videoFee > 0 && (
-                    <span className="text-[#7d5d9a]">– ${doctor.videoFee}</span>
-                  )}
+                  {doctor.videoFee > 0 && <span className="text-[#7d5d9a]">– ${doctor.videoFee}</span>}
                 </span>
               )}
               {doctor.consultationModes.includes('IN_CLINIC') && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 text-[#9b7ab8] text-xs font-medium rounded-full">
                   <Building2 className="w-3 h-3" />
                   In-Clinic
-                  {doctor.inPersonFee > 0 && (
-                    <span className="text-[#7d5d9a]">– ${doctor.inPersonFee}</span>
-                  )}
+                  {doctor.inPersonFee > 0 && <span className="text-[#7d5d9a]">– ${doctor.inPersonFee}</span>}
                 </span>
               )}
             </div>
-
-            {/* Base consultation fee */}
             <div className="flex items-center gap-1 text-lg font-bold text-gray-800">
               <DollarSign className="w-5 h-5" />
               {doctor.consultationFee}
@@ -563,13 +551,15 @@ const DoctorListingPage = () => {
 
           {/* Action Buttons */}
           <div className="flex gap-3">
-            <button className="flex-1 px-4 py-2.5 border-2 border-[#9b7ab8] text-[#9b7ab8] rounded-lg font-medium text-sm hover:bg-purple-50 transition-all active:scale-95"
-              onClick={() => router.push(`/doctor/${doctor.id}`)}>
+            <button
+              className="flex-1 px-4 py-2.5 border-2 border-[#9b7ab8] text-[#9b7ab8] rounded-lg font-medium text-sm hover:bg-purple-50 transition-all active:scale-95"
+              onClick={() => router.push(`/doctor/${doctor.id}`)}
+            >
               View Profile
             </button>
-            <button className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#9b7ab8] to-[#7d5d9a] text-white rounded-lg font-medium text-sm hover:shadow-lg hover:scale-105 transition-all active:scale-95">
+            {/* <button className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#9b7ab8] to-[#7d5d9a] text-white rounded-lg font-medium text-sm hover:shadow-lg hover:scale-105 transition-all active:scale-95">
               Book Now
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
@@ -624,7 +614,6 @@ const DoctorListingPage = () => {
               Connect with certified doctors instantly. Get prescriptions, medical advice, and comprehensive care from the comfort of your home.
             </p>
 
-            {/* Search */}
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -649,7 +638,6 @@ const DoctorListingPage = () => {
             </div>
           </aside>
 
-          {/* Main */}
           <main className="flex-1 min-w-0">
             {/* Mobile Filter Button */}
             <div className="lg:hidden mb-4">
@@ -687,7 +675,6 @@ const DoctorListingPage = () => {
                   ))}
                 </div>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex justify-center mt-8">
                     <Pagination>
@@ -753,17 +740,11 @@ const DoctorListingPage = () => {
       {/* Mobile Filter Drawer */}
       {isFilterOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setIsFilterOpen(false)}
-          />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsFilterOpen(false)} />
           <div className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-2xl overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
               <h2 className="text-lg font-semibold text-gray-800">Filters</h2>
-              <button
-                onClick={() => setIsFilterOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
+              <button onClick={() => setIsFilterOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
@@ -782,7 +763,6 @@ const DoctorListingPage = () => {
         </div>
       )}
 
-      {/* Custom Scrollbar */}
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar        { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track  { background: #f5f2f8; border-radius: 3px; }

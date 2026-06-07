@@ -33,7 +33,6 @@ export class NotificationRepository implements INotificationRepository {
             })
             .sort({ createdAt: -1 })
             .lean<IMongoNotificationDocument[]>();
-        console.log('all the notifications in the repo: ', notifications)
         return NotificationMapper.toNotificationEntities(notifications)
     }
 

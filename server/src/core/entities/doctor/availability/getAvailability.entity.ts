@@ -1,4 +1,4 @@
-import { AvailabilityDomainService } from "src/core/services/doctor/availabilityDomain.service";
+import { AvailabilityDomainService } from "src/core/services/doctor/availability.service.core";
 import { DateVO } from "src/core/valueOfObjects/doctor/date.vo";
 import { DayOfWeekVO } from "src/core/valueOfObjects/doctor/dayOfWeek.vo";
 import { DoctorIdVO } from "src/core/valueOfObjects/doctor/doctorId.vo";

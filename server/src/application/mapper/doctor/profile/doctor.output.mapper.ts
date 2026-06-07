@@ -14,7 +14,9 @@ export class DoctorOutputMapper {
             status: doctor.status,
             profile: doctor.profile,
             profilePhoto: doctor.profilePhoto,
-            certificates: doctor.certificates
+            certificates: doctor.certificates,
+            createdAt: doctor.createdAt,
+            updatedAt: doctor.updatedAt
         }
     }
 
@@ -28,7 +30,9 @@ export class DoctorOutputMapper {
             status: doctorDto.status,
             profile: doctorDto.profile,
             profilePhoto: doctorDto.profilePhoto,
-            certificates: doctorDto.certificates
+            certificates: doctorDto.certificates,
+            createdAt: doctorDto.createdAt,
+            updatedAt: doctorDto.updatedAt
         }))
 
         return doctorsDto;
@@ -44,7 +48,7 @@ export class DoctorOutputMapper {
             status: doctorDto.status,
             profile: doctorDto.profile,
             profilePhoto: doctorDto.profilePhoto,
-            certificates: doctorDto.certificates,
+            certificates: doctorDto.certificates
         }))
 
         return { doctors: doctorsDto, doctorsCount }

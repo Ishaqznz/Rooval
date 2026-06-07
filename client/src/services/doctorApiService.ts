@@ -13,6 +13,7 @@ import {
   UPDATE_DOCTOR_PROFILE,
   CHANGE_DOCTOR_PASSWORD,
   GET_DOCTOR,
+  GET_DOCTOR_DASHBOARD,
 } from "@/graphql/queries/doctor";
 import { IUpdateDoctorProfile } from "@/interfaces/api/doctor/updateProfile.api.interface";
 import { IListDoctorsRequestDTO } from "@/interfaces/api/doctor/doctor.api.interface";
@@ -196,6 +197,11 @@ export const doctorServiceApi = {
       ,
       'doctor:get'
     )
+  },
+
+  getDashboardData: async (fields: string) => {
+    const queryObj = GET_DOCTOR_DASHBOARD(fields);
+    return apiRequest({ ...queryObj })
   }
 };
 

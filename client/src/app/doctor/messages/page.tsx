@@ -20,12 +20,6 @@ import { useAuth } from "@/context/AuthContext";
 import { userServiceApi } from "@/services/userApiService";
 import { doctorServiceApi } from "@/services/doctorApiService";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-/**
- * Client-side pre-check only — gives a fast UX rejection before hitting
- * the network. The real limit is enforced by your upload API / storage.
- */
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
 const MY_ROLE = "DOCTOR";
@@ -36,7 +30,6 @@ const EMOJI_LIST = [
   "🩺", "💉", "🩻", "🧬", "🫀", "🫁", "🧠", "👁️", "🦷", "🦴",
 ];
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type MessageStatus = "sending" | "sent" | "delivered" | "read" | "failed" | "SENT" | "DELIVERED" | "READ";
 type MessageType = "text" | "image" | "document" | "emoji";
@@ -1108,7 +1101,7 @@ const DoctorChatPage = () => {
             <p className="text-sm font-medium text-foreground truncate">You</p>
             <p className="text-xs text-muted-foreground">Doctor</p>
           </div>
-          <Button variant="ghost" size="icon" className="w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent" onClick={() => router.push('/')}>
+          <Button variant="ghost" size="icon" className="w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent" onClick={() => router.push('/doctor/dashboard')}>
             <LogOut className="w-3.5 h-3.5" />
           </Button>
         </div>

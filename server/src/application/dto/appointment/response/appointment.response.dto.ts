@@ -20,6 +20,7 @@ export interface IAppointmentResponseDTO {
     bufferTime?: number
     reminderSent?: boolean
     isCheckedIn?: boolean
+    hasReviewed?: boolean
     createdAt?: Date
     updatedAt?: Date
 }

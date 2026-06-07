@@ -5,6 +5,7 @@ import { IUpdateProfilePhotoDTO } from "src/application/dto/user/request/updateP
 import { IUpdateProfileRequestDTO } from "src/application/dto/user/request/udpateProfile.input"
 import { Role } from "src/core/enums/user/role.enum"
 import { IChatEnabledRequestDTO } from "src/application/dto/user/request/isChatEnabled.request.dto"
+import { IAdminDashboardResponseDTO } from "src/application/dto/user/response/adminDashboard.response.dto"
 
 export interface IUserUseCase {
     findUsers(input: IFindUsersRequestDTO): Promise<IUserResponseDTO[]>
@@ -20,4 +21,5 @@ export interface IUserUseCase {
     findByRole(id: string): Promise<Role>
     findAdminId(): Promise<string | null>
     isChatEnabled(input: IChatEnabledRequestDTO): Promise<boolean>
+    getDashboardData(): Promise<IAdminDashboardResponseDTO>
 }

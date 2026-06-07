@@ -10,4 +10,6 @@ export interface IDoctorResponseDTO {
   profile: IDoctorProfile
   profilePhoto: string
   certificates: string[]
+  createdAt?: Date
+  updatedAt?: Date
 }

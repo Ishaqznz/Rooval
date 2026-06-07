@@ -25,13 +25,15 @@ import { PaymentStatus } from "src/core/enums/appointments/appointment.enums";
 import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface";
 import { DeleteAppointmentsBySession } from "src/core/entities/appointment/deleteAppointmentsBySession.entity";
 import { IsAvailableByStatus } from "src/core/entities/appointment/isAvailableByStatus.entity";
-import { AppointmentDomainService } from "src/core/services/appointment/appointmentDomainService";
+import { AppointmentDomainService } from "src/core/services/appointment/appointment.service.core";
 import { IWalletUseCase } from "../interface/wallet.usecase.interface";
 import { WalletErrorType, WalletTransactionReason, WalletTransactionType } from "src/core/enums/wallet/wallet.enum";
 import { AppointmentErrorType } from "src/core/enums/appointments/appointment.enums";
 import { IDoctorUseCase } from "../interface/doctor.usecase.interface";
 import { IPaymentUseCase } from "../interface/payment.usecase.interface";
 import { forwardRef } from "@nestjs/common";
+import { IChangeAppointmentStatusDTO } from "src/application/dto/appointment/request/changeAppointmentStatus.request.dto.";
+import { ChangeAppointmentStatus } from "src/core/entities/appointment/changeAppointmentStatus.entity";
 
 @Injectable()
 export class AppointmentUseCase implements IAppointmentUseCase {
@@ -105,6 +107,15 @@ export class AppointmentUseCase implements IAppointmentUseCase {
 
     async findUserAppointments(userId: string): Promise<IAppointmentResponseDTO[]> {
         const entities = await this._appointmentRepository.findUserAppointments(userId)
+        const appointments = AppointmentOutputMapper.toAppointmentDtos(entities)
+        if (appointments.ok == false) {
+            throw new BusinessRuleViolationError(appointments.error)
+        }
+        return appointments.value
+    }
+
+    async findDoctorAppointments(doctorId: string): Promise<IAppointmentResponseDTO[]> {
+        const entities = await this._appointmentRepository.findDoctorAppointments(doctorId)
         const appointments = AppointmentOutputMapper.toAppointmentDtos(entities)
         if (appointments.ok == false) {
             throw new BusinessRuleViolationError(appointments.error)
@@ -244,5 +255,21 @@ export class AppointmentUseCase implements IAppointmentUseCase {
     async isAvailableByStatus(input: IAppointmentAvailabilitySession): Promise<boolean> {
         const entity = IsAvailableByStatus.create(input)
         return await this._appointmentRepository.isAvailableByStatus(entity)
+    }
+
+    async changeAppointmentStatus(input: IChangeAppointmentStatusDTO): Promise<boolean> {
+        const entity = ChangeAppointmentStatus.create(input)
+        return await this._appointmentRepository.changeAppointmentStatus(entity)
+    }
+
+    async changeReviewStatus(appointmentId: string, value: boolean): Promise<boolean> {
+        return await this._appointmentRepository.changeReviewStatus(appointmentId, value)
+    }
+
+    async findAllAppointments(): Promise<IAppointmentResponseDTO[]> {
+        const entities = await this._appointmentRepository.findAllAppointments()
+        const appointments = AppointmentOutputMapper.toAppointmentDtos(entities)
+        if (appointments.ok == false) throw new BusinessRuleViolationError(appointments.error)
+        return appointments.value;
     }
 }

@@ -138,3 +138,13 @@ export const GET_DOCTOR = (fields: string) => ({
     }
   `
 })
+
+export const GET_DOCTOR_DASHBOARD = (fields: string) => ({
+  query: `
+    query getDoctorDashboardStats { 
+      getDoctorDashboardStats {
+        ${ fields }
+      }
+    }
+  `
+})

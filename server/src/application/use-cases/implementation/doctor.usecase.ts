@@ -30,16 +30,33 @@ import { IGrantChatAccessRequestDTO } from 'src/application/dto/doctor/profile/r
 import { GrantChatAccess } from 'src/core/entities/doctor/profile/grantChatAccess.entity';
 import { IRemoveChatAccessRequestDTO } from 'src/application/dto/doctor/profile/request/removeChatAccess.request.dto';
 import { RemoveChatAccess } from 'src/core/entities/doctor/profile/removeChatAccess.entity';
+import { IReviewsUseCase } from '../interface/reviews.usecase.interface';
+import { IDoctorDashboardResponseDTO } from 'src/application/dto/doctor/dashboard/response/doctorDashboard.response.dto';
+import { IAppointmentUseCase } from '../interface/appointment.usecase.interface';
+import { AppointmentStatus } from 'src/core/enums/appointments/appointment.enums';
+import { IWalletUseCase } from '../interface/wallet.usecase.interface';
+import { ListTransactionType, WalletTransactionType } from 'src/core/enums/wallet/wallet.enum';
 
 @Injectable()
 export class DoctorUseCase implements IDoctorUseCase {
   constructor(
     @Inject('IDoctorRepository')
     private readonly _doctorRepository: IDoctorRepository,
+
     @Inject('ICloudinaryService')
     private readonly _cloudinaryService: ICloudinaryService,
+
     @Inject('IDoctorService')
-    private readonly _doctorService: IDoctorService
+    private readonly _doctorService: IDoctorService,
+
+    @Inject('IReviewsUseCase')
+    private readonly _reviewsUseCase: IReviewsUseCase,
+
+    @Inject('IAppointmentUseCase')
+    private readonly _appointmentUseCase: IAppointmentUseCase,
+
+    @Inject('IWalletUseCase')
+    private readonly _walletUseCase: IWalletUseCase
   ) { }
 
   async findDoctors(input: IFindDoctorsRequestDTO): Promise<IDoctorResponseDTO[]> {
@@ -169,5 +186,177 @@ export class DoctorUseCase implements IDoctorUseCase {
   async removeChatAccess(input: IRemoveChatAccessRequestDTO): Promise<boolean> {
     const entity = RemoveChatAccess.create(input)
     return this._doctorRepository.removeChatAccess(entity)
+  }
+
+  async getAverageRating(doctorId: string): Promise<number> {
+    const reviews = await this._reviewsUseCase.getReviewsByDoctorId(doctorId);
+
+    if (!reviews.length) {
+      return 0;
+    }
+
+    const totalRating = reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+
+    return totalRating / reviews.length;
+  }
+
+  async getDoctorDashboard(
+    doctorId: string
+  ): Promise<IDoctorDashboardResponseDTO> {
+    const doctorWallet = await this._walletUseCase.getWallet({ ownerId: doctorId })
+    const [appointments, reviews, wallet, transactionData] =
+      await Promise.all([
+        await this._appointmentUseCase.findDoctorAppointments(doctorId),
+        this._reviewsUseCase.getReviewsByDoctorId(doctorId),
+        doctorWallet,
+        this._walletUseCase.listTransactions({
+          walletId: doctorWallet.id,
+          page: 1,
+          limit: 10000,
+          type: ListTransactionType.ALL
+        }),
+      ]);
+
+    const transactions = transactionData.transactions;
+
+    const today = new Date();
+
+    const todayAppointments = appointments.filter((appointment) => {
+      const appointmentDate = new Date(
+        appointment.createdAt
+      );
+
+      return (
+        appointmentDate.getFullYear() === today.getFullYear() &&
+        appointmentDate.getMonth() === today.getMonth() &&
+        appointmentDate.getDate() === today.getDate()
+      );
+    });
+
+    const completedAppointments = appointments.filter(
+      (appointment) =>
+        appointment.status === AppointmentStatus.COMPLETED
+    ).length;
+
+    const cancelledAppointments = appointments.filter(
+      (appointment) =>
+        appointment.status === AppointmentStatus.CANCELLED
+    ).length;
+
+    const upcomingAppointments = appointments.filter(
+      (appointment) => {
+        const appointmentDate = new Date(
+          appointment.createdAt
+        );
+
+        return (
+          appointmentDate > today &&
+          appointment.status !== AppointmentStatus.CANCELLED
+        );
+      }
+    ).length;
+
+    const uniquePatients = new Set(
+      appointments.map(
+        (appointment) => appointment.patientId
+      )
+    );
+
+    const totalRating = reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+
+    const averageRating =
+      reviews.length > 0
+        ? totalRating / reviews.length
+        : 0;
+
+    const recentReviews = [...reviews]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime()
+      )
+      .slice(0, 5);
+
+    const creditTransactions = transactions.filter(
+      (transaction) =>
+        transaction.type === WalletTransactionType.CREDIT
+    );
+
+    const totalRevenue = creditTransactions.reduce(
+      (sum, transaction) => sum + transaction.amount,
+      0
+    );
+
+    const todayRevenue = creditTransactions
+      .filter((transaction) => {
+        const transactionDate = new Date(
+          transaction.createdAt
+        );
+
+        return (
+          transactionDate.getFullYear() ===
+          today.getFullYear() &&
+          transactionDate.getMonth() ===
+          today.getMonth() &&
+          transactionDate.getDate() ===
+          today.getDate()
+        );
+      })
+      .reduce(
+        (sum, transaction) => sum + transaction.amount,
+        0
+      );
+
+    const monthlyRevenue = creditTransactions
+      .filter((transaction) => {
+        const transactionDate = new Date(
+          transaction.createdAt
+        );
+
+        return (
+          transactionDate.getFullYear() ===
+          today.getFullYear() &&
+          transactionDate.getMonth() ===
+          today.getMonth()
+        );
+      })
+      .reduce(
+        (sum, transaction) => sum + transaction.amount,
+        0
+      );
+
+    return {
+      stats: {
+        totalPatients: uniquePatients.size,
+        totalAppointments: appointments.length,
+        upcomingAppointments,
+        completedAppointments,
+        cancelledAppointments,
+      },
+
+      ratings: {
+        averageRating: Number(
+          averageRating.toFixed(1)
+        ),
+        totalReviews: reviews.length,
+      },
+
+      revenue: {
+        availableBalance: wallet.balance,
+        todayRevenue,
+        monthlyRevenue,
+        totalRevenue,
+      },
+
+      todayAppointments,
+
+      recentReviews,
+    };
   }
 }

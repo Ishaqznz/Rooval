@@ -84,7 +84,6 @@ const navGroups: { label: string; items: NavItem[] }[] = [
     items: [
       { label: "Dashboard", href: "/doctor/dashboard", icon: Icons.grid },
       { label: "Appointments", href: "/doctor/dashboard/appointments", icon: Icons.calendar },
-      { label: "Sessions", href: "/doctor/dashboard/live-sessions", icon: Icons.live, badgeColor: "bg-green-500" },
     ],
   },
   {
@@ -97,7 +96,6 @@ const navGroups: { label: string; items: NavItem[] }[] = [
     label: "Finance",
     items: [
       { label: "Earnings", href: "/doctor/dashboard/earnings", icon: Icons.earnings },
-      { label: "Notifications", href: "/doctor/dashboard/notifications", icon: Icons.bell },
     ],
   },
 ];

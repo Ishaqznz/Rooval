@@ -9,7 +9,8 @@ import {
   UPDATE_PROFILE_PHOTO,
   UPDATE_PROFILE,
   FIND_USER_BY_ID,
-  IS_CHAT_ENABLED
+  IS_CHAT_ENABLED,
+  GET_ADMIN_DASHBOARD
 } from "@/graphql/queries/user";
 import { IFindUsers } from "@/interfaces/user/user.interface";
 
@@ -90,5 +91,10 @@ export const userServiceApi = {
   isChatEnabled: async (variables: { input: { doctorId: string }}) => {
     const queryObj = IS_CHAT_ENABLED();
     return apiRequest({ ...queryObj, variables })
+  },
+
+  getAdminDashboard: async (fields: string) => {
+    const queryObj = GET_ADMIN_DASHBOARD(fields)
+    return apiRequest({ ...queryObj })
   }
 }

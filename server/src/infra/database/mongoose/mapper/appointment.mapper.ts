@@ -25,14 +25,13 @@ export class AppointmentMapper {
                 bufferTime: item.bufferTime,
                 reminderSent: item.reminderSent,
                 isCheckedIn: item.isCheckedIn,
+                hasReviewed: item.hasReviewed,
                 createdAt: item.createdAt,
                 updatedAt: item.updatedAt
             });
 
             entities.push(result);
         }
-
-        console.log('entities in the mapper: ', entities)
 
         return entities;
     }
@@ -57,6 +56,7 @@ export class AppointmentMapper {
             bufferTime: input.bufferTime,
             reminderSent: input.reminderSent,
             isCheckedIn: input.isCheckedIn,
+            hasReviewed: input.hasReviewed,
             createdAt: input.createdAt,
             updatedAt: input.updatedAt
         })

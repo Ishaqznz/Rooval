@@ -7,7 +7,7 @@ import { AvailabilityInputMapper } from "src/application/mapper/doctor/availabil
 import { IGetSlotsRequestDTO } from "src/application/dto/availability/request/slots.request.dto";
 import { ISlotResponseDTO } from "src/application/dto/availability/response/slots.response.dto";
 import { GetAvailability } from "src/core/entities/doctor/availability/getAvailability.entity";
-import { AvailabilityDomainService } from "src/core/services/doctor/availabilityDomain.service";
+import { AvailabilityDomainService } from "src/core/services/doctor/availability.service.core";
 import { IAvailabilityResponseDTO } from "src/application/dto/availability/response/availability.response.dto";
 import { AvailabilityOutputMapper } from "src/application/mapper/doctor/availability/availability.output.mapper";
 import { ITimeZoneService } from "src/application/services/timezone.service.interface";

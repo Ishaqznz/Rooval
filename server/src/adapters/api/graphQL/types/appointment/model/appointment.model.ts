@@ -59,6 +59,9 @@ export class Appointment {
   isCheckedIn?: boolean;
 
   @Field()
+  hasReviewed?: boolean
+
+  @Field()
   createdAt?: Date;
 
   @Field()

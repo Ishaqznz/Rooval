@@ -10,4 +10,6 @@ export interface IUserResponseDTO {
   isAdmin: boolean;
   isBlocked: boolean;
   password: string;
+  createdAt?: Date
+  updatedAt?: Date
 }

@@ -1,6 +1,6 @@
 import { apiRequest } from "@/api";
-import { CANCEL_APPOINTMENT, CANCEL_APPOINTMENT_BY_DOCTOR, CREATE_APPOINTMENT, FIND_APPOINTMENTS, LIST_ALL_APPOINTEMNTS, LIST_APPOINTMENTS, LIST_USER_APPOINTMENTS } from "@/graphql/queries/appointment";
-import { ICreateAppointment, IListAppointment } from "@/interfaces/user/appointment.interface";
+import { CANCEL_APPOINTMENT, CANCEL_APPOINTMENT_BY_DOCTOR, CHANGE_APPOINTMENT_STATUS, CREATE_APPOINTMENT, FIND_APPOINTMENTS, LIST_ALL_APPOINTEMNTS, LIST_APPOINTMENTS, LIST_USER_APPOINTMENTS } from "@/graphql/queries/appointment";
+import { AppointmentStatus, ICreateAppointment, IListAppointment } from "@/interfaces/user/appointment.interface";
 
 export const appointmentServiceApi = {
     create: async (variables: { input: ICreateAppointment }) => {
@@ -35,6 +35,14 @@ export const appointmentServiceApi = {
 
     listAll: async (variables: { input: IListAppointment, fields: string }) => {
         const queryObj = LIST_ALL_APPOINTEMNTS(variables.fields)
+        return apiRequest({ ...queryObj, variables })
+    },
+
+    changeAppointmentStatus: async (variables: { input: {
+        appointmentId: string
+        status: AppointmentStatus
+    }}) => {
+        const queryObj = CHANGE_APPOINTMENT_STATUS();
         return apiRequest({ ...queryObj, variables })
     }
 }

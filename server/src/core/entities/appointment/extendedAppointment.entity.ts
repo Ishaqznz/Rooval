@@ -28,6 +28,8 @@ export class ExtendedAppointment {
     public readonly reminderSent?: boolean,
     public readonly isCheckedIn?: boolean,
 
+    public readonly hasReviewed?: boolean,
+
     public readonly createdAt?: Date,
     public readonly updatedAt?: Date
   ) {}
@@ -62,6 +64,8 @@ export class ExtendedAppointment {
     reminderSent?: boolean;
     isCheckedIn?: boolean;
 
+    hasReviewed?: boolean
+
     createdAt?: Date;
     updatedAt?: Date;
   }): ExtendedAppointment {
@@ -87,6 +91,7 @@ export class ExtendedAppointment {
       data.bufferTime,
       data.reminderSent,
       data.isCheckedIn,
+      data.hasReviewed,
       data.createdAt,
       data.updatedAt
     );

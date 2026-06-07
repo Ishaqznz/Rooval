@@ -80,3 +80,13 @@ export const IS_CHAT_ENABLED = () => ({
     } 
   `
 })
+
+export const GET_ADMIN_DASHBOARD = (fields: string) => ({
+  query: `#graphql
+    query getDashboardData {
+      getDashboardData {  
+        ${ fields }
+      }
+    }
+  `
+})

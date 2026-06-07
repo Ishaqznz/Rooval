@@ -54,17 +54,8 @@ const Navigation = () => {
             <Link href="/" className="text-foreground hover:text-primary transition-colors">
               Home
             </Link>
-            <Link href="/features" className="text-foreground hover:text-primary transition-colors">
-              Features
-            </Link>
             <Link href="/doctors" className="text-foreground hover:text-primary transition-colors">
               Doctors
-            </Link>
-            <Link href="/communities" className="text-foreground hover:text-primary transition-colors">
-              Communities
-            </Link>
-            <Link href="/about" className="text-foreground hover:text-primary transition-colors">
-              About us
             </Link>
           </div>
 

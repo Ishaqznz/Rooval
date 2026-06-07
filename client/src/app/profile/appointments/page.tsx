@@ -5,10 +5,10 @@ import { useAuth } from "@/context/AuthContext";
 import { AppointmentStatus, IListAppointment } from "@/interfaces/user/appointment.interface";
 import { appointmentServiceApi } from "@/services/appointmentApiService";
 import { paymentServiceApi } from "@/services/paymentApiService";
+import { reviewApiService } from "@/services/reviewApiService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
 
 type AppointmentStatusType = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
 type AppointmentType   = 'IN_PERSON' | 'ONLINE';
@@ -33,6 +33,7 @@ interface Appointment {
   bufferTime?: number;
   reminderSent?: boolean;
   isCheckedIn?: boolean;
+  hasReviewed?: boolean;   // ← added
   createdAt?: string;
   updatedAt?: string;
   doctor: {
@@ -67,17 +68,14 @@ function formatDate(iso?: string | null) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
-
 function formatTime(iso?: string | null) {
   if (!iso) return '—';
   return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
-
 function formatDateTime(iso?: string | null) {
   if (!iso) return '—';
   return formatDate(iso) + ' · ' + formatTime(iso);
 }
-
 function getDuration(start?: string | null, end?: string | null) {
   if (!start || !end) return null;
   const diff = new Date(end).getTime() - new Date(start).getTime();
@@ -163,6 +161,21 @@ function IconCheckIn({ className = '' }: { className?: string }) {
     </svg>
   );
 }
+function IconStar({ className = '', filled = false }: { className?: string; filled?: boolean }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  );
+}
 
 /* ── Cancel Modal ────────────────────────────────────────────── */
 function CancelModal({
@@ -212,6 +225,126 @@ function CancelModal({
             onClick={() => onConfirm(reason.trim())}
           >
             {loading ? 'Cancelling…' : 'Confirm'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Review Modal ────────────────────────────────────────────── */
+function ReviewModal({
+  appt,
+  onConfirm,
+  onClose,
+  loading,
+}: {
+  appt: Appointment;
+  onConfirm: (rating: number, review: string) => void;
+  onClose: () => void;
+  loading: boolean;
+}) {
+  const [rating, setRating]   = useState(0);
+  const [hovered, setHovered] = useState(0);
+  const [review, setReview]   = useState('');
+  const textareaRef           = useRef<HTMLTextAreaElement>(null);
+
+  const displayRating = hovered || rating;
+
+  const RATING_LABELS: Record<number, string> = {
+    1: 'Poor',
+    2: 'Fair',
+    3: 'Good',
+    4: 'Very Good',
+    5: 'Excellent',
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-background rounded-xl border border-border shadow-xl w-full max-w-md"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Rate Your Visit</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Dr. {appt.doctor.fullName}</p>
+          </div>
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="text-muted-foreground hover:text-foreground text-lg leading-none disabled:opacity-50"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="px-5 py-5 space-y-5">
+          {/* Star rating */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map(star => (
+                <button
+                  key={star}
+                  type="button"
+                  disabled={loading}
+                  onMouseEnter={() => setHovered(star)}
+                  onMouseLeave={() => setHovered(0)}
+                  onClick={() => {
+                    setRating(star);
+                    textareaRef.current?.focus();
+                  }}
+                  className="p-0.5 transition-transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                >
+                  <IconStar
+                    className={`w-8 h-8 transition-colors ${
+                      star <= displayRating
+                        ? 'text-yellow-400'
+                        : 'text-muted-foreground/30'
+                    }`}
+                    filled={star <= displayRating}
+                  />
+                </button>
+              ))}
+            </div>
+            <p className={`text-xs font-medium transition-opacity ${displayRating ? 'opacity-100' : 'opacity-0'} text-yellow-500`}>
+              {RATING_LABELS[displayRating] ?? ''}
+            </p>
+          </div>
+
+          {/* Review text */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-foreground">
+              Your review <span className="text-muted-foreground font-normal">(optional)</span>
+            </label>
+            <textarea
+              ref={textareaRef}
+              value={review}
+              onChange={e => setReview(e.target.value)}
+              disabled={loading}
+              placeholder="Share your experience with the doctor…"
+              rows={4}
+              className="w-full rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none disabled:opacity-50"
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-3 border-t border-border flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={onClose} disabled={loading}>
+            Cancel
+          </Button>
+          <Button
+            size="sm"
+            disabled={loading || rating === 0}
+            onClick={() => onConfirm(rating, review.trim())}
+          >
+            {loading ? 'Submitting…' : 'Submit Review'}
           </Button>
         </div>
       </div>
@@ -396,6 +529,7 @@ function AppointmentRow({
   onViewDetails,
   onPay,
   paying,
+  onReview,
 }: {
   appt: Appointment;
   onCancel: (id: string) => void;
@@ -403,10 +537,13 @@ function AppointmentRow({
   onViewDetails: () => void;
   onPay: (id: string) => void;
   paying: boolean;
+  onReview: () => void;
 }) {
   const router = useRouter();
   const canCancel = appt.status === 'SCHEDULED';
   const canPay    = appt.paymentStatus === 'PENDING' && appt.status !== 'CANCELLED';
+  // Show "Review" only for completed + paid appointments that haven't been reviewed yet
+  const canReview = appt.status === 'COMPLETED' && appt.paymentStatus === 'PAID' && !appt.hasReviewed;
   const duration  = getDuration(appt.session?.startTime, appt.session?.endTime);
 
   return (
@@ -455,6 +592,11 @@ function AppointmentRow({
               <IconCheckIn className="w-2.5 h-2.5" /> Checked in
             </span>
           )}
+          {appt.hasReviewed && (
+            <span className="flex items-center gap-0.5 text-[10px] px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-100">
+              <IconStar className="w-2.5 h-2.5" filled /> Reviewed
+            </span>
+          )}
         </div>
 
         {/* Row 3: reason or cancel reason */}
@@ -490,6 +632,18 @@ function AppointmentRow({
           >
             <IconMessage className="w-3 h-3" />
             Message
+          </Button>
+        )}
+
+        {canReview && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs px-2.5 flex items-center gap-1 text-yellow-600 border-yellow-300 hover:bg-yellow-50"
+            onClick={onReview}
+          >
+            <IconStar className="w-3 h-3" />
+            Review
           </Button>
         )}
 
@@ -535,6 +689,9 @@ export default function UserAppointments() {
   const [cancellingId, setCancellingId]       = useState<string | null>(null);
   const [payingId, setPayingId]               = useState<string | null>(null);
   const [selectedAppt, setSelectedAppt]       = useState<Appointment | null>(null);
+  // Review state
+  const [reviewAppt, setReviewAppt]           = useState<Appointment | null>(null);
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -577,6 +734,7 @@ export default function UserAppointments() {
             bufferTime
             reminderSent
             isCheckedIn
+            hasReviewed
             createdAt
             updatedAt
             doctor { fullName }
@@ -641,6 +799,38 @@ export default function UserAppointments() {
       toast.error('Something went wrong during payment');
     } finally {
       setPayingId(null);
+    }
+  };
+
+  // ── Review handler ──────────────────────────────────────────
+  const handleReviewSubmit = async (rating: number, review: string) => {
+    if (!reviewAppt) return;
+    setSubmittingReview(true);
+    try {
+      const result = await reviewApiService.createReview({
+        input: {
+          doctorId:      reviewAppt.doctorId,
+          appointmentId: reviewAppt.id,
+          rating,
+          review,
+        },
+      });
+
+      if (result?.errors?.length) {
+        toast.error(result.errors[0]?.message || 'Failed to submit review');
+        return;
+      }
+
+      toast.success('Review submitted. Thank you!');
+      // Optimistically mark as reviewed so the button disappears
+      setAppointments(prev =>
+        prev.map(a => a.id === reviewAppt.id ? { ...a, hasReviewed: true } : a)
+      );
+      setReviewAppt(null);
+    } catch {
+      toast.error('Something went wrong while submitting your review');
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -732,6 +922,7 @@ export default function UserAppointments() {
                 onViewDetails={() => setSelectedAppt(appt)}
                 onPay={handlePay}
                 paying={payingId === appt.id}
+                onReview={() => setReviewAppt(appt)}
               />
             ))
           )}
@@ -786,6 +977,15 @@ export default function UserAppointments() {
 
       {selectedAppt && (
         <DetailModal appt={selectedAppt} onClose={() => setSelectedAppt(null)} />
+      )}
+
+      {reviewAppt && (
+        <ReviewModal
+          appt={reviewAppt}
+          onConfirm={handleReviewSubmit}
+          onClose={() => setReviewAppt(null)}
+          loading={submittingReview}
+        />
       )}
     </div>
   );

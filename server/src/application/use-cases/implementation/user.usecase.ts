@@ -17,6 +17,13 @@ import { Role } from 'src/core/enums/user/role.enum';
 import { IChatEnabledRequestDTO } from 'src/application/dto/user/request/isChatEnabled.request.dto';
 import { IsChatEnabled } from 'src/core/entities/user/isChatEnabled.entity';
 import { IDoctorRepository } from 'src/core/repositories/doctor.repository.interface';
+import { IAdminDashboardResponseDTO } from 'src/application/dto/user/response/adminDashboard.response.dto';
+import { IDoctorUseCase } from '../interface/doctor.usecase.interface';
+import { IAppointmentUseCase } from '../interface/appointment.usecase.interface';
+import { IWalletUseCase } from '../interface/wallet.usecase.interface';
+import { DoctorStatusFilter } from 'src/core/enums/doctor/doctor.enums';
+import { AppointmentStatus } from 'src/core/enums/appointments/appointment.enums';
+import { WalletTransactionType } from 'src/core/enums/wallet/wallet.enum';
 
 @Injectable()
 export class UserUseCase implements IUserUseCase {
@@ -28,7 +35,16 @@ export class UserUseCase implements IUserUseCase {
     private readonly _cloudinaryService: ICloudinaryService,
 
     @Inject('IDoctorRepository')
-    private readonly _doctorRepository: IDoctorRepository
+    private readonly _doctorRepository: IDoctorRepository,
+
+    @Inject('IDoctorUseCase')
+    private readonly _doctorUseCase: IDoctorUseCase,
+
+    @Inject('IAppointmentUseCase')
+    private readonly _appointmentUseCase: IAppointmentUseCase,
+
+    @Inject('IWalletUseCase')
+    private readonly _walletUseCase: IWalletUseCase
   ) { }
 
   async findUsers(input: IFindUsersRequestDTO): Promise<IUserResponseDTO[]> {
@@ -96,5 +112,144 @@ export class UserUseCase implements IUserUseCase {
   async isChatEnabled(input: IChatEnabledRequestDTO): Promise<boolean> {
     const entity = IsChatEnabled.create(input)
     return await this._doctorRepository.isChatEnabled(entity)
+  }
+
+  async getDashboardData(): Promise<IAdminDashboardResponseDTO> {
+    const [
+      users,
+      doctors,
+      appointments,
+      transactions,
+    ] = await Promise.all([
+      this.findAllUsers(),
+      this._doctorUseCase.findAllDoctors(),
+      this._appointmentUseCase.findAllAppointments(),
+      this._walletUseCase.findAllTransactions(),
+    ]);
+
+    const approvedDoctors = doctors.filter(
+      doctor => doctor.status === DoctorStatusFilter.APPROVED
+    ).length;
+
+    const pendingDoctors = doctors.filter(
+      doctor => doctor.status === DoctorStatusFilter.PENDING
+    ).length;
+
+    const rejectedDoctors = doctors.filter(
+      doctor => doctor.status === DoctorStatusFilter.REJECTED
+    ).length;
+
+    const completedAppointments = appointments.filter(
+      appointment =>
+        appointment.status === AppointmentStatus.COMPLETED
+    ).length;
+
+    const cancelledAppointments = appointments.filter(
+      appointment =>
+        appointment.status === AppointmentStatus.CANCELLED
+    ).length;
+
+    const recentAppointments = [...appointments]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime()
+      )
+      .slice(0, 10);
+
+    const recentlyRegisteredDoctors = [...doctors]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime()
+      )
+      .slice(0, 10);
+
+    const recentlyRegisteredUsers = [...users]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime()
+      )
+      .slice(0, 10);
+
+    const commissionPercentage =
+      Number(process.env.PLATFORM_COMMISSION) || 20;
+
+    const today = new Date();
+
+    const creditTransactions = transactions.filter(
+      transaction =>
+        transaction.type === WalletTransactionType.CREDIT
+    );
+
+    const totalRevenue = creditTransactions.reduce(
+      (sum, transaction) => sum + transaction.amount,
+      0
+    );
+
+    const todayRevenue = creditTransactions
+      .filter(transaction => {
+        const date = new Date(transaction.createdAt);
+
+        return (
+          date.getFullYear() === today.getFullYear() &&
+          date.getMonth() === today.getMonth() &&
+          date.getDate() === today.getDate()
+        );
+      })
+      .reduce(
+        (sum, transaction) => sum + transaction.amount,
+        0
+      );
+
+    const monthlyRevenue = creditTransactions
+      .filter(transaction => {
+        const date = new Date(transaction.createdAt);
+
+        return (
+          date.getFullYear() === today.getFullYear() &&
+          date.getMonth() === today.getMonth()
+        );
+      })
+      .reduce(
+        (sum, transaction) => sum + transaction.amount,
+        0
+      );
+
+    const doctorPayouts =
+      totalRevenue *
+      ((100 - commissionPercentage) / 100);
+
+    const platformProfit =
+      totalRevenue *
+      (commissionPercentage / 100);
+
+    return {
+      stats: {
+        totalUsers: users.length,
+        totalDoctors: doctors.length,
+        approvedDoctors,
+        pendingDoctors,
+        rejectedDoctors,
+        totalAppointments: appointments.length,
+        completedAppointments,
+        cancelledAppointments,
+      },
+
+      revenue: {
+        todayRevenue,
+        monthlyRevenue,
+        totalRevenue,
+        doctorPayouts,
+        platformProfit,
+      },
+
+      recentAppointments,
+
+      recentlyRegisteredDoctors,
+
+      recentlyRegisteredUsers,
+    };
   }
 }

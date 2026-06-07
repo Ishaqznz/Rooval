@@ -14,6 +14,8 @@ export class User {
     public isAdmin: boolean,
     public isBlocked: boolean,
     public profile: IUserProfile,
+    public createdAt?: Date,
+    public updatedAt?: Date
   ) { }
 
   public static create(
@@ -24,7 +26,9 @@ export class User {
     role?: Role,
     isAdmin?: boolean,
     isBlocked?: boolean,
-    profile?: IUserProfile
+    profile?: IUserProfile,
+    createdAt?: Date,
+    updatedAt?: Date
   ): { ok: true, value: User } | { ok: false, error: string } {
 
     const fullNameResult = UserFullNameVO.create(fullName);
@@ -44,7 +48,9 @@ export class User {
       role,
       isAdmin ?? false,
       isBlocked ?? false,
-      profile
+      profile,
+      createdAt,
+      updatedAt
     )
 
     return { ok: true, value: user }

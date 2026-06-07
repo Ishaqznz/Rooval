@@ -20,6 +20,7 @@ export interface IMongoAppointmentDocument {
     bufferTime?: number
     reminderSent?: boolean
     isCheckedIn?: boolean
+    hasReviewed?: boolean
     createdAt?: Date
     updatedAt?: Date
 }

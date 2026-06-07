@@ -208,7 +208,7 @@ export class MongoDoctorRepository implements IDoctorRepository {
                         },
                         consultationSettings: {
                             type: "",
-                            consultationModes: data.consultationModes,
+                            consultationModes: [data.consultationModes[0]],
                             consultationFee: data.consultationFee,
                             inPersonFee: 0,
                             videoFee: data.consultationFee,

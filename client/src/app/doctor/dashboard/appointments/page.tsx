@@ -17,6 +17,9 @@ import { Textarea } from "@/components/reusable/ui/textarea";
 import NotificationBell from "@/components/user/NotificationBell";
 import { useAuth } from "@/context/AuthContext";
 import { connectSocket, disconnectSocket } from "@/sockets/socket";
+import { IconVideo } from "@/components/sessions/sessionIcons";
+import { Button } from "@/components/reusable/ui/button";
+import { useRouter } from "next/navigation";
 
 enum AppointmentStatus {
   SCHEDULED = "SCHEDULED",
@@ -148,9 +151,9 @@ const statusConfig: Record<AppointmentStatus, { label: string; className: string
 };
 
 const paymentConfig: Record<PaymentStatus, { label: string; className: string }> = {
-  [PaymentStatus.PAID]:    { label: "Paid",    className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
+  [PaymentStatus.PAID]: { label: "Paid", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
   [PaymentStatus.PENDING]: { label: "Pending", className: "bg-amber-50 text-amber-700 border border-amber-200" },
-  [PaymentStatus.FAILED]:  { label: "Failed",  className: "bg-rose-50 text-rose-700 border border-rose-200" },
+  [PaymentStatus.FAILED]: { label: "Failed", className: "bg-rose-50 text-rose-700 border border-rose-200" },
 };
 
 /* ── Icons ──────────────────────────────────────────────────── */
@@ -212,8 +215,8 @@ const SpinnerIcon = () => (
 function Avatar({ user, size = "md" }: { user: AppointmentUser | null | undefined; size?: "sm" | "md" | "lg" }) {
   const sizeClass =
     size === "lg" ? "w-14 h-14 text-base rounded-2xl" :
-    size === "sm" ? "w-8 h-8 text-[10px] rounded-full" :
-                    "w-9 h-9 text-[11px] rounded-full";
+      size === "sm" ? "w-8 h-8 text-[10px] rounded-full" :
+        "w-9 h-9 text-[11px] rounded-full";
 
   // Safe fallback when user is null/undefined
   if (!user) {
@@ -322,8 +325,8 @@ export default function AppointmentsPage() {
     try {
       const input: Record<string, unknown> = { page, limit: PAGE_SIZE };
       if (debouncedSearch) input.search = debouncedSearch;
-      if (statusFilter)    input.appointmentStatus = statusFilter;
-      if (typeFilter)      input.appointmentType   = typeFilter;
+      if (statusFilter) input.appointmentStatus = statusFilter;
+      if (typeFilter) input.appointmentType = typeFilter;
 
       const response = await appointmentServiceApi.list({
         input: input as unknown as Parameters<typeof appointmentServiceApi.list>[0]["input"],
@@ -375,6 +378,9 @@ export default function AppointmentsPage() {
   }, [page, debouncedSearch, statusFilter, typeFilter]);
 
   useEffect(() => { fetchAppointments(); }, [fetchAppointments]);
+
+  const router = useRouter()
+  
 
   /* ── List View ── */
   const ListView = () => (
@@ -459,7 +465,7 @@ export default function AppointmentsPage() {
             <tbody>
               {appointments.map((a) => {
                 // Safe lookups — fall back to SCHEDULED / PENDING defaults
-                const sc = statusConfig[a.status]         ?? statusConfig[AppointmentStatus.SCHEDULED];
+                const sc = statusConfig[a.status] ?? statusConfig[AppointmentStatus.SCHEDULED];
                 const pc = paymentConfig[a.paymentStatus] ?? paymentConfig[PaymentStatus.PENDING];
 
                 return (
@@ -587,9 +593,9 @@ export default function AppointmentsPage() {
 
   /* ── Detail View ── */
   const DetailView = ({ a }: { a: Appointment }) => {
-    const sc = statusConfig[a.status]         ?? statusConfig[AppointmentStatus.SCHEDULED];
+    const sc = statusConfig[a.status] ?? statusConfig[AppointmentStatus.SCHEDULED];
     const pc = paymentConfig[a.paymentStatus] ?? paymentConfig[PaymentStatus.PENDING];
-    const isOnline    = a.type === AppointmentType.ONLINE;
+    const isOnline = a.type === AppointmentType.ONLINE;
     const isScheduled = a.status === AppointmentStatus.SCHEDULED;
 
     return (
@@ -646,20 +652,31 @@ export default function AppointmentsPage() {
                 </div>
 
                 {/* Actions */}
+
                 {isScheduled && (
                   <div className="flex gap-2 flex-shrink-0">
-                    <button className="text-[11px] px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:bg-card transition-colors">
-                      Reschedule
-                    </button>
-                    <button
-                      className="text-[11px] px-3 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
-                      onClick={() => setAppointmentToCancel(a.id)}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs px-2.5 flex items-center gap-1"
+                      onClick={() =>
+                        router.push(`/doctor/session?appointmentId=${a.id}&type=video`)
+                      }
                     >
-                      Cancel
-                    </button>
-                    <button className="text-[11px] px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-secondary transition-colors">
-                      {isOnline ? "Start Call" : "Mark Arrived"}
-                    </button>
+                      <IconVideo className="w-3 h-3" />
+                      Video
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs px-2.5 flex items-center gap-1"
+                      onClick={() =>
+                        router.push(`/doctor/session?appointmentId=${a.id}&type=audio`)
+                      }
+                    >
+                      📞 Audio
+                    </Button>
                   </div>
                 )}
               </div>

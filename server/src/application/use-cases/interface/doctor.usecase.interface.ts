@@ -11,6 +11,7 @@ import { IListDoctorsRequestDTO } from "src/application/dto/doctor/profile/reque
 import { IListDoctorsResponseDTO } from "src/application/dto/doctor/profile/response/listDoctors.response.dto"
 import { IGrantChatAccessRequestDTO } from "src/application/dto/doctor/profile/request/grantChatAccess.request.dto"
 import { IRemoveChatAccessRequestDTO } from "src/application/dto/doctor/profile/request/removeChatAccess.request.dto"
+import { IDoctorDashboardResponseDTO } from "src/application/dto/doctor/dashboard/response/doctorDashboard.response.dto"
 
 export interface IDoctorUseCase {
     findDoctors(input: IFindDoctorsRequestDTO): Promise<IDoctorResponseDTO[]>
@@ -32,5 +33,7 @@ export interface IDoctorUseCase {
     getById(doctorId: string): Promise<IDoctorResponseDTO>
     grantChatAccess(input: IGrantChatAccessRequestDTO): Promise<boolean>
     removeChatAccess(input: IRemoveChatAccessRequestDTO): Promise<boolean>
+    getAverageRating(doctorId: string): Promise<number>
+    getDoctorDashboard(doctorId: string): Promise<IDoctorDashboardResponseDTO>
 }
 

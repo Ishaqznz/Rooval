@@ -28,6 +28,7 @@ export class AppointmentOutputMapper {
       bufferTime: entity.bufferTime,
       reminderSent: entity.reminderSent,
       isCheckedIn: entity.isCheckedIn,
+      hasReviewed: entity.hasReviewed,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt
     }));
@@ -60,6 +61,7 @@ export class AppointmentOutputMapper {
       bufferTime: entity.bufferTime,
       reminderSent: entity.reminderSent,
       isCheckedIn: entity.isCheckedIn,
+      hasReviewed: entity.hasReviewed,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt
     }

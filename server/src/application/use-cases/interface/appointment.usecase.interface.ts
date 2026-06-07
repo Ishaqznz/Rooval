@@ -7,12 +7,14 @@ import { IListAppointmentsResponseDTO } from "src/application/dto/appointment/re
 import { IListAllAppointmentsRequestDTO } from "src/application/dto/appointment/request/listAll.request.dto"
 import { IListUserAppointmentsRequestDTO } from "src/application/dto/appointment/request/listUser.request.dto"
 import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface"
-import { PaymentStatus } from "src/core/enums/appointments/appointment.enums"
+import { IChangeAppointmentStatusDTO } from "src/application/dto/appointment/request/changeAppointmentStatus.request.dto."
 
 export interface IAppointmentUseCase {
     findById(appointmentId: string): Promise<IAppointmentResponseDTO>
     createAppointment(input: ICreateAppointmentRequestDTO): Promise<string>
+    findAllAppointments(): Promise<IAppointmentResponseDTO[]>
     findUserAppointments(userId: string): Promise<IAppointmentResponseDTO[]>
+    findDoctorAppointments(doctorId: string): Promise<IAppointmentResponseDTO[]>
     cancelAppointment(input: ICancelAppointmentRequestDTO): Promise<boolean>
     cancelAppointmentByDoctor(input: ICancelAppointmentByDoctorRequestDTO): Promise<boolean>
     getUserAppointments(userIds: string[]): Promise<IAppointmentResponseDTO[]>
@@ -22,4 +24,6 @@ export interface IAppointmentUseCase {
     listAllAppointments(input: IListAllAppointmentsRequestDTO): Promise<IListAppointmentsResponseDTO>
     deleteUnpaidSessionAppointments(input: IAppointmentAvailabilitySession): Promise<boolean>
     isAvailableByStatus(input: IAppointmentAvailabilitySession): Promise<boolean>
+    changeAppointmentStatus(input: IChangeAppointmentStatusDTO): Promise<boolean>
+    changeReviewStatus(appointmentId: string, value: boolean): Promise<boolean>
 }

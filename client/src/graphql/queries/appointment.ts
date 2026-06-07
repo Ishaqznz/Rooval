@@ -66,3 +66,11 @@ export const LIST_ALL_APPOINTEMNTS = (fields: string) => ({
         }
     `
 })
+
+export const CHANGE_APPOINTMENT_STATUS = () => ({
+    query: `
+        mutation changeAppointmentStatus($input: ChangeAppointmentStatusInput!) {
+            changeAppointmentStatus(input: $input) 
+        } 
+    `
+})

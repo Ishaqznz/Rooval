@@ -177,4 +177,16 @@ export class MongoWalletRepository implements IWalletRepository {
             totalTransactions,
         });
     }
+
+    async findAllWallets(): Promise<Wallet[]> {
+        const wallets = await this._walletModel.find()
+            .lean<IMongoWalletDocument[]>();
+        return WalletMapper.toWalletEntities(wallets)
+    }
+
+    async findAllTransactions(): Promise<Transaction[]> {
+        const transactions = await this._transactionModel.find()
+            .lean<IMongoTransactionDocument[]>();
+        return WalletMapper.toTransactionEntities(transactions)
+    }
 }

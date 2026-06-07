@@ -4,7 +4,7 @@ import { AvailabilitySessionsVO } from "src/core/valueOfObjects/doctor/availabil
 import { SlotDurationVO } from "src/core/valueOfObjects/doctor/slotDuration.vo";
 import { DayOfWeek } from "src/core/enums/doctor/availability.enums";
 import { IAvailabilitySessions } from "src/core/interfaces/doctor/availabilitySessions.interface";
-import { AvailabilityDomainService } from "src/core/services/doctor/availabilityDomain.service";
+import { AvailabilityDomainService } from "src/core/services/doctor/availability.service.core";
 
 export class ExtendedAvailability {
   private constructor(

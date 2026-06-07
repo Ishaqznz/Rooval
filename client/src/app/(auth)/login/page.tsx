@@ -16,6 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useGoogleLogin } from "@/lib/google-login";
+import { connectSocket } from "@/sockets/socket";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -54,6 +55,7 @@ const Login = () => {
       }
 
       setApi((value) => value + 1);
+      connectSocket()
       toast.success('Thanks for signing in!');
       router.push('/');
 
@@ -96,6 +98,7 @@ const Login = () => {
 
         setApi((value) => value + 1)
         toast.success('successful!')
+        connectSocket()
         if (role == 'doctor') {
           router.push('/doctor/onboarding')
           return;

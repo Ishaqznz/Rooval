@@ -17,4 +17,6 @@ export interface IWalletRepository {
     getBalance(entity: GetBalance): Promise<number>
     listTransactions(entity: GetTransactions): Promise<ListTransactions>
     getWallet(entity: GetWallet): Promise<Wallet>
+    findAllWallets(): Promise<Wallet[]>
+    findAllTransactions(): Promise<Transaction[]>
 }

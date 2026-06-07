@@ -17,4 +17,6 @@ export interface IWalletUseCase {
     getWallet(input: IGetWalletRequestDTO): Promise<IWalletResponseDTO>;
     getBalance(input: IGetBalanceRequestDTO): Promise<number>;
     listTransactions(input: IGetTransactionsRequestDTO): Promise<IListTransactionsResponseDTO>
+    findAllWallets(): Promise<IWalletResponseDTO[]>
+    findAllTransactions(): Promise<ITransactionResponseDTO[]>
 }

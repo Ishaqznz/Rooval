@@ -16,13 +16,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
   { icon: Users, label: "Users", path: "/admin/users" },
   { icon: Stethoscope, label: "Doctors", path: "/admin/doctors" },
   { icon: Calendar, label: "Appointments", path: "/admin/appointments" },
   { icon: DollarSign, label: "Revenue & Commissions", path: "/admin/revenue" },
-  { icon: Video, label: "Live Sessions", path: "/admin/sessions" },
-  { icon: MessageSquare, label: "Communities", path: "/admin/communities" },
   { icon: Bell, label: "Notifications", path: "/admin/notifications" },
 ];
 

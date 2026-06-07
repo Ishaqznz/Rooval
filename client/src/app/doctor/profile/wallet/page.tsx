@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/reusable/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { paymentServiceApi } from "@/services/paymentApiService";
 import { walletApiService, ListTransactionType } from "@/services/walletApiService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -378,8 +379,22 @@ export default function DoctorWallet() {
   const handleWithdraw = async (data: WithdrawFormData) => {
     setWithdrawLoading(true);
     try {
-      // TODO: wire up walletApiService.withdraw
+      const res = await paymentServiceApi.withdrawDoctorMoney({ input: { 
+        amount: Number(data.amount), 
+        accountHolderName: data.accountHolderName,
+        accountNumber: Number(data.accountNumber),
+        bankName:  data.bankName,
+        ifscCode: data.ifscCode,
+        notes: data.notes
+      }})
+
+      if (res?.errors) {
+        toast.error('Withdrawal failed!')
+        return;
+      }
       await new Promise(r => setTimeout(r, 900));
+
+      await fetchWallet()
       toast.success('Withdrawal request submitted successfully');
       setShowWithdraw(false);
       if (wallet?.id) fetchTransactions(wallet.id);

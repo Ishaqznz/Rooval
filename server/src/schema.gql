@@ -7,6 +7,33 @@ input AddMoneyInput {
   walletId: String!
 }
 
+type AdminDashboard {
+  recentAppointments: [Appointment!]!
+  recentlyRegisteredDoctors: [Doctor!]!
+  recentlyRegisteredUsers: [User!]!
+  revenue: AdminRevenueOverview!
+  stats: AdminDashboardStats!
+}
+
+type AdminDashboardStats {
+  approvedDoctors: Int!
+  cancelledAppointments: Int!
+  completedAppointments: Int!
+  pendingDoctors: Int!
+  rejectedDoctors: Int!
+  totalAppointments: Int!
+  totalDoctors: Int!
+  totalUsers: Int!
+}
+
+type AdminRevenueOverview {
+  doctorPayouts: Float!
+  monthlyRevenue: Float!
+  platformProfit: Float!
+  todayRevenue: Float!
+  totalRevenue: Float!
+}
+
 type Appointment {
   amount: Float
   appointmentNo: Float!
@@ -16,6 +43,7 @@ type Appointment {
   createdAt: DateTime!
   doctor: Doctor!
   doctorId: String!
+  hasReviewed: Boolean!
   id: ID!
   isCheckedIn: Boolean!
   notes: String
@@ -84,6 +112,11 @@ input CancelAppointmentByDoctorInput {
 input CancelAppointmentInput {
   appointmentId: String!
   reason: String!
+}
+
+input ChangeAppointmentStatusInput {
+  appointmentId: String!
+  status: AppointmentStatus!
 }
 
 input ChangeDoctorStatusInput {
@@ -191,6 +224,13 @@ input CreatePaymentSessionInput {
   appointmentId: String!
 }
 
+input CreateReviewInput {
+  appointmentId: String!
+  doctorId: String!
+  rating: Float!
+  review: String!
+}
+
 input CreateTransactionInput {
   amount: Float!
   reason: WalletTransactionReason!
@@ -201,6 +241,14 @@ input CreateTransactionInput {
 input CreateWalletInput {
   role: Role!
   userId: String!
+}
+
+type DashboardStats {
+  cancelledAppointments: Int!
+  completedAppointments: Int!
+  totalAppointments: Int!
+  totalPatients: Int!
+  upcomingAppointments: Int!
 }
 
 """
@@ -256,6 +304,14 @@ type DoctorAvailability {
   slotDuration: Float
   startDate: String!
   timezone: String!
+}
+
+type DoctorDashboard {
+  ratings: RatingOverview!
+  recentReviews: [Review!]!
+  revenue: RevenueOverview!
+  stats: DashboardStats!
+  todayAppointments: [Appointment!]!
 }
 
 input DoctorFileUpdateInput {
@@ -367,6 +423,10 @@ input FindDoctorsInput {
   specialization: String
 }
 
+input FindReviewsByDoctorIdInput {
+  doctorId: String!
+}
+
 input FindUserByIdInput {
   userId: String!
 }
@@ -386,6 +446,10 @@ enum Gender {
   FEMALE
   MALE
   OTHER
+}
+
+input GetAverageRatingInput {
+  doctorId: String!
 }
 
 input GetConversationByIdInput {
@@ -519,11 +583,13 @@ type Mutation {
   adminLogin(input: LoginInput!): User!
   cancelAppointment(input: CancelAppointmentInput!): Boolean!
   cancelAppointmentByDoctor(input: CancelAppointmentByDoctorInput!): Boolean!
+  changeAppointmentStatus(input: ChangeAppointmentStatusInput!): Boolean!
   changeDoctorStatus(input: ChangeDoctorStatusInput!): Boolean!
   changeStatus(input: ChangeStatusInput!): Boolean!
   createAppointment(input: CreateAppointmentInput!): String!
   createConversation(input: CreateConversationInput!): Conversation!
   createPaymentSession(input: CreatePaymentSessionInput!): PaymentSession!
+  createReview(input: CreateReviewInput!): Boolean!
   createTransaction(input: CreateTransactionInput!): Transaction!
   createUser(input: SignUpInput!): User!
   createWallet(input: CreateWalletInput!): Wallet!
@@ -623,17 +689,23 @@ type Query {
   findDoctor: Doctor!
   findDoctorByUsername(input: FindByUsernameInput!): Doctor!
   findDoctors(input: FindDoctorsInput!): [Doctor!]!
+  findReviewsByDoctorId(input: FindReviewsByDoctorIdInput!): [Review!]!
   findUser: User!
   findUserAppointments: [Appointment!]!
   findUserById(input: FindUserByIdInput!): User!
   findUserNotifications: [Notification!]!
   findUsers(input: FindUsersInput!): [User!]!
+  getAverageRating(input: GetAverageRatingInput!): Float!
   getBalance: Float!
   getConversationById(input: GetConversationByIdInput!): Conversation!
   getConversationByParticipants(input: GetConversationsByParticipantsInput!): [Conversation!]!
+  getDashboardData: AdminDashboard!
   getDoctor(input: GetDoctorInput!): Doctor!
+  getDoctorDashboardStats: DoctorDashboard!
   getDoctorSlotsByDate(input: SlotInput!): [Slot!]!
   getMessages(input: GetMessagesInput!): [Message!]!
+  getReviewsByDoctorId: [Review!]!
+  getReviewsByUserId: [Review!]!
   getUserConversations: [Conversation!]!
   getWallet: Wallet!
   listAllAppointments(input: ListAllAppointmentsInput!): ListAppointments!
@@ -643,9 +715,33 @@ type Query {
   listUserAppointments(input: ListAppointmentsInput!): ListAppointments!
 }
 
+type RatingOverview {
+  averageRating: Float!
+  totalReviews: Int!
+}
+
 input RejectionReasonInput {
   doctorId: String!
   rejectionReason: String!
+}
+
+type RevenueOverview {
+  availableBalance: Float!
+  monthlyRevenue: Float!
+  todayRevenue: Float!
+  totalRevenue: Float!
+}
+
+type Review {
+  appointmentId: String!
+  createdAt: DateTime!
+  doctorId: String!
+  id: String!
+  isVisible: Boolean!
+  patientId: String!
+  rating: Float!
+  review: String!
+  updatedAt: DateTime!
 }
 
 enum Role {

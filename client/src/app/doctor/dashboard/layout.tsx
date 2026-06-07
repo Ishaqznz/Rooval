@@ -9,12 +9,12 @@ export default function DoctorDashboardLayout({
 }) {
   return (
     <DoctorGuard>
-    <div className="flex h-screen bg-background overflow-hidden">
-      <DoctorSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {children}
+      <div className="flex h-screen bg-background overflow-hidden">
+        <DoctorSidebar />
+        <div className="flex-1 flex flex-col overflow-y-auto">
+          {children}
+        </div>
       </div>
-    </div>
     </DoctorGuard>
   );
 }

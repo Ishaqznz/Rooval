@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { GraphqlFrameworkModule } from './infra/graphql/graphql.module';
-import { GraphqlAdaptersModule } from './adapters/api/graphQL/modules/graphql.module';
+import { GraphqlConfigModule } from './infra/modules/graphql.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongoConfigModule } from './infra/database/mongoose/config/mongo.config';
 import { RedisConfigModule } from './infra/database/redis/config/redis.config';
@@ -12,7 +12,7 @@ dotenv.config();
 @Module({
   imports: [
     GraphqlFrameworkModule,
-    GraphqlAdaptersModule,
+    GraphqlConfigModule,
     MongoConfigModule,
     RedisConfigModule,
     ConfigModule.forRoot({

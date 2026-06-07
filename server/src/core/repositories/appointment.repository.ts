@@ -1,6 +1,7 @@
 import { Appointment } from "../entities/appointment/appointment.entity"
 import { CancelAppointment } from "../entities/appointment/cancelAppointment.entity"
 import { CancelAppointmentByDoctor } from "../entities/appointment/cancelAppointmentByDoctor.entity"
+import { ChangeAppointmentStatus } from "../entities/appointment/changeAppointmentStatus.entity"
 import { DeleteAppointmentsBySession } from "../entities/appointment/deleteAppointmentsBySession.entity"
 import { ExtendedAppointment } from "../entities/appointment/extendedAppointment.entity"
 import { AppointmentOverlap } from "../entities/appointment/getAppointment.entity"
@@ -13,6 +14,7 @@ export interface IAppointmentRepository {
     create(entity: Appointment): Promise<string>
     findById(appointmentId: string): Promise<ExtendedAppointment>
     findUserAppointments(userId: string): Promise<ExtendedAppointment[]>
+    findDoctorAppointments(doctorId: string): Promise<ExtendedAppointment[]>
     findOverLapping(entity: AppointmentOverlap): Promise<ExtendedAppointment[]>
     cancelAppointment(entity: CancelAppointment): Promise<boolean>
     cancelAppointmentByDoctor(entity: CancelAppointmentByDoctor): Promise<boolean>
@@ -27,4 +29,7 @@ export interface IAppointmentRepository {
     deleteUnpaidSessionAppointments(entity: DeleteAppointmentsBySession): Promise<boolean>
     isAvailableByStatus(entity: IsAvailableByStatus): Promise<boolean>
     existsByAppointmentNo(appointmentNo: number): Promise<boolean>
+    changeAppointmentStatus(entity: ChangeAppointmentStatus): Promise<boolean>
+    changeReviewStatus(appointmentId: string, value: boolean): Promise<boolean>
+    findAllAppointments(): Promise<ExtendedAppointment[]>
 }

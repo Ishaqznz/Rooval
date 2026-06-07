@@ -74,6 +74,9 @@ export class AppointmentSchema {
   @Prop({ default: false })
   reminderSent: boolean;
 
+  @Prop({ default: false, required: false })
+  hasReviewed: false
+
   @Prop({ default: false })
   isCheckedIn: boolean;
 }

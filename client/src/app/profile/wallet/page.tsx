@@ -441,6 +441,29 @@ export default function UserWallet() {
   const handleWithdraw = async (
     data: WithdrawFormData
   ) => {
+
+    console.log('the withdrawal dataa: ', data)
+    
+    if (data.accountHolderName.length < 3) {
+      alert('Accont holder name must be more than 3 characters!')
+      return;
+    }
+
+    if (data.accountNumber.length < 5) {
+      alert('Account no must be greater than 5!')
+      return;
+    }
+
+    if (Number(data.amount) > 2000) {
+      alert('amount cannot be greater than 2000!')
+      return;
+    }
+
+    if (data.ifscCode.length < 4) {
+      alert('ifsc must greater than 4!')
+      return;
+    }
+
     setWithdrawLoading(true);
 
     try {

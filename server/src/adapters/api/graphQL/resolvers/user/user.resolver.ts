@@ -16,6 +16,7 @@ import { UppercasePipe } from 'src/common/pipes/uppercase/uppercase.pipe';
 import { Appointment } from '../../types/appointment/model/appointment.model';
 import { FindUserByIdInput } from '../../types/user/input/findUserById.input';
 import { IsChatEnabledInput } from '../../types/user/input/isChatEnabled.input';
+import { AdminDashboard } from '../../types/user/model/adminDashboard.model';
 
 @Injectable()
 @Resolver(() => User)
@@ -104,5 +105,11 @@ export class UserResolver {
         const userId = context.req.user.userId;
         const doctorId = input.doctorId
         return this.__userUseCase.isChatEnabled({ userId, doctorId });
+    }
+
+    @Query(() => AdminDashboard)
+    @UseGuards(JwtAdminGuard)
+    async getDashboardData(): Promise<AdminDashboard> {
+        return await this.__userUseCase.getDashboardData()
     }
 }

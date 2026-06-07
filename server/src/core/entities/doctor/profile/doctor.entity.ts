@@ -15,6 +15,8 @@ export class Doctor {
     public profilePhoto: string,
     public certificates: string[],
     public id: string,
+    public createdAt?: Date,
+    public updatedAt?: Date
   ) {}
 
   static create(
@@ -26,7 +28,9 @@ export class Doctor {
     profile: IDoctorProfile,
     profilePhoto: string,
     certificates: string[],
-    id?: string
+    id?: string,
+    createdAt?: Date,
+    updatedAt?: Date
   ): { ok: true, value: Doctor } | { ok: false, error: string } {
     const fullNameResult = DoctorFullNameVO.create(fullName);
     if (fullNameResult.ok == false) return { ok: false, error: fullNameResult.error };
@@ -46,7 +50,9 @@ export class Doctor {
       profile,
       profilePhoto,
       certificates,
-      id
+      id,
+      createdAt,
+      updatedAt
     )
 
     return { ok: true, value: doctor }

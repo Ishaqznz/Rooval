@@ -11,7 +11,8 @@ export class UserOutputMapper {
             isAdmin: entity.isAdmin,
             isBlocked: entity.isBlocked,
             password: entity.password,
-            profile: entity.profile
+            profile: entity.profile,
+            createdAt: entity.createdAt
         }
         return userOutputDto;
     }
