@@ -8,7 +8,8 @@
     "lint": "next lint",
     "lint:fix": "eslint . --fix",
     "dev": "next dev --experimental-https",
-    "dev:http": "next dev --turbo"
+    "dev:http": "next dev --turbo",
+    "vercel-install": "npm install --legacy-peer-deps"
   },
   "dependencies": {
     "@apollo/client": "^3.14.0",
