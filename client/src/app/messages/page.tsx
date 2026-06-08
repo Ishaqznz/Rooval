@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import { Button } from "@/components/reusable/ui/button";
 import { Input } from "@/components/reusable/ui/input";
 import {
@@ -19,7 +19,7 @@ import { conversationApiService } from "@/services/conversationApiService";
 import { messageApiService } from "@/services/messageApiService";
 import { userServiceApi } from "@/services/userApiService";
 
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; 
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 const MY_ROLE = "USER";
 
@@ -254,116 +254,6 @@ const ImageModal = ({ src, onClose }: { src: string; onClose: () => void }) => (
   </div>
 );
 
-
-// const MessageBubble = ({
-//   msg, isMe, onImageClick, onRetry,
-// }: {
-//   msg: Message; isMe: boolean; onImageClick: (url: string) => void; onRetry?: (msg: Message) => void;
-// }) => {
-//   const isImage = msg.type === "image";
-//   const isDocument = msg.type === "document";
-//   const isFailed = String(msg.status).toLowerCase() === "failed";
-
-//   return (
-//     <div className={cn("flex flex-col gap-1", isMe ? "items-end" : "items-start")}>
-//       <div className={cn("flex items-end gap-2 group", isMe ? "flex-row-reverse" : "flex-row")}>
-//         <div
-//           className={cn(
-//             "max-w-[70%] rounded-2xl text-sm leading-relaxed shadow-sm overflow-hidden",
-//             isMe
-//               ? isFailed
-//                 ? "bg-destructive/10 text-foreground border border-destructive/30 rounded-br-sm"
-//                 : "bg-primary text-primary-foreground rounded-br-sm"
-//               : "bg-card text-card-foreground border border-border rounded-bl-sm",
-//             isImage ? "p-1" : "px-4 py-2.5"
-//           )}
-//         >
-//           {isImage && msg.fileUrl ? (
-//             <div className="relative group/img">
-//               <img
-//                 src={msg.fileUrl}
-//                 alt={msg.fileName || "Image"}
-//                 className="rounded-xl max-w-[260px] max-h-[200px] object-cover cursor-pointer"
-//                 onClick={() => onImageClick(msg.fileUrl!)}
-//               />
-//               <button
-//                 onClick={() => onImageClick(msg.fileUrl!)}
-//                 className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 flex items-center justify-center transition-all rounded-xl"
-//               >
-//                 <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover/img:opacity-100 transition-opacity" />
-//               </button>
-//               <div className={cn("flex items-center gap-1 px-2 pb-1 mt-1", isMe ? "justify-end" : "justify-start")}>
-//                 <span className={cn("text-[10px]", isMe ? "text-primary-foreground/70" : "text-muted-foreground")}>
-//                   {formatTime(msg.timestamp)}
-//                 </span>
-//                 {isMe && <StatusIcon status={msg.status} />}
-//               </div>
-//             </div>
-//           ) : isDocument ? (
-//             <div>
-//               <div className={cn(
-//                 "flex items-center gap-3 p-3 rounded-xl border",
-//                 isMe ? (isFailed ? "border-destructive/30" : "border-primary-foreground/20") : "border-border"
-//               )}>
-//                 <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
-//                   isMe ? (isFailed ? "bg-destructive/10" : "bg-primary-foreground/20") : "bg-primary/10"
-//                 )}>
-//                   <FileText className={cn("w-5 h-5", isMe ? (isFailed ? "text-destructive" : "text-primary-foreground") : "text-primary")} />
-//                 </div>
-//                 <div className="min-w-0 flex-1">
-//                   <p className={cn("text-xs font-medium truncate", isMe ? (isFailed ? "text-foreground" : "text-primary-foreground") : "text-foreground")}>
-//                     {msg.fileName || "Document"}
-//                   </p>
-//                   <p className={cn("text-[10px]", isMe ? (isFailed ? "text-muted-foreground" : "text-primary-foreground/60") : "text-muted-foreground")}>
-//                     {msg.fileUrl ? "Tap to download" : "Uploading…"}
-//                   </p>
-//                 </div>
-//                 {msg.fileUrl && (
-//                   <a
-//                     href={msg.fileUrl}
-//                     download={msg.fileName || "document"}
-//                     target="_blank"
-//                     rel="noopener noreferrer"
-//                     onClick={(e) => e.stopPropagation()}
-//                     aria-label="Download document"
-//                   >
-//                     <Download className={cn("w-4 h-4 flex-shrink-0 cursor-pointer", isMe ? (isFailed ? "text-muted-foreground" : "text-primary-foreground/70") : "text-muted-foreground")} />
-//                   </a>
-//                 )}
-//               </div>
-//               <div className={cn("flex items-center gap-1 mt-1", isMe ? "justify-end" : "justify-start")}>
-//                 <span className={cn("text-[10px]", isMe ? (isFailed ? "text-muted-foreground" : "text-primary-foreground/70") : "text-muted-foreground")}>
-//                   {formatTime(msg.timestamp)}
-//                 </span>
-//                 {isMe && <StatusIcon status={msg.status} />}
-//               </div>
-//             </div>
-//           ) : (
-//             <div>
-//               <p className={msg.type === "emoji" ? "text-3xl" : ""}>{msg.content}</p>
-//               <div className={cn("flex items-center gap-1 mt-1", isMe ? "justify-end" : "justify-start")}>
-//                 <span className={cn("text-[10px]", isMe ? (isFailed ? "text-muted-foreground" : "text-primary-foreground/70") : "text-muted-foreground")}>
-//                   {formatTime(msg.timestamp)}
-//                 </span>
-//                 {isMe && <StatusIcon status={msg.status} />}
-//               </div>
-//             </div>
-//           )}
-//         </div>
-//       </div>
-//       {isMe && isFailed && onRetry && (
-//         <button
-//           onClick={() => onRetry(msg)}
-//           className="flex items-center gap-1 text-[11px] text-destructive hover:text-destructive/80 transition-colors mr-1"
-//         >
-//           <RefreshCw className="w-3 h-3" />
-//           Failed · Tap to retry
-//         </button>
-//       )}
-//     </div>
-//   );
-// };
-
 const MessageBubble = ({
   msg, isMe, onImageClick, onRetry,
 }: {
@@ -379,7 +269,6 @@ const MessageBubble = ({
     e.stopPropagation();
     if (!msg.fileUrl || downloading) return;
 
-    // Supabase supports ?download= query param to force download
     const url = new URL(msg.fileUrl);
     url.searchParams.set('download', msg.fileName || 'document');
 
@@ -491,6 +380,7 @@ const MessageBubble = ({
     </div>
   );
 };
+
 const EmojiPicker = ({ onSelect, onClose }: { onSelect: (emoji: string) => void; onClose: () => void }) => (
   <div className="absolute bottom-14 right-12 z-30 bg-popover border border-border rounded-2xl shadow-xl p-3 w-64">
     <div className="flex items-center justify-between mb-2">
@@ -664,7 +554,6 @@ const PatientChatPage = () => {
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [fileError, setFileError] = useState<string | null>(null);
-  /** True while the HTTP upload is in-flight */
   const [uploading, setUploading] = useState(false);
 
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -827,7 +716,6 @@ const PatientChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [active?.messages.length]);
 
-  // Revoke object URLs when file is cleared to prevent memory leaks
   useEffect(() => {
     if (!selectedFile && filePreview && filePreview.startsWith("blob:")) {
       URL.revokeObjectURL(filePreview);
@@ -873,7 +761,6 @@ const PatientChatPage = () => {
     setSelectedFile(file);
 
     if (type === "image") {
-      // Object URL for preview only — never sent over the wire
       setFilePreview(URL.createObjectURL(file));
     } else {
       setFilePreview(undefined);
@@ -951,7 +838,6 @@ const PatientChatPage = () => {
       try {
         remoteFileUrl = await uploadFile(selectedFile);
       } catch (err: any) {
-        // setFileError(err?.message ?? "Upload failed. Please try again.");
         setFileError(err?.message || "Upload failed. Please try again!")
         setUploading(false);
         return;
@@ -960,7 +846,6 @@ const PatientChatPage = () => {
       }
     }
 
-    // Clear UI immediately after upload succeeds
     setInput("");
     setSelectedFile(null);
     setFilePreview(undefined);
@@ -972,11 +857,10 @@ const PatientChatPage = () => {
       message: content,
       type: msgType,
       fileName,
-      fileUrl: remoteFileUrl, // short URL string, not base64
+      fileUrl: remoteFileUrl,
       mimeType,
     };
 
-    // ── Ghost path ────────────────────────────────────────────────────────────
     if (!active && ghost) {
       emitMessage(retryPayload);
       const pollForConversation = async (retries = 10, delay = 600) => {
@@ -1009,7 +893,6 @@ const PatientChatPage = () => {
       timestamp: new Date(),
       status: "sending",
       type: msgType,
-      // For image preview show the local object URL until the remote URL arrives via socket
       fileUrl: msgType === "image" ? (localObjectUrl ?? remoteFileUrl) : remoteFileUrl,
       fileName,
       mimeType,
@@ -1281,4 +1164,16 @@ const PatientChatPage = () => {
   );
 };
 
-export default PatientChatPage;
+// ─── Page Export (Suspense wrapper) ───────────────────────────────────────────
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="w-8 h-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+      </div>
+    }>
+      <PatientChatPage />
+    </Suspense>
+  );
+}
