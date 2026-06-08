@@ -1,14 +1,14 @@
 'use client';
 import { FullPageSpinner } from "@/components/reusable/ui/spinner";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { authServiceApi } from "@/services/authApiService";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-const VerifyEmail = () => {
-    const searchParams = useSearchParams()
-    const router = useRouter()
+const VerifyEmailInner = () => {
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
     const verifyEmail = async (token: string) => {
         try {
@@ -50,15 +50,19 @@ const VerifyEmail = () => {
     };
 
     useEffect(() => {
-        const token = searchParams.get('token') || ''
-        verifyEmail(token)
-    }, [])
+        const token = searchParams.get('token') || '';
+        verifyEmail(token);
+    }, []);
 
+    return <FullPageSpinner />;
+};
+
+const VerifyEmail = () => {
     return (
-        <>
-            <FullPageSpinner />
-        </>
-    )
-}
+        <Suspense fallback={<FullPageSpinner />}>
+            <VerifyEmailInner />
+        </Suspense>
+    );
+};
 
 export default VerifyEmail;
