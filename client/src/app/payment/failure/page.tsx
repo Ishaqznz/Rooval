@@ -1,12 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { XCircle, RefreshCw, ArrowLeft, AlertTriangle, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { paymentServiceApi } from '@/services/paymentApiService';
 
-export default function PaymentFailurePage() {
+const commonReasons = [
+  { icon: '💳', title: 'Card declined', desc: 'Insufficient funds or card restrictions.' },
+  { icon: '🔒', title: 'Authentication failed', desc: '3D Secure or OTP verification failed.' },
+  { icon: '🌐', title: 'Network issue', desc: 'Connection interrupted during payment.' },
+  { icon: '⏰', title: 'Session expired', desc: 'Payment window timed out.' },
+];
+
+function PaymentFailureInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get('appointmentId');
@@ -44,13 +51,6 @@ export default function PaymentFailurePage() {
       setRetrying(false);
     }
   };
-
-  const commonReasons = [
-    { icon: '💳', title: 'Card declined', desc: 'Insufficient funds or card restrictions.' },
-    { icon: '🔒', title: 'Authentication failed', desc: '3D Secure or OTP verification failed.' },
-    { icon: '🌐', title: 'Network issue', desc: 'Connection interrupted during payment.' },
-    { icon: '⏰', title: 'Session expired', desc: 'Payment window timed out.' },
-  ];
 
   return (
     <div className="min-h-screen bg-[#f8f6fb] flex items-center justify-center px-4">
@@ -145,22 +145,23 @@ export default function PaymentFailurePage() {
                 My Appointments
               </button>
             </div>
-
-            {/* <p className="text-xs text-gray-400 mt-5 leading-relaxed">
-              Need help?{' '}
-              <button className="text-[#9b7ab8] font-semibold hover:underline">
-                Contact Support
-              </button>
-              {' '}— your appointment slot is held for a limited time.
-            </p> */}
           </div>
         </div>
 
-        {/* Bottom tag */}
-        <p className="text-center text-xs text-gray-400 mt-4">
-          {/* Secured by <span className="font-semibold text-[#9b7ab8]">HealthConnect</span> */}
-        </p>
+        <p className="text-center text-xs text-gray-400 mt-4" />
       </div>
     </div>
+  );
+}
+
+export default function PaymentFailurePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#f8f6fb] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-4 border-[#9b7ab8]/30 border-t-[#9b7ab8] animate-spin" />
+      </div>
+    }>
+      <PaymentFailureInner />
+    </Suspense>
   );
 }
