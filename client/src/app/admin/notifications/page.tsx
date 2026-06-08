@@ -8,31 +8,16 @@ import {
   Stethoscope,
   UsersRound,
   Megaphone,
-  Clock,
   CheckCheck,
-  Trash2,
-  Filter,
-  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { notificationApiService } from "@/services/notificationApiService";
 import { RealAudience } from "@/interfaces/notifications/notification.interfaces";
 import { toast } from "sonner";
+import { NotificationType } from "@/interfaces/notifications/notification.interfaces";
 
 type Audience = "all" | "users" | "doctors";
 type NotifType = "announcement" | "system" | "alert" | "reminder";
-
-export enum NotificationType {
-  MESSAGE = 'message',
-  APPOINTMENT = 'appointment',
-  PAYMENT = 'payment',
-  VIDEO_CALL = 'video_call',
-  SYSTEM = 'system',
-  SECURITY = 'security',
-  ANNOUNCEMENT = 'announcement',
-  ALERT = 'alert',
-  REMINDER = 'reminder'
-}
 
 interface Notification {
   id: number;

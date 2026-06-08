@@ -111,8 +111,6 @@ const SPECIALIZATIONS = [
   "Oncologist",
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function countActiveFilters(f: AdvancedFilters): number {
   let n = 0;
   if (f.specialization) n++;
@@ -129,8 +127,6 @@ function statusVariant(status: string) {
   if (status === "rejected") return "destructive";
   return "secondary";
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Doctors() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -157,8 +153,6 @@ export default function Doctors() {
 
   const debouncedSearch = useDebounce(searchQuery, 500);
   const activeCount = countActiveFilters(advanced);
-
-  // ── Fetch ─────────────────────────────────────────────────────────────────
 
   const fetchDoctors = async () => {
     try {
@@ -220,8 +214,6 @@ export default function Doctors() {
   useEffect(() => {
     fetchDoctors();
   }, [currentPage, debouncedSearch, statusFilter, advanced, reload]);
-
-  // ── Actions ───────────────────────────────────────────────────────────────
 
   const handleViewDetails = (doctor: any) => {
     setSelectedDoctor(doctor);
@@ -394,7 +386,7 @@ export default function Doctors() {
                 <div className="flex gap-1 flex-1">
                   {(
                     [
-                      { value: "all", label: "All" },
+                      { value: "all", label: "All", icon: null },
                       { value: "ONLINE", label: "Online", icon: <Video className="h-3 w-3" /> },
                       { value: "IN_CLINIC", label: "Clinic", icon: <Building2 className="h-3 w-3" /> },
                     ] as const

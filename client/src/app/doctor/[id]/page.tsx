@@ -40,8 +40,6 @@ import { paymentServiceApi } from '@/services/paymentApiService';
 import { appointmentServiceApi } from '@/services/appointmentApiService';
 import { reviewApiService } from '@/services/reviewApiService';
 
-// ── Interfaces ─────────────────────────────────────────────────────────────────
-
 interface IReview {
   id: string;
   doctorId: string;
