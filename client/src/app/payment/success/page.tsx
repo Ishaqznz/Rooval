@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Calendar, ArrowRight, Sparkles } from 'lucide-react';
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get('appointmentId');
@@ -14,8 +14,8 @@ export default function PaymentSuccessPage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    const DURATION = 5000; // 5 seconds total
-    const TICK = 50; // update every 50ms for smooth progress bar
+    const DURATION = 5000;
+    const TICK = 50;
     let elapsed = 0;
 
     intervalRef.current = setInterval(() => {
@@ -58,7 +58,6 @@ export default function PaymentSuccessPage() {
                              animate-[scale-in_0.5s_cubic-bezier(0.34,1.56,0.64,1)_both]">
                 <CheckCircle className="w-12 h-12 text-green-500 stroke-[1.5]" />
               </div>
-              {/* Sparkle accents */}
               <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-amber-400 animate-pulse" />
               <Sparkles className="absolute -bottom-1 -left-2 w-4 h-4 text-[#9b7ab8] animate-pulse [animation-delay:0.3s]" />
             </div>
@@ -117,11 +116,22 @@ export default function PaymentSuccessPage() {
           </div>
         </div>
 
-        {/* Bottom tag */}
         <p className="text-center text-xs text-gray-400 mt-4">
           Secured by <span className="font-semibold text-[#9b7ab8]">HealthConnect</span>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#f8f6fb] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-4 border-[#9b7ab8]/30 border-t-[#9b7ab8] animate-spin" />
+      </div>
+    }>
+      <PaymentSuccessInner />
+    </Suspense>
   );
 }
