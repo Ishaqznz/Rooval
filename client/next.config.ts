@@ -7,11 +7,23 @@
 // export default nextConfig;
 
 
+// import type { NextConfig } from "next";
+
+// const nextConfig: NextConfig = {
+//   output: "export",
+
+//   eslint: {
+//     ignoreDuringBuilds: true,
+//   },
+// };
+
+// export default nextConfig;
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
-
+  /* Remove output: "export" so Vercel can handle your dynamic [id] routes */
+  
   eslint: {
     ignoreDuringBuilds: true,
   },
