@@ -5,9 +5,7 @@ dotenv.config();
 
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGO_URI, {
-      dbName: 'project_demo_db',
-    }),
+    MongooseModule.forRoot(process.env.MONGO_URI),
   ],
 })
 export class MongoConfigModule {}

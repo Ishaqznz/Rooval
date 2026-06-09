@@ -10,7 +10,7 @@ import { UserUseCase } from 'src/application/use-cases/implementation/user.useca
 import { MongoAuthRepository } from 'src/infra/database/mongoose/repositories/mongo.auth.repository';
 import { MongoUserRepository } from 'src/infra/database/mongoose/repositories/mongo.user.repository';
 import { JwtAuthGuard } from 'src/common/guards/auth.guard';
-import { LoggerModule } from 'src/infra/graphQL/logger.module';
+import { LoggerModule } from 'src/infra/graphql/logger.module';
 import { DoctorSchema } from 'src/infra/database/mongoose/schemas/doctor/doctor.schema';
 import { MongoDoctorSchema } from 'src/infra/database/mongoose/schemas/doctor/doctor.schema';
 import { UserResolver } from 'src/adapters/api/graphQL/resolvers/user/user.resolver';

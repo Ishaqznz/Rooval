@@ -1,7 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { GlobalGraphQLExceptionFilter } from './infra/graphQL/filters/graphql-exception.filter';
+import { GlobalGraphQLExceptionFilter } from './infra/graphql/filters/graphql-exception.filter';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 import { WinstonModule } from 'nest-winston';
