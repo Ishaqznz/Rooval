@@ -3,6 +3,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { FileUpload } from 'graphql-upload-ts';
 import { ISupaBaseService } from 'src/application/services/supabase.service.interface';
 import { Readable } from 'stream';
+import ws from 'ws';
 
 @Injectable()
 export class SupabaseService implements ISupaBaseService {
@@ -13,7 +14,8 @@ export class SupabaseService implements ISupaBaseService {
     const url = process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_KEY;
     this.supabase = createClient(url!, key!, {
-      auth: { persistSession: false }
+      auth: { persistSession: false },
+      realtime: { transport: ws },
     });
   }
 
