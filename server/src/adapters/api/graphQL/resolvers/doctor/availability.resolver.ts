@@ -48,6 +48,7 @@ export class DoctorAvailabilityResolver {
     async getDoctorSlotsByDate(
         @Args('input') input: SlotInput
     ): Promise<Slot[]> {
+        console.log('the input in the production getDoctorSlotsByDate method: ', input)
         const slots = await this._availabilityUseCase.getSlotsBydate(input)
         return slots
     }
