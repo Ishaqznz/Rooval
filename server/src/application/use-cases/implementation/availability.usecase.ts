@@ -48,7 +48,9 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
             throw new BusinessRuleViolationError(entity.error);
         }
 
+        console.log('entity values before: ', entity.value)
         const availabilities = await this._availabilityRepository.getByDay(entity.value);
+
 
         console.log("Availabilities count:", availabilities.length);
         console.log(
