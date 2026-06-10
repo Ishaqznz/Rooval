@@ -18,7 +18,6 @@ export class MongoAvailabilityRepository implements IAvailabilityRepository {
   ) { }
 
   async upsert(entities: Availability[]): Promise<boolean> {
-    console.log('userting availability input: ', entities)
     const doctorObjectId = new mongoose.Types.ObjectId(
       entities[0].doctorId.value
     );
@@ -59,12 +58,10 @@ export class MongoAvailabilityRepository implements IAvailabilityRepository {
   }
 
   async getByDay(entity: GetAvailability): Promise<Availability[]> {
-    console.log('the input entity in the repository method in t getbyday: ', entity)
     const availabilities = await this._availabilityModel.find({ 
       doctorId: new mongoose.Types.ObjectId(entity.doctorId.value), 
       dayOfWeek: entity.dayOfWeek.value 
     }).lean<IMongoAvailabilityDocument[]>();
-    console.log('all the availabilities in the getByDay method: ', availabilities)
     const entities = AvailabilityMapper.toAvailabilityEntities(availabilities)
     return entities;
   }
@@ -81,7 +78,7 @@ export class MongoAvailabilityRepository implements IAvailabilityRepository {
     const availability = await this._availabilityModel.findOne({ doctorId: 
       new mongoose.Types.ObjectId(doctorId)
     }).lean<IMongoAvailabilityDocument>()
-    
+
     return availability.timezone
   }
 }

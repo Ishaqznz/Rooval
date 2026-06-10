@@ -38,39 +38,20 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
     }
 
     async getSlotsBydate(input: IGetSlotsRequestDTO): Promise<ISlotResponseDTO[]> {
-        console.log("========== GET SLOTS START ==========");
-        console.log("Input:", JSON.stringify(input, null, 2));
-
         const timezone = await this._availabilityRepository.getTimezone(input.doctorId)
         const entity = GetAvailability.create(input.doctorId, input.date, timezone);
 
         if (entity.ok === false) {
-            console.log("GetAvailability validation failed:", entity.error);
             throw new BusinessRuleViolationError(entity.error);
         }
 
-        console.log('entity values before: ', entity.value)
         const availabilities = await this._availabilityRepository.getByDay(entity.value);
-
-        console.log("Availabilities count:", availabilities.length);
-        console.log(
-            "Availabilities:",
-            JSON.stringify(availabilities, null, 2)
-        );
 
         const pureDate = new Date(input.date).toISOString().split("T")[0];
 
-        console.log("Pure Date:", pureDate);
-
         const preparedAvailabilities = availabilities.map(a => {
-            console.log("Availability timezone:", a.timezone);
 
             const convertedSessions = a.sessions.value.map(session => {
-                console.log("Original Session:", {
-                    start: session.startTime,
-                    end: session.endTime,
-                });
-
                 const startUTC = this._timezoneService.toUTC(
                     pureDate,
                     session.startTime,
@@ -82,11 +63,6 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
                     session.endTime,
                     a.timezone
                 );
-
-                console.log("Converted Session:", {
-                    startUTC,
-                    endUTC,
-                });
 
                 return {
                     startTimeUTC: startUTC,
@@ -100,28 +76,8 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
             };
         });
 
-        console.log(
-            "Prepared Availabilities:",
-            JSON.stringify(preparedAvailabilities, null, 2)
-        );
-
         const slots =
             AvailabilityDomainService.toSlots(preparedAvailabilities);
-
-        console.log("Generated Slots Count:", slots.length);
-
-        console.log(
-            "Generated Slots:",
-            slots.map(slot => ({
-                start: slot.startTime,
-                end: slot.endTime,
-            }))
-        );
-
-        if (slots.length === 0) {
-            console.log("No slots generated.");
-            return [];
-        }
 
         const minStart = new Date(
             Math.min(...slots.map(s => s.startTime.getTime()))
@@ -130,9 +86,6 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
         const maxEnd = new Date(
             Math.max(...slots.map(s => s.endTime.getTime()))
         );
-
-        console.log("Min Start:", minStart.toISOString());
-        console.log("Max End:", maxEnd.toISOString());
 
         const overlappingEntity = AppointmentOverlap.create(
             input.doctorId,
@@ -144,16 +97,6 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
             await this._appointmentRepository.findOverLapping(
                 overlappingEntity
             );
-
-        console.log("Appointments Count:", appointments.length);
-
-        console.log(
-            "Appointments:",
-            appointments.map(app => ({
-                start: app.session.startTime,
-                end: app.session.endTime,
-            }))
-        );
 
         const availableSlots = slots.filter(slot => {
             const overlappingAppointment = appointments.find(app =>
@@ -167,36 +110,12 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
             );
 
             if (overlappingAppointment) {
-                console.log("Slot removed due to overlap:", {
-                    slotStart: slot.startTime,
-                    slotEnd: slot.endTime,
-                    appointmentStart:
-                        overlappingAppointment.session.startTime,
-                    appointmentEnd:
-                        overlappingAppointment.session.endTime
-                });
-
                 return false;
             }
 
             return true;
         });
-
-        console.log(
-            "Available Slots Count:",
-            availableSlots.length
-        );
-
-        console.log(
-            "Available Slots:",
-            availableSlots.map(slot => ({
-                start: slot.startTime,
-                end: slot.endTime,
-            }))
-        );
-
-        console.log("========== GET SLOTS END ==========");
-
+        
         return availableSlots;
     }
 
