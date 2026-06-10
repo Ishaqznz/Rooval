@@ -29,18 +29,29 @@ export class AvailabilityDomainService {
     return true;
   }
 
-  static getDayofWeek(date: string): DayOfWeek {
-    const dayIndex = new Date(date).getDay();
+  static getDayOfWeek(
+    date: string,
+    timeZone: string
+  ): DayOfWeek {
+    const weekday = new Intl.DateTimeFormat(
+      "en-US",
+      {
+        weekday: "long",
+        timeZone,
+      }
+    ).format(new Date(date));
+
     const map = {
-      0: DayOfWeek.SUNDAY,
-      1: DayOfWeek.MONDAY,
-      2: DayOfWeek.TUESDAY,
-      3: DayOfWeek.WEDNESDAY,
-      4: DayOfWeek.THURSDAY,
-      5: DayOfWeek.FRIDAY,
-      6: DayOfWeek.SATURDAY,
+      Sunday: DayOfWeek.SUNDAY,
+      Monday: DayOfWeek.MONDAY,
+      Tuesday: DayOfWeek.TUESDAY,
+      Wednesday: DayOfWeek.WEDNESDAY,
+      Thursday: DayOfWeek.THURSDAY,
+      Friday: DayOfWeek.FRIDAY,
+      Saturday: DayOfWeek.SATURDAY,
     };
-    return map[dayIndex]
+
+    return map[weekday];
   }
 
   static toSlots(entities: any[]): ISlot[] {

@@ -76,4 +76,12 @@ export class MongoAvailabilityRepository implements IAvailabilityRepository {
     }).lean<IMongoAvailabilityDocument[]>();
      return AvailabilityMapper.toExtendedAvailabilityEntities(availabilities)
   }
+
+  async getTimezone(doctorId: string): Promise<string> {
+    const availability = await this._availabilityModel.findOne({ doctorId: 
+      new mongoose.Types.ObjectId(doctorId)
+    }).lean<IMongoAvailabilityDocument>()
+    
+    return availability.timezone
+  }
 }

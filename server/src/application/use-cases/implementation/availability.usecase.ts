@@ -41,7 +41,8 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
         console.log("========== GET SLOTS START ==========");
         console.log("Input:", JSON.stringify(input, null, 2));
 
-        const entity = GetAvailability.create(input.doctorId, input.date);
+        const timezone = await this._availabilityRepository.getTimezone(input.doctorId)
+        const entity = GetAvailability.create(input.doctorId, input.date, timezone);
 
         if (entity.ok === false) {
             console.log("GetAvailability validation failed:", entity.error);
@@ -50,7 +51,6 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
 
         console.log('entity values before: ', entity.value)
         const availabilities = await this._availabilityRepository.getByDay(entity.value);
-
 
         console.log("Availabilities count:", availabilities.length);
         console.log(
@@ -204,5 +204,9 @@ export class AvailabilityUseCase implements IAvailabilityUseCase {
     async getAvailabilities(doctorIds: string[]): Promise<IAvailabilityResponseDTO[]> {
         const entities = await this._availabilityRepository.getByIds(doctorIds)
         return AvailabilityOutputMapper.toAvailabilitiesDTO(entities)
+    }
+
+    async getDoctorTimezone(doctorId: string): Promise<string> {
+        return await this._availabilityRepository.getTimezone(doctorId)
     }
 }

@@ -6,12 +6,14 @@ import { DoctorIdVO } from "src/core/valueOfObjects/doctor/doctorId.vo";
 export class GetAvailability {
     private constructor(
         public readonly doctorId: DoctorIdVO,
-        public readonly dayOfWeek: DayOfWeekVO
+        public readonly dayOfWeek: DayOfWeekVO,
+        public readonly timezone: string
     ) { }
 
     public static create(
         doctorId: string,
         date: string,
+        timezone: string
     ): { ok: true; value: GetAvailability } | { ok: false; error: string } {
 
         const doctorIdOrError = DoctorIdVO.create(doctorId);
@@ -20,7 +22,7 @@ export class GetAvailability {
         const dateOrError = DateVO.create(date)
         if (dateOrError.ok == false) return dateOrError;
 
-        const dayOfWeek = AvailabilityDomainService.getDayofWeek(date)
+        const dayOfWeek = AvailabilityDomainService.getDayOfWeek(date, timezone)
         const dayOfWeekOrError = DayOfWeekVO.create(dayOfWeek);
         
         if (dayOfWeekOrError.ok == false) return dayOfWeekOrError;
@@ -30,6 +32,7 @@ export class GetAvailability {
             value: new GetAvailability(
                 doctorIdOrError.value,
                 dayOfWeekOrError.value,
+                timezone
             ),
         };
     }

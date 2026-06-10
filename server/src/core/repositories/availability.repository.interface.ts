@@ -7,4 +7,5 @@ export interface IAvailabilityRepository {
     delete(doctorId: string): Promise<boolean>
     getByDay(entity: GetAvailability): Promise<Availability[]>
     getByIds(doctorIds: string[]): Promise<ExtendedAvailability[]>
+    getTimezone(doctorId: string): Promise<string>
 }

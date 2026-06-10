@@ -8,4 +8,5 @@ export interface IAvailabilityUseCase {
     deleteAvailabilities(doctorId: string): Promise<boolean>
     getSlotsBydate(input: IGetSlotsRequestDTO): Promise<ISlotResponseDTO[]>
     getAvailabilities(doctorIds: string[]): Promise<IAvailabilityResponseDTO[]>
+    getDoctorTimezone(doctorId: string): Promise<string>
 }
