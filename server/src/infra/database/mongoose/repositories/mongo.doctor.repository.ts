@@ -7,7 +7,7 @@ import { MongoDoctorSchema, DoctorDocument } from '../schemas/doctor/doctor.sche
 import { DoctorMapper } from '../mapper/doctor.mapper';
 import { Doctor } from 'src/core/entities/doctor/profile/doctor.entity';
 import { IMongoDoctorDocument } from '../interfaces/documents/mongo.doctor.document';
-import { DoctorErrorType, DoctorSortBy } from 'src/core/enums/doctor/doctor.enums';
+import { ConsultationType, DoctorErrorType, DoctorSortBy } from 'src/core/enums/doctor/doctor.enums';
 import { DoctorOnboarding } from 'src/core/entities/doctor/profile/onboarding.entity';
 import { Types } from "mongoose";
 import { FileUpload } from 'src/core/entities/doctor/profile/fileupload.entity';
@@ -208,7 +208,7 @@ export class MongoDoctorRepository implements IDoctorRepository {
                         },
                         consultationSettings: {
                             type: "",
-                            consultationModes: [data.consultationModes[0]],
+                            consultationModes: ConsultationType.ONLINE,
                             consultationFee: data.consultationFee,
                             inPersonFee: 0,
                             videoFee: data.consultationFee,
