@@ -29,10 +29,10 @@ export const doctorServiceApi = {
 
   findOne: async (variables: { fields: string }) => {
     const queryObj = FIND_DOCTOR_QUERY(variables.fields)
-    return apiRequest({ ... queryObj }, "user:findDoctor");
+    return apiRequest({ ...queryObj }, "user:findDoctor");
   },
-  
-  count: async (variables?: { input: { search?: string, status?: string }}) => {
+
+  count: async (variables?: { input: { search?: string, status?: string } }) => {
     return apiRequest({ ...COUNT_DOCTORS_QUERY, variables }, "doctor:countDoctors");
   },
 
@@ -84,7 +84,7 @@ export const doctorServiceApi = {
         },
       },
     });
-    
+
     formData.append("operations", operations);
 
     const map: Record<string, string[]> = {
@@ -118,7 +118,7 @@ export const doctorServiceApi = {
       query: DOCTOR_FILE_RE_UPLOAD.query,
       variables: {
         input: {
-          certificates: data.certificates.map(() => null), 
+          certificates: data.certificates.map(() => null),
         },
       },
     });
@@ -134,7 +134,7 @@ export const doctorServiceApi = {
     formData.append("map", JSON.stringify(map));
 
     data.certificates.forEach((file, index) => {
-      formData.append(String(index), file); 
+      formData.append(String(index), file);
     });
 
     return apiRequest(
@@ -146,7 +146,7 @@ export const doctorServiceApi = {
     );
   },
 
-  addRejectionReason: async (variables: { input: { doctorId: string, rejectionReason: string }}) => {
+  addRejectionReason: async (variables: { input: { doctorId: string, rejectionReason: string } }) => {
     return apiRequest(
       {
         ...ADD_REJECTION_REASON,
@@ -188,7 +188,7 @@ export const doctorServiceApi = {
     )
   },
 
-  get: async (variables: { input: { doctorId: string }}, fields: string) => {
+  get: async (variables: { input: { doctorId: string } }, fields: string) => {
     const queryObj = GET_DOCTOR(fields)
     return apiRequest(
       {
@@ -205,12 +205,35 @@ export const doctorServiceApi = {
     return apiRequest({ ...queryObj })
   },
 
-  async uplaodProfilePhoto(variables: {
-    input: {
-      file: File
-    }
-  }) {
-    const queryObj = UPLOAD_PROFILE_PHOTO();
-    return apiRequest({ ...queryObj, variables })
+  async uploadProfilePhoto(data: { file: File }) {
+    const formData = new FormData();
+
+    const operations = JSON.stringify({
+      query: UPLOAD_PROFILE_PHOTO().query,
+      variables: {
+        input: {
+          file: null,
+        },
+      },
+    });
+
+    formData.append("operations", operations);
+
+    formData.append(
+      "map",
+      JSON.stringify({
+        "0": ["variables.input.file"],
+      })
+    );
+
+    formData.append("0", data.file);
+
+    return apiRequest(
+      {
+        ...UPLOAD_PROFILE_PHOTO(),
+        formData,
+      },
+      "doctor:uploadProfilePhoto"
+    );
   }
 };

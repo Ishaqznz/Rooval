@@ -60,10 +60,8 @@ export default function GeneralInfo() {
     setIsUploadingPhoto(true);
 
     try {
-      const result = await doctorServiceApi.uplaodProfilePhoto({
-        input: {
-          file
-        }
+      const result = await doctorServiceApi.uploadProfilePhoto({
+        file
       })
 
       if (result?.data?.uploadDoctorProfilePhoto) {
