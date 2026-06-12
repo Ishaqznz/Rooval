@@ -7,28 +7,53 @@ import { Label } from "@/components/reusable/ui/label";
 import { Textarea } from "@/components/reusable/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { userServiceApi } from "@/services/userApiService";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Camera, Loader2 } from "lucide-react";
 
 export default function UserGeneralInfo() {
     const { user, setApi } = useAuth();
     const [profileImage, setProfileImage] = useState<File | null>(null);
+    const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-
         if (!file) return;
 
+        // Validate file
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!allowedTypes.includes(file.type)) {
+            toast.error('Only JPG and PNG files are allowed.');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Image must be under 5MB.');
+            return;
+        }
+
         setProfileImage(file);
+        setIsUploadingPhoto(true);
 
-        const result = await userServiceApi.updateProfilePhoto({
-            profilePhoto: file,
-        });
+        try {
+            const result = await userServiceApi.updateProfilePhoto({
+                profilePhoto: file,
+            });
 
-        if (result?.data?.updateUserProfilePhoto) {
-            toast.success('Successfully updated!');
-        } else {
+            if (result?.data?.updateUserProfilePhoto) {
+                toast.success('Profile photo updated!');
+                setApi((prev) => prev + 1);
+            } else {
+                toast.error('Photo upload failed. Please try again.');
+                setProfileImage(null); // revert preview on failure
+            }
+        } catch {
             toast.error('Something went wrong!');
+            setProfileImage(null);
+        } finally {
+            setIsUploadingPhoto(false);
+            // Reset input so same file can be re-selected if needed
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
@@ -37,7 +62,6 @@ export default function UserGeneralInfo() {
         : user?.profilePhoto ?? null;
 
     const placeholderLetter = user?.fullName?.[0]?.toUpperCase() ?? "?";
-
 
     const [formData, setFormData] = useState({
         fullName: "",
@@ -53,10 +77,7 @@ export default function UserGeneralInfo() {
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
     ) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     useEffect(() => {
@@ -73,7 +94,8 @@ export default function UserGeneralInfo() {
                             phoneNumber
                         }
                     }
-                `})
+                `
+            });
 
             setFormData({
                 fullName: userInfo?.data?.findUser?.fullName ?? "",
@@ -84,7 +106,7 @@ export default function UserGeneralInfo() {
                 email: userInfo?.data?.findUser?.email ?? "",
                 profilePhoto: userInfo?.data?.findUser?.profile?.personal?.profilePhoto ?? ''
             });
-        }
+        };
 
         fetchUserInfo();
     }, [user]);
@@ -101,20 +123,20 @@ export default function UserGeneralInfo() {
 
         if (result?.errors?.[0]) {
             if (result?.errors?.[0]?.code !== 'BAD_USER_INPUT') {
-                result?.errors?.[0]?.message
+                result?.errors?.[0]?.message;
                 return;
             }
-            toast.error("Something went wrong!")
+            toast.error("Something went wrong!");
             return;
         }
 
         if (result?.data?.updateUserProfile) {
-            toast.success('Successfully updated!')
-            setApi((prev) => prev + 1)
+            toast.success('Successfully updated!');
+            setApi((prev) => prev + 1);
             return;
         }
 
-        toast.error("Something went wrong!")
+        toast.error("Something went wrong!");
     };
 
     return (
@@ -127,34 +149,54 @@ export default function UserGeneralInfo() {
                 <div className="space-y-8">
                     {/* Profile Photo */}
                     <div className="flex gap-6 items-start">
-                        <div className="flex-shrink-0 relative w-48 h-48 group">
-                            {profilePreview || formData.profilePhoto ? (
-                                <img
-                                    src={profilePreview || formData.profilePhoto}
-                                    alt="User"
-                                    className="w-full h-full object-cover rounded-lg"
-                                />
-                            ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-7xl font-bold text-primary-foreground shadow-lg">
-                                    {placeholderLetter}
-                                </div>
-                            )}
+                        <div className="flex flex-col items-center gap-3">
+                            {/* Avatar */}
+                            <div className="relative w-32 h-32 flex-shrink-0">
+                                {profilePreview || formData.profilePhoto ? (
+                                    <img
+                                        src={profilePreview || formData.profilePhoto}
+                                        alt="Profile"
+                                        className="w-full h-full object-cover rounded-full border-2 border-border"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-4xl font-bold text-primary-foreground border-2 border-border">
+                                        {placeholderLetter}
+                                    </div>
+                                )}
 
-                            <label className="absolute bottom-2 right-2 bg-primary hover:bg-secondary text-primary-foreground px-3 py-1.5 rounded-md cursor-pointer text-sm font-medium shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                Upload
-                                <input
-                                    type="file"
-                                    accept=".jpg,.jpeg,.png"
-                                    onChange={handleImageChange}
-                                    className="hidden"
-                                />
-                            </label>
+                                {/* Uploading spinner overlay */}
+                                {isUploadingPhoto && (
+                                    <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+                                        <Loader2 className="h-6 w-6 text-white animate-spin" />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Always-visible upload button */}
+                            <button
+                                type="button"
+                                disabled={isUploadingPhoto}
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <Camera className="h-4 w-4" />
+                                {isUploadingPhoto ? 'Uploading...' : 'Change photo'}
+                            </button>
+
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".jpg,.jpeg,.png"
+                                onChange={handleImageChange}
+                                className="hidden"
+                            />
                         </div>
 
-                        <div>
+                        <div className="pt-2">
                             <h3 className="text-lg font-semibold mb-2">Profile Photo</h3>
                             <p className="text-sm text-muted-foreground">
-                                Upload a professional photo of yourself. This photo will be visible on your public profile.
+                                Upload a professional photo. JPG or PNG, max 5MB.
+                                This photo will be visible on your public profile.
                             </p>
                         </div>
                     </div>
@@ -173,18 +215,21 @@ export default function UserGeneralInfo() {
                     </div>
 
                     {/* Gender */}
-                    <select
-                        id="gender"
-                        name="gender"
-                        className="max-w-md border border-input rounded-md px-3 py-2 text-sm bg-background"
-                        value={formData.gender}
-                        onChange={handleChange}
-                    >
-                        <option value="">Select Gender</option>
-                        <option value="MALE">Male</option>
-                        <option value="FEMALE">Female</option>
-                        <option value="OTHER">Other</option>
-                    </select>
+                    <div className="space-y-2">
+                        <Label htmlFor="gender">Gender</Label>
+                        <select
+                            id="gender"
+                            name="gender"
+                            className="max-w-md w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+                            value={formData.gender}
+                            onChange={handleChange}
+                        >
+                            <option value="">Select Gender</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
 
                     {/* Address */}
                     <div className="space-y-2">
