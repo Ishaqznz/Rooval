@@ -63,7 +63,7 @@ function DoctorSessionInner() {
     callState, audioMuted, videoOff, peerAudioMuted, peerVideoOff,
     duration, localVideoRef, remoteVideoRef,
     toggleAudio, toggleVideo, endCall,
-  } = useWebRTC({ appointmentId, callType, role: 'doctor', authToken: '' });
+  } = useWebRTC({ appointmentId, callType, role: 'doctor' });
 
   useEffect(() => {
     if (callState === 'ended' && !sessionMarked) {
