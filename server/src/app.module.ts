@@ -6,7 +6,7 @@ import { MongoConfigModule } from './infra/database/mongoose/config/mongo.config
 import { RedisConfigModule } from './infra/database/redis/config/redis.config';
 import { JwtModule } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
-import { registerGraphQLEnums } from './adapters/api/graphQL/enums/register.enum';
+import { registerGraphQLEnums } from './adapters/api/graphql/enums/register.enum';
 dotenv.config();
 
 @Module({

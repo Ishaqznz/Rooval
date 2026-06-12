@@ -1,22 +1,22 @@
 import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { Mutation, Args } from '@nestjs/graphql';
 import { Resolver } from '@nestjs/graphql';
-import { User } from 'src/adapters/api/graphQL/types/user/model/user.model';
-import { SignUpInput } from 'src/adapters/api/graphQL/types/user/input/signup.input';
-import { TokenInput } from 'src/adapters/api/graphQL/types/user/input/token.input';
+import { User } from 'src/adapters/api/graphql/types/user/model/user.model';
+import { SignUpInput } from 'src/adapters/api/graphql/types/user/input/signup.input';
+import { TokenInput } from 'src/adapters/api/graphql/types/user/input/token.input';
 import { Context } from '@nestjs/graphql';
 import { Response } from 'express';
-import { LoginInput } from 'src/adapters/api/graphQL/types/user/input/login.input';
+import { LoginInput } from 'src/adapters/api/graphql/types/user/input/login.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/common/guards/auth.guard';
-import { EmailInput } from 'src/adapters/api/graphQL/types/user/input/email.input';
-import { PasswordInput } from 'src/adapters/api/graphQL/types/user/input/password.input';
+import { EmailInput } from 'src/adapters/api/graphql/types/user/input/email.input';
+import { PasswordInput } from 'src/adapters/api/graphql/types/user/input/password.input';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Doctor } from 'src/adapters/api/graphQL/types/doctor/model/doctor.model';
+import { Doctor } from 'src/adapters/api/graphql/types/doctor/model/doctor.model';
 import { TokenUtil } from 'src/utils/token.util';
 import { AuthErrorType } from 'src/core/enums/auth/auth.enums';
 import { IAuthUseCase } from 'src/application/use-cases/interface/auth.usecase.interface';
-import { GoogleLoginInput } from 'src/adapters/api/graphQL/types/user/input/googleLogin.input';
+import { GoogleLoginInput } from 'src/adapters/api/graphql/types/user/input/googleLogin.input';
 import { GqlContext } from 'src/common/types/gql-context.type';
 
 @Injectable()

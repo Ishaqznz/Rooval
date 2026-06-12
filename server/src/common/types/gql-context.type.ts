@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import DataLoader from 'dataloader';
-import { DoctorAvailability } from 'src/adapters/api/graphQL/types/availability/model/availability.model';
-import { Appointment } from 'src/adapters/api/graphQL/types/appointment/model/appointment.model';
-import { Doctor } from 'src/adapters/api/graphQL/types/doctor/model/doctor.model';
-import { User } from 'src/adapters/api/graphQL/types/user/model/user.model';
+import { DoctorAvailability } from 'src/adapters/api/graphql/types/availability/model/availability.model';
+import { Appointment } from 'src/adapters/api/graphql/types/appointment/model/appointment.model';
+import { Doctor } from 'src/adapters/api/graphql/types/doctor/model/doctor.model';
+import { User } from 'src/adapters/api/graphql/types/user/model/user.model';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
