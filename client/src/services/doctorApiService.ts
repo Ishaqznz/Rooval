@@ -205,14 +205,14 @@ export const doctorServiceApi = {
     return apiRequest({ ...queryObj })
   },
 
-  async uploadProfilePhoto(data: { file: File }) {
+  async uploadProfilePhoto(data: { profilePhoto: File }) {
     const formData = new FormData();
 
     const operations = JSON.stringify({
       query: UPLOAD_PROFILE_PHOTO().query,
       variables: {
         input: {
-          file: null,
+          profilePhoto: null,
         },
       },
     });
@@ -222,11 +222,11 @@ export const doctorServiceApi = {
     formData.append(
       "map",
       JSON.stringify({
-        "0": ["variables.input.file"],
+        "0": ["variables.input.profilePhoto"],
       })
     );
 
-    formData.append("0", data.file);
+    formData.append("0", data.profilePhoto);
 
     return apiRequest(
       {

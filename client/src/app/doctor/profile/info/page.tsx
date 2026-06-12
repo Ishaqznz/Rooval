@@ -61,7 +61,7 @@ export default function GeneralInfo() {
 
     try {
       const result = await doctorServiceApi.uploadProfilePhoto({
-        file
+        profilePhoto: file
       })
 
       if (result?.data?.uploadDoctorProfilePhoto) {
