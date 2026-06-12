@@ -26,6 +26,7 @@ import { ListDoctors } from '../../types/doctor/model/listDoctors.model';
 import { Appointment } from '../../types/appointment/model/appointment.model';
 import { GetAverageRatingInput } from '../../types/doctor/input/getAverageRating.input';
 import { DoctorDashboard } from '../../types/doctor/model/doctorDashboard.model';
+import { DoctorProfilePhotoUpdateInput } from '../../types/doctor/input/doctorProfilePhotoUpdate.input';
 
 @Injectable()
 @Resolver(() => Doctor)
@@ -187,5 +188,15 @@ export class DoctorResolver {
     const doctorId = context.req.user.userId;
     const dashboardData = await this._doctorUseCase.getDoctorDashboard(doctorId)
     return dashboardData;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtAuthGuard)
+  async uploadDoctorProfilePhoto(
+    @Args('input') input: DoctorProfilePhotoUpdateInput,
+    @Context() context: GqlContext
+  ): Promise<boolean> {
+    const doctorId = context.req.user.userId;
+    return await this._doctorUseCase.uploadProfilePhoto({ ...input, doctorId })
   }
 } 

@@ -14,6 +14,7 @@ import {
   CHANGE_DOCTOR_PASSWORD,
   GET_DOCTOR,
   GET_DOCTOR_DASHBOARD,
+  UPLOAD_PROFILE_PHOTO,
 } from "@/graphql/queries/doctor";
 import { IUpdateDoctorProfile } from "@/interfaces/api/doctor/updateProfile.api.interface";
 import { IListDoctorsRequestDTO } from "@/interfaces/api/doctor/doctor.api.interface";
@@ -202,7 +203,14 @@ export const doctorServiceApi = {
   getDashboardData: async (fields: string) => {
     const queryObj = GET_DOCTOR_DASHBOARD(fields);
     return apiRequest({ ...queryObj })
+  },
+
+  async uplaodProfilePhoto(variables: {
+    input: {
+      file: File
+    }
+  }) {
+    const queryObj = UPLOAD_PROFILE_PHOTO();
+    return apiRequest({ ...queryObj, variables })
   }
 };
-
-

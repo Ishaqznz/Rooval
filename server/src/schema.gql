@@ -360,6 +360,10 @@ type DoctorProfile {
   personal: Personal
 }
 
+input DoctorProfilePhotoUpdateInput {
+  profilePhoto: Upload!
+}
+
 enum DoctorSortBy {
   AVAILABILITY
   EXPERIENCE
@@ -614,6 +618,7 @@ type Mutation {
   updateLastMessage(input: UpdateLastMessageInput!): Boolean!
   updateUserProfile(input: UpdateUserProfileInput!): Boolean!
   updateUserProfilePhoto(input: UserUpdateProfileInput!): String!
+  uploadDoctorProfilePhoto(input: DoctorProfilePhotoUpdateInput!): Boolean!
   uploadMessageFile(input: UploadMessageFileInput!): String!
   upsertDoctorAvailability(input: [UpsertDoctorAvailabilityInput!]!): Boolean!
   verifyEmail(input: TokenInput!): User!

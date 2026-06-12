@@ -11,6 +11,7 @@ import { ListDoctorsPayload } from "../entities/doctor/profile/listDoctorsPayloa
 import { IsChatEnabled } from "../entities/user/isChatEnabled.entity"
 import { GrantChatAccess } from "../entities/doctor/profile/grantChatAccess.entity"
 import { RemoveChatAccess } from "../entities/doctor/profile/removeChatAccess.entity"
+import { UploadDoctorProfilePhoto } from "../entities/doctor/profile/uploadProfilePhoto.entity"
 
 export interface IDoctorRepository {
     findDoctors(entity: DoctorQueryParams): Promise<Doctor[]>
@@ -32,4 +33,5 @@ export interface IDoctorRepository {
     isChatEnabled(entity: IsChatEnabled): Promise<boolean>
     grantChatAccess(entitity: GrantChatAccess): Promise<boolean>
     removeChatAccess(entity: RemoveChatAccess): Promise<boolean>
+    uploadProfilePhoto(entity: UploadDoctorProfilePhoto): Promise<boolean>
 }

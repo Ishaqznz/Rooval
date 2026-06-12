@@ -27,6 +27,8 @@ import { Inject } from '@nestjs/common';
 import { IsChatEnabled } from 'src/core/entities/user/isChatEnabled.entity';
 import { GrantChatAccess } from 'src/core/entities/doctor/profile/grantChatAccess.entity';
 import { RemoveChatAccess } from 'src/core/entities/doctor/profile/removeChatAccess.entity';
+import { UploadDoctorProfilePhoto } from 'src/core/entities/doctor/profile/uploadProfilePhoto.entity';
+import { mongo } from 'globals';
 
 @Injectable()
 export class MongoDoctorRepository implements IDoctorRepository {
@@ -449,5 +451,16 @@ export class MongoDoctorRepository implements IDoctorRepository {
         })
 
         return update.modifiedCount > 0;
+    }
+
+    async uploadProfilePhoto(entity: UploadDoctorProfilePhoto): Promise<boolean> {
+        const update = await this._doctorModel.findByIdAndUpdate(new mongoose.Types.ObjectId(
+            entity.input.doctorId), {
+            $set: {
+                profilePhoto: entity.input.profilePhoto
+            }
+        })
+
+        return true;
     }
 }

@@ -36,6 +36,8 @@ import { IAppointmentUseCase } from '../interface/appointment.usecase.interface'
 import { AppointmentStatus } from 'src/core/enums/appointments/appointment.enums';
 import { IWalletUseCase } from '../interface/wallet.usecase.interface';
 import { ListTransactionType, WalletTransactionType } from 'src/core/enums/wallet/wallet.enum';
+import { IUploadProfilePhotoInputRequestDTO } from 'src/application/dto/doctor/profile/request/uploadProfilePhoto.request.dto';
+import { UploadDoctorProfilePhoto } from 'src/core/entities/doctor/profile/uploadProfilePhoto.entity';
 
 @Injectable()
 export class DoctorUseCase implements IDoctorUseCase {
@@ -358,5 +360,12 @@ export class DoctorUseCase implements IDoctorUseCase {
 
       recentReviews,
     };
+  }
+
+  async uploadProfilePhoto(input: IUploadProfilePhotoInputRequestDTO): Promise<boolean> {
+    const file = await input.profilePhoto;
+    const uploadedFile = await this._cloudinaryService.uploadFile(file, 'doctor/images')
+    const entity = UploadDoctorProfilePhoto.create({ doctorId: input.doctorId, profilePhoto: uploadedFile })
+    return await this._doctorRepository.uploadProfilePhoto(entity)
   }
 }

@@ -12,6 +12,7 @@ import { IListDoctorsResponseDTO } from "src/application/dto/doctor/profile/resp
 import { IGrantChatAccessRequestDTO } from "src/application/dto/doctor/profile/request/grantChatAccess.request.dto"
 import { IRemoveChatAccessRequestDTO } from "src/application/dto/doctor/profile/request/removeChatAccess.request.dto"
 import { IDoctorDashboardResponseDTO } from "src/application/dto/doctor/dashboard/response/doctorDashboard.response.dto"
+import { IUploadProfilePhotoInputRequestDTO } from "src/application/dto/doctor/profile/request/uploadProfilePhoto.request.dto"
 
 export interface IDoctorUseCase {
     findDoctors(input: IFindDoctorsRequestDTO): Promise<IDoctorResponseDTO[]>
@@ -35,5 +36,6 @@ export interface IDoctorUseCase {
     removeChatAccess(input: IRemoveChatAccessRequestDTO): Promise<boolean>
     getAverageRating(doctorId: string): Promise<number>
     getDoctorDashboard(doctorId: string): Promise<IDoctorDashboardResponseDTO>
+    uploadProfilePhoto(input: IUploadProfilePhotoInputRequestDTO): Promise<boolean>
 }
 

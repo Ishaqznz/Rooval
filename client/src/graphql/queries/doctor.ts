@@ -148,3 +148,11 @@ export const GET_DOCTOR_DASHBOARD = (fields: string) => ({
     }
   `
 })
+
+export const UPLOAD_PROFILE_PHOTO = () => ({
+  query: `
+    mutation uploadDoctorProfilePhoto($input: DoctorProfilePhotoUpdateInput!) {
+      uploadDoctorProfilePhoto(input: $input)
+    }
+  `
+})
