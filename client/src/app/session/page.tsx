@@ -114,7 +114,7 @@ function SessionInner() {
 
   const {
     callState, audioMuted, videoOff, peerAudioMuted, peerVideoOff,
-    duration, localVideoRef, remoteVideoRef,
+    duration, localVideoRef, remoteVideoRef, remoteAudioRef,
     toggleAudio, toggleVideo, endCall,
   } = useWebRTC({ appointmentId, callType, role: 'user' });
 
@@ -125,8 +125,7 @@ function SessionInner() {
     }
   }, [callState, router]);
 
-  const isVideo  = callType === 'video';
-  const isActive = callState === 'connected';
+  const isVideo = callType === 'video';
 
   if (!user) {
     return (
@@ -136,7 +135,6 @@ function SessionInner() {
     );
   }
 
-  // ── Call ended ────────────────────────────────────────────────────
   if (callState === 'ended') {
     return (
       <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center gap-4 text-white text-center px-4">
@@ -149,7 +147,6 @@ function SessionInner() {
     );
   }
 
-  // ── Error ─────────────────────────────────────────────────────────
   if (callState === 'error') {
     return (
       <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center gap-4 text-white text-center px-4">
@@ -174,7 +171,6 @@ function SessionInner() {
     );
   }
 
-  // ── Connecting / waiting states ───────────────────────────────────
   if (callState !== 'connected') {
     return (
       <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center gap-5 text-white text-center px-4">
@@ -186,7 +182,6 @@ function SessionInner() {
         <p className="text-lg font-medium text-white/80">
           {STATE_LABEL[callState] ?? 'Connecting…'}
         </p>
-        {/* Show controls so user can cancel/mute while waiting */}
         <Controls
           audioMuted={audioMuted} videoOff={videoOff} isVideo={isVideo}
           toggleAudio={toggleAudio} toggleVideo={toggleVideo} endCall={endCall}
@@ -199,6 +194,9 @@ function SessionInner() {
   if (isVideo) {
     return (
       <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center p-4">
+        {/* Hidden audio element — autoPlay in JSX satisfies browser autoplay policy */}
+        <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" />
+
         <div className="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden bg-[#1a1d27]">
           <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
 
@@ -229,7 +227,6 @@ function SessionInner() {
             {formatDuration(duration)}
           </div>
 
-          {/* Local PiP */}
           <div className="absolute bottom-4 right-4 w-32 aspect-video rounded-xl overflow-hidden border border-white/10 bg-[#0f1117] shadow-lg">
             <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
             {videoOff && (
@@ -253,10 +250,11 @@ function SessionInner() {
   // ── Connected — audio only ────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center gap-8 px-4">
-      {/* Avatar card */}
+      {/* Hidden audio element — autoPlay in JSX satisfies browser autoplay policy */}
+      <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" />
+
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
-          {/* Outer pulse ring when active */}
           <div className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping" />
           <div className="relative w-24 h-24 rounded-full bg-white/10 ring-2 ring-emerald-500/40 ring-offset-4 ring-offset-[#0f1117] flex items-center justify-center text-4xl">
             👨‍⚕️

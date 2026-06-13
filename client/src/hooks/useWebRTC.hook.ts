@@ -1,4 +1,3 @@
-// hooks/useWebRTC.hook.ts
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -27,19 +26,16 @@ export function useWebRTC({ appointmentId, callType, role }: UseWebRTCOptions) {
   const [peerVideoOff, setPeerVideoOff]     = useState(false);
   const [duration, setDuration]             = useState(0);
 
-  const socketRef      = useRef<Socket | null>(null);
-  const pcRef          = useRef<RTCPeerConnection | null>(null);
-  const localStream    = useRef<MediaStream | null>(null);
-  const remoteStream   = useRef<MediaStream | null>(null);
-  const localVideoEl   = useRef<HTMLVideoElement | null>(null);
-  const remoteVideoEl  = useRef<HTMLVideoElement | null>(null);
-  // Always-present hidden <audio> element — handles audio for both call types.
-  // For video calls this ensures audio plays even before the <video> element mounts.
-  // For audio-only calls this is the sole output element.
-  const remoteAudioEl  = useRef<HTMLAudioElement | null>(null);
-  const timerRef       = useRef<ReturnType<typeof setInterval> | null>(null);
-  const audioMutedRef  = useRef(false);
-  const videoOffRef    = useRef(false);
+  const socketRef     = useRef<Socket | null>(null);
+  const pcRef         = useRef<RTCPeerConnection | null>(null);
+  const localStream   = useRef<MediaStream | null>(null);
+  const remoteStream  = useRef<MediaStream | null>(null);
+  const localVideoEl  = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoEl = useRef<HTMLVideoElement | null>(null);
+  const remoteAudioEl = useRef<HTMLAudioElement | null>(null);
+  const timerRef      = useRef<ReturnType<typeof setInterval> | null>(null);
+  const audioMutedRef = useRef(false);
+  const videoOffRef   = useRef(false);
 
   const iceCandidateQueue = useRef<RTCIceCandidateInit[]>([]);
 
@@ -56,36 +52,25 @@ export function useWebRTC({ appointmentId, callType, role }: UseWebRTCOptions) {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
   }, []);
 
-  // ── Ensure the hidden <audio> element exists ───────────────────────────
-  const ensureAudioEl = useCallback(() => {
-    if (!remoteAudioEl.current) {
-      const audio = document.createElement('audio');
-      audio.autoplay = true;
-      audio.style.display = 'none';
-      document.body.appendChild(audio);
-      remoteAudioEl.current = audio;
-      log('Created hidden <audio> element for remote audio');
-    }
-    return remoteAudioEl.current;
-  }, []);
-
-  // ── Attach remote stream to outputs ───────────────────────────────────
-  // Always pipes audio through the hidden <audio> element.
-  // For video calls, also pipes the full stream to the <video> element
-  // (video element handles video track; audio element handles audio track).
+  // ── Attach remote stream to all output elements ────────────────────────
   const attachRemoteStream = useCallback((stream: MediaStream) => {
-    // Audio — always attach to the hidden audio element
-    const audioEl = ensureAudioEl();
-    audioEl.srcObject = stream;
-    audioEl.play().catch(e => warn('remoteAudioEl.play() failed', e));
-    log('Remote stream attached to hidden audio element');
+    // Always pipe through the declarative <audio> ref — browser autoplay policy
+    // is satisfied because the element comes from JSX (autoPlay attribute),
+    // not document.createElement().
+    if (remoteAudioEl.current) {
+      remoteAudioEl.current.srcObject = stream;
+      remoteAudioEl.current.play().catch(e => warn('remoteAudioEl.play() failed', e));
+      log('Remote stream attached to <audio> element');
+    } else {
+      warn('remoteAudioEl is null — audio will not play');
+    }
 
-    // Video — attach to the video element only for video calls
+    // For video calls also attach to the <video> element when it is mounted
     if (callType === 'video' && remoteVideoEl.current) {
       remoteVideoEl.current.srcObject = stream;
-      log('Remote stream also attached to video element');
+      log('Remote stream attached to <video> element');
     }
-  }, [callType, ensureAudioEl]);
+  }, [callType]);
 
   // ── Flush queued ICE candidates ────────────────────────────────────────
   const flushIceQueue = useCallback(async (pc: RTCPeerConnection) => {
@@ -119,10 +104,8 @@ export function useWebRTC({ appointmentId, callType, role }: UseWebRTCOptions) {
 
     pc.ontrack = (event) => {
       log(`ontrack fired: kind=${event.track.kind} streams=${event.streams.length}`);
-
       if (!remoteStream.current) remoteStream.current = new MediaStream();
 
-      // Collect all tracks from the event
       const tracksToAdd = event.streams[0]
         ? event.streams[0].getTracks()
         : [event.track];
@@ -135,7 +118,6 @@ export function useWebRTC({ appointmentId, callType, role }: UseWebRTCOptions) {
         }
       });
 
-      // Always re-attach whenever a new track arrives so nothing is missed
       attachRemoteStream(remoteStream.current!);
     };
 
@@ -160,8 +142,10 @@ export function useWebRTC({ appointmentId, callType, role }: UseWebRTCOptions) {
       if (pc.connectionState === 'connected') {
         setCallState('connected');
         startTimer();
-        // Re-attach in case the video element mounted after ontrack fired
-        if (remoteStream.current) attachRemoteStream(remoteStream.current);
+        // Re-attach after React re-renders the connected UI and mounts the elements
+        setTimeout(() => {
+          if (remoteStream.current) attachRemoteStream(remoteStream.current);
+        }, 100);
       }
       if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
         warn('Connection dropped');
@@ -187,12 +171,7 @@ export function useWebRTC({ appointmentId, callType, role }: UseWebRTCOptions) {
     socketRef.current = null;
     if (localVideoEl.current)  localVideoEl.current.srcObject  = null;
     if (remoteVideoEl.current) remoteVideoEl.current.srcObject = null;
-    if (remoteAudioEl.current) {
-      remoteAudioEl.current.srcObject = null;
-      remoteAudioEl.current.remove();
-      remoteAudioEl.current = null;
-      log('Removed hidden audio element');
-    }
+    if (remoteAudioEl.current) remoteAudioEl.current.srcObject = null;
   }, [stopTimer]);
 
   // ── Create and send offer (doctor only) ───────────────────────────────
@@ -224,7 +203,6 @@ export function useWebRTC({ appointmentId, callType, role }: UseWebRTCOptions) {
     async function init() {
       setCallState('joining');
 
-      // Step 1: Get media
       let stream: MediaStream;
       try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -247,14 +225,12 @@ export function useWebRTC({ appointmentId, callType, role }: UseWebRTCOptions) {
         localVideoEl.current.srcObject = stream;
       }
 
-      // Step 2: Connect socket
       const socket = io(`${process.env.NEXT_PUBLIC_SOCKET_BACKEND_URL2}/call`, {
         withCredentials: true,
         transports: ['websocket'],
       });
       socketRef.current = socket;
 
-      // Step 3: Socket events
       socket.on('connect', () => {
         log(`Socket connected: id=${socket.id}`);
         socket.emit('join_room', { appointmentId, callType });
@@ -347,13 +323,23 @@ export function useWebRTC({ appointmentId, callType, role }: UseWebRTCOptions) {
 
   const setRemoteVideoRef = useCallback((el: HTMLVideoElement | null) => {
     remoteVideoEl.current = el;
-    // When the video element mounts (after state becomes 'connected'),
-    // attach the stream if we already have it
     if (el && remoteStream.current && callType === 'video') {
       el.srcObject = remoteStream.current;
       log('Remote stream attached to video element via ref callback');
     }
   }, [callType]);
+
+  // ── Key fix: declarative ref for the <audio> element in JSX ───────────
+  // The browser grants autoplay because the element is rendered via JSX
+  // with the autoPlay attribute — not created imperatively via JS.
+  const setRemoteAudioRef = useCallback((el: HTMLAudioElement | null) => {
+    remoteAudioEl.current = el;
+    if (el && remoteStream.current) {
+      el.srcObject = remoteStream.current;
+      el.play().catch(e => warn('remoteAudioEl.play() via ref failed', e));
+      log('Remote stream attached to audio element via ref callback');
+    }
+  }, []);
 
   // ── Controls ───────────────────────────────────────────────────────────
   const toggleAudio = useCallback(() => {
@@ -362,6 +348,12 @@ export function useWebRTC({ appointmentId, callType, role }: UseWebRTCOptions) {
     audioMutedRef.current = newMuted;
     localStream.current.getAudioTracks().forEach(t => { t.enabled = !newMuted; });
     setAudioMuted(newMuted);
+
+    // Piggyback on this user gesture to unlock remote audio if still paused
+    if (remoteAudioEl.current?.paused && remoteAudioEl.current.srcObject) {
+      remoteAudioEl.current.play().catch(() => {});
+    }
+
     socketRef.current?.emit('media_toggle', {
       appointmentId,
       audio: !newMuted,
@@ -394,6 +386,7 @@ export function useWebRTC({ appointmentId, callType, role }: UseWebRTCOptions) {
     duration,
     localVideoRef:  setLocalVideoRef,
     remoteVideoRef: setRemoteVideoRef,
+    remoteAudioRef: setRemoteAudioRef,  // ← new
     toggleAudio, toggleVideo, endCall,
   };
 }

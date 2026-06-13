@@ -61,7 +61,7 @@ function DoctorSessionInner() {
 
   const {
     callState, audioMuted, videoOff, peerAudioMuted, peerVideoOff,
-    duration, localVideoRef, remoteVideoRef,
+    duration, localVideoRef, remoteVideoRef, remoteAudioRef,
     toggleAudio, toggleVideo, endCall,
   } = useWebRTC({ appointmentId, callType, role: 'doctor' });
 
@@ -98,8 +98,7 @@ function DoctorSessionInner() {
     }
   }
 
-  const isVideo  = callType === 'video';
-  const isActive = callState === 'connected';
+  const isVideo = callType === 'video';
 
   // ── Session marked ────────────────────────────────────────────────
   if (sessionMarked) {
@@ -170,7 +169,9 @@ function DoctorSessionInner() {
           <IconPhone className="w-8 h-8 text-white/70" />
         </div>
         <p className="text-lg font-medium text-white/80">
-          {callState === 'waiting' ? 'Waiting for patient to join…' : STATE_MESSAGE[callState as keyof typeof STATE_MESSAGE] ?? 'Connecting…'}
+          {callState === 'waiting'
+            ? 'Waiting for patient to join…'
+            : STATE_MESSAGE[callState as keyof typeof STATE_MESSAGE] ?? 'Connecting…'}
         </p>
         <Controls
           audioMuted={audioMuted} videoOff={videoOff} isVideo={isVideo}
@@ -184,6 +185,9 @@ function DoctorSessionInner() {
   if (isVideo) {
     return (
       <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center p-4">
+        {/* Hidden audio element — autoPlay in JSX satisfies browser autoplay policy */}
+        <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" />
+
         <div className="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden bg-[#1a1d27]">
           <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
 
@@ -235,6 +239,9 @@ function DoctorSessionInner() {
   // ── Connected — audio only ────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center gap-8 px-4">
+      {/* Hidden audio element — autoPlay in JSX satisfies browser autoplay policy */}
+      <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" />
+
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
           <div className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping" />
