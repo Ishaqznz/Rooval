@@ -1,8 +1,12 @@
+'use client';
+
 import { Button } from "@/components/reusable/ui/button";
 import { ArrowRight, Calendar, Video, Shield } from "lucide-react";
 import heroDoctor from "@/assets/hero-doctor.png";
+import { useRouter } from "next/navigation";
 
 const Hero = () => {
+  const router = useRouter()
   return (
     <section className="pt-32 sm:pt-40 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
@@ -24,12 +28,9 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6">
+              <Button size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6" onClick={() => router.push('/doctors')}>
                 Book Appointment
                 <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button size="lg" variant="outline" className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6">
-                Learn More
               </Button>
             </div>
 
