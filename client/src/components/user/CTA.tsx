@@ -21,7 +21,7 @@ const CTA = () => {
               size="lg" 
               variant="outline"
               className="bg-white text-primary hover:bg-white/90 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6"
-              onClick={() => router.push('/get-started')}
+              onClick={() => router.push('/role-selection')}
             >
               Get Started Free
               <ArrowRight className="ml-2 w-5 h-5" />
