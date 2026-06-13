@@ -1,7 +1,11 @@
+'use client';
+
 import { Button } from "../reusable/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const CTA = () => {
+  const router = useRouter()
   return (
     <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
@@ -17,16 +21,10 @@ const CTA = () => {
               size="lg" 
               variant="outline"
               className="bg-white text-primary hover:bg-white/90 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6"
+              onClick={() => router.push('/get-started')}
             >
               Get Started Free
               <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="border-white text-white hover:bg-white/10 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6"
-            >
-              Talk to Sales
             </Button>
           </div>
         </div>
