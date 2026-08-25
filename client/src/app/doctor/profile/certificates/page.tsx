@@ -7,7 +7,7 @@ import { Badge } from "@/components/reusable/ui/badge";
 import { Alert, AlertDescription } from "@/components/reusable/ui/alert";
 import { Progress } from "@/components/reusable/ui/progress";
 import { Upload, CheckCircle, XCircle, Clock, AlertCircle, FileText, X } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { doctorServiceApi } from "@/services/doctorApiService";
 import { toast } from "sonner";
@@ -25,25 +25,30 @@ interface Certificate {
 }
 
 export default function CertificatesLicenses() {
-  const { user } = useAuth();
-  const { setApi } = useAuth();
+  const { user, setApi } = useAuth();
 
-  const userCertificate = {
-    name: 'Medical License Certificate',
-    status: user?.status,
-    uploadedDate: "2025-11-07",
-    documentType: "image"
-  }
-
-  const [certificate, setCertificate] = useState<Certificate | null>(userCertificate);
+  const [certificate, setCertificate] = useState<Certificate | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
   const ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+
+  // Keep certificate in sync with `user` whenever auth data loads or changes
+  useEffect(() => {
+    if (!user) return; // auth still loading, wait
+
+    setCertificate({
+      name: 'Medical License Certificate',
+      status: user?.status,
+      uploadedDate: "2025-11-07",
+      documentType: "image",
+      rejectionReason: user?.profile?.rejectionReason,
+    });
+  }, [user]);
 
   const validateFile = (file: File): string | null => {
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -58,7 +63,7 @@ export default function CertificatesLicenses() {
   const handleFileSelect = (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
-    const file = files[0]; 
+    const file = files[0];
     const error = validateFile(file);
 
     if (error) {
@@ -110,16 +115,15 @@ export default function CertificatesLicenses() {
     }, 200);
 
     try {
-     
-      const doctorReupload = await doctorServiceApi.fileReUpload({ certificates: [selectedFile] })
-      setApi(((value) => value + 1))
+      const doctorReupload = await doctorServiceApi.fileReUpload({ certificates: [selectedFile] });
+      setApi((value: number) => value + 1);
 
       setUploadProgress(100);
-      
+
       if (!doctorReupload?.data?.fileReUpload) {
-        toast.error('upload failed')
+        toast.error('upload failed');
       }
-      toast.success('uplaoded succefully');
+      toast.success('uploaded successfully');
 
       setCertificate({
         name: selectedFile.name,
@@ -142,6 +146,21 @@ export default function CertificatesLicenses() {
     clearInterval(interval);
   };
 
+  // Show a lightweight loading state while auth/user is being fetched
+  if (!user) {
+    return (
+      <div className="flex-1 p-8">
+        <div className="max-w-4xl">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Medical Certificate</h1>
+          <p className="text-muted-foreground mb-8">
+            Upload and manage your medical license verification.
+          </p>
+          <Card className="p-6 text-sm text-muted-foreground">Loading certificate status...</Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 p-8">
       <div className="max-w-4xl">
@@ -151,7 +170,6 @@ export default function CertificatesLicenses() {
         </p>
 
         <div className="space-y-6">
-          {/* Current Certificate Status */}
           {certificate && (
             <Card className="p-6">
               <div className="flex items-start justify-between gap-4 mb-6">
@@ -159,7 +177,7 @@ export default function CertificatesLicenses() {
                   <div className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                     <FileText className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  
+
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-xl font-semibold text-foreground">{certificate.name}</h3>
@@ -182,7 +200,7 @@ export default function CertificatesLicenses() {
                         </Badge>
                       )}
                     </div>
-                    
+
                     <div className="space-y-1 text-sm text-muted-foreground">
                       <p>Uploaded: {new Date(certificate.uploadedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                       {certificate.verifiedDate && (
@@ -220,8 +238,8 @@ export default function CertificatesLicenses() {
                   <Alert className="border-red-200 bg-red-50 mb-4">
                     <AlertCircle className="h-4 w-4 text-red-600" />
                     <AlertDescription className="text-red-800">
-                      <strong>Your application was rejected.</strong><br />
-                      { user?.profile?.personal?.rejectionReason }
+                      <strong>Your application was rejected. Because, {certificate.rejectionReason}</strong><br />
+                      {user?.profile?.personal?.rejectionReason}
                     </AlertDescription>
                   </Alert>
                   <Alert className="border-primary bg-primary/5">
@@ -235,45 +253,42 @@ export default function CertificatesLicenses() {
             </Card>
           )}
 
-          {/* Upload Section - Show only if no certificate or rejected */}
           {(!certificate || certificate.status === "rejected") && (
             <Card className="p-6">
               <h3 className="text-lg font-semibold text-foreground mb-4">
                 {certificate?.status === "rejected" ? "Re-upload Certificate" : "Upload Certificate"}
               </h3>
-            <div 
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
-                isDragging 
-                  ? 'border-primary bg-primary/5' 
-                  : 'border-border hover:border-primary/50'
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <div className="flex flex-col items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Upload className="h-6 w-6 text-primary" />
+              <div
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                  isDragging
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Upload className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-base font-medium text-foreground mb-1">Click to upload or drag and drop</p>
+                    <p className="text-sm text-muted-foreground">
+                      PDF, JPG, PNG (Max 10MB)
+                    </p>
+                  </div>
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={handleInputChange}
+                  />
                 </div>
-                <div>
-                  <p className="text-base font-medium text-foreground mb-1">Click to upload or drag and drop</p>
-                  <p className="text-sm text-muted-foreground">
-                    PDF, JPG, PNG (Max 10MB)
-                  </p>
-                </div>
-                <Input 
-                  ref={fileInputRef}
-                  type="file" 
-                  className="hidden" 
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={handleInputChange}
-                  multiple
-                />
               </div>
-            </div>
 
-              {/* Selected File Preview */}
               {selectedFile && (
                 <div className="mt-4 space-y-3">
                   <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
@@ -300,7 +315,6 @@ export default function CertificatesLicenses() {
                     </Button>
                   </div>
 
-                  {/* Upload Progress */}
                   {isUploading && (
                     <div className="space-y-2">
                       <Progress value={uploadProgress} className="h-2" />
@@ -310,8 +324,7 @@ export default function CertificatesLicenses() {
                     </div>
                   )}
 
-                  {/* Upload Button */}
-                  <Button 
+                  <Button
                     className="w-full"
                     onClick={handleUpload}
                     disabled={isUploading}

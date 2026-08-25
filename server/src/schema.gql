@@ -683,6 +683,7 @@ type Personal {
   preferredMode: String
   profileVisibility: Boolean
   registrationNumber: String
+  rejectionReason: String
   specializations: [String!]
   state: String
   username: String
@@ -713,6 +714,7 @@ type Query {
   getReviewsByUserId: [Review!]!
   getUserConversations: [Conversation!]!
   getWallet: Wallet!
+  isAuthenticated: Boolean!
   listAllAppointments(input: ListAllAppointmentsInput!): ListAppointments!
   listAppointments(input: ListAppointmentsInput!): ListAppointments!
   listDoctors(input: ListDoctorsInput!): ListDoctors!

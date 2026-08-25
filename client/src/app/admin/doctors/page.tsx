@@ -215,6 +215,21 @@ export default function Doctors() {
     fetchDoctors();
   }, [currentPage, debouncedSearch, statusFilter, advanced, reload]);
 
+  // ── Radix nested-dialog pointer-events safety net ──────────────────────────
+  // When an AlertDialog is layered on top of a Dialog and both close around
+  // the same time, Radix's body pointer-events cleanup for each dialog can
+  // race and leave `document.body` stuck with `pointer-events: none`,
+  // making every button on the page unclickable. This effect guarantees the
+  // lock is released whenever neither dialog is actually open.
+  useEffect(() => {
+    if (!isDialogOpen && !pendingAction) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = '';
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [isDialogOpen, pendingAction]);
+
   const handleViewDetails = (doctor: any) => {
     setSelectedDoctor(doctor);
     setShowCertificate(false);
@@ -250,9 +265,18 @@ export default function Doctors() {
       prev.map((d) => (d.id === doctorId ? { ...d, status: action } : d))
     );
     toast.success(`Doctor application ${action}`);
+
+    // Close the AlertDialog (inner modal) first...
     setPendingAction(null);
     setRejectionReason("");
-    setIsDialogOpen(false);
+
+    // ...then close the outer Dialog on the next tick. Closing both dialogs
+    // in the same tick is what triggers Radix's pointer-events race —
+    // deferring this avoids it.
+    setTimeout(() => {
+      setIsDialogOpen(false);
+    }, 0);
+
     setReload((n) => n + 1);
   };
 
@@ -763,6 +787,7 @@ export default function Doctors() {
       {/* Detail dialog */}
       <Dialog
         open={isDialogOpen}
+        modal={!pendingAction}
         onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) setShowCertificate(false);
@@ -890,9 +915,11 @@ export default function Doctors() {
       {/* Confirm dialog */}
       <AlertDialog
         open={!!pendingAction}
-        onOpenChange={() => {
-          setPendingAction(null);
-          setRejectionReason("");
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingAction(null);
+            setRejectionReason("");
+          }
         }}
       >
         <AlertDialogContent>

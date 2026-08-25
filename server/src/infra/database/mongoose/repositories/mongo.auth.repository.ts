@@ -220,7 +220,7 @@ export class MongoAuthRepository implements IAuthRepository {
     }
 
     const userExists = await this._userModel.findOne({ email: data.email }).lean<IMongoUserDocument>();
-    if (userExists.isAdmin) throw new BusinessRuleViolationError(UserErrorType.USER_HAVE_NO_ACCESS)
+    if (userExists?.isAdmin) throw new BusinessRuleViolationError(UserErrorType.USER_HAVE_NO_ACCESS)
     if (userExists) {
       const entity = UserMapper.toUserEntity(userExists as unknown as IMongoUserDocument)
       if (typeof entity == 'string') throw new BusinessRuleViolationError(entity)

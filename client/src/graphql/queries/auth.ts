@@ -98,3 +98,11 @@ export const GOOGLE_AUTH = {
   `,
   variables: {}
 }
+
+export const IS_AUTHENTICATED = () => ({
+  query: `#graphql
+    query isAuthenticated {
+      isAuthenticated
+    }
+  `
+})

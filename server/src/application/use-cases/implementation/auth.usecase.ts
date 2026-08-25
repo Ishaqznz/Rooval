@@ -21,7 +21,6 @@ import { GoogleLogin } from 'src/core/entities/user/googleLogin.entity';
 import { INotificationOrchestrator } from 'src/application/orchestrators/interface/notification.orch.interface';
 import { NotificationMessages, NotificationType } from 'src/core/enums/notifications/notification.enum';
 import { IWalletUseCase } from '../interface/wallet.usecase.interface';
-import { Role } from 'src/core/enums/user/role.enum';
 
 @Injectable()
 export class AuthUseCase implements IAuthUseCase {

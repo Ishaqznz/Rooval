@@ -4,7 +4,6 @@ import { GraphQLQuery } from "./interfaces/common/graphql";
 export async function apiRequest(query: GraphQLQuery, requestType: string = "default") {
 
   if (query.formData) {
-    console.log('form data in the front: ', query.formData)
     const response = await axiosInstance.post("", query.formData, {
       headers: {
         "apollo-require-preflight": "true",

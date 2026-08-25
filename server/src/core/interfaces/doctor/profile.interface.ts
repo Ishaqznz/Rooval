@@ -15,6 +15,7 @@ export interface IDoctorProfile {
         preferredMode: string
         profileVisibility: boolean
         chatEnabledUsers: [string]
+        rejectionReason: string
     }
 
     clinic: {

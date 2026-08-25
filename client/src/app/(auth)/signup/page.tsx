@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/reusable/ui/spinner";
 import { useGoogleLogin } from "@/lib/google-login";
+import { useAuth } from "@/context/AuthContext";
 
 const signupSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters").max(100, "Full name is too long"),
@@ -34,6 +35,7 @@ const signupSchema = z.object({
 type SignupFormData = z.infer<typeof signupSchema>;
 
 const Signup = () => {
+  const { setApi } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -114,12 +116,13 @@ const Signup = () => {
             role: role
           }
         });
-
+        
         if (login?.errors) {
-          toast.error('Google Auth failed!')
+          toast.error(login?.errors?.[0]?.message || 'Google Auth failed!')
           return;
         }
 
+        setApi((value) => value + 1);
         toast.success('successful!')
         if (role == 'doctor') {
           router.push('/doctor/onboarding')

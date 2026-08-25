@@ -64,6 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 registrationNumber
                 preferredMode
                 profileVisibility
+                rejectionReason
               }
               clinic {
                   name

@@ -37,4 +37,7 @@ export class Personal {
 
   @Field({ nullable: true })
   profileVisibility?: boolean;
+
+  @Field({ nullable: true })
+  rejectionReason?: string
 }

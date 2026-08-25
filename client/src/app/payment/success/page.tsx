@@ -69,7 +69,7 @@ function PaymentSuccessInner() {
 
             {appointmentId && (
               <div className="mt-3 mb-6 px-4 py-2.5 bg-purple-50 border border-purple-100 rounded-xl w-full">
-                <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-0.5">Appointment ID</p>
+                <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-0.5">Appointment Booking ID</p>
                 <p className="text-sm font-mono text-[#7d5d9a] font-semibold break-all">{appointmentId}</p>
               </div>
             )}

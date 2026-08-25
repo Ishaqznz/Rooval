@@ -1,5 +1,5 @@
 import { Inject, Injectable, LoggerService } from '@nestjs/common';
-import { Mutation, Args } from '@nestjs/graphql';
+import { Query, Mutation, Args } from '@nestjs/graphql';
 import { Resolver } from '@nestjs/graphql';
 import { User } from 'src/adapters/api/graphql/types/user/model/user.model';
 import { SignUpInput } from 'src/adapters/api/graphql/types/user/input/signup.input';
@@ -18,6 +18,7 @@ import { AuthErrorType } from 'src/core/enums/auth/auth.enums';
 import { IAuthUseCase } from 'src/application/use-cases/interface/auth.usecase.interface';
 import { GoogleLoginInput } from 'src/adapters/api/graphql/types/user/input/googleLogin.input';
 import { GqlContext } from 'src/common/types/gql-context.type';
+import { TestJwtAuthGuard } from 'src/common/guards/testAuthGuard';
 
 @Injectable()
 @Resolver(() => User)
@@ -133,5 +134,12 @@ export class AuthResolver {
     const refreshToken = await this._authUseCase.generateRefreshToken(user.id, user.role)
     TokenUtil.sendAuthCookies(res, accessToken, refreshToken)
     return user;
+  }
+
+  @Query(() => Boolean)
+  @UseGuards(TestJwtAuthGuard)
+  async isAuthenticated(
+  ): Promise<boolean> {
+    return true;
   }
 }

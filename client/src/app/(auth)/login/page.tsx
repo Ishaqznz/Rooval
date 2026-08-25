@@ -92,7 +92,7 @@ const Login = () => {
         });
 
         if (login?.errors) {
-          toast.error('Google Auth failed!')
+          toast.error(login?.errors?.[0]?.message || 'Google Auth failed!')
           return;
         }
 

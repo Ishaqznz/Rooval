@@ -8,7 +8,8 @@ import {
   VERIFY_RESET_PASSWORD,
   LOGOUT_USER_MUTATION,
   REFRESH_TOKEN,
-  GOOGLE_AUTH
+  GOOGLE_AUTH,
+  IS_AUTHENTICATED
 } from "@/graphql/queries/auth";
 
 export const authServiceApi = {
@@ -46,5 +47,13 @@ export const authServiceApi = {
 
   googleAuth: async (variables: { input: { fullName: string, email: string, role: string, googleId: string } }) => {
     return apiRequest({ ...GOOGLE_AUTH, variables })
+  },
+
+  isAuthenticated: async () => {
+    const queryObj = IS_AUTHENTICATED()
+    const res = await apiRequest({ ...queryObj });
+    console.log('the response in the isAuthenticated: ', res)
+    if (res?.errors) return false;
+    return true
   }
 };
