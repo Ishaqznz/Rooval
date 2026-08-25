@@ -1,5 +1,5 @@
 import { ValueObject } from "../valueObject";
-import { IRating } from "src/core/interfaces/doctor/listing.interface";
+import { IRating } from "../../interfaces/doctor/listing.interface";
 
 export class RatingVO extends ValueObject<IRating> {
   private constructor(props: IRating) {

@@ -1,5 +1,5 @@
-import { IWalletResponseDTO } from "src/application/dto/wallet/response/wallet.response.dto";
-import { Wallet } from "src/core/entities/wallet/wallet.entity";
+import { IWalletResponseDTO } from "../../dto/wallet/response/wallet.response.dto";
+import { Wallet } from "../../../core/entities/wallet/wallet.entity";
 
 export class WalletOutputMapper {
     static toDto(entity: Wallet): IWalletResponseDTO {

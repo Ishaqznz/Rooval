@@ -1,8 +1,8 @@
-import { User } from "src/core/entities/user/user.entity";
+import { User } from "../../../../core/entities/user/user.entity";
 import { IMongoUserDocument } from "../interfaces/documents/mongo.user.document";
-import { BusinessRuleViolationError } from "src/core/errors/businessRule.error";
-import { UserErrorType } from "src/core/enums/user/user.enums";
-import { Role } from "src/core/enums/user/role.enum";
+import { BusinessRuleViolationError } from "../../../../core/errors/businessRule.error";
+import { UserErrorType } from "../../../../core/enums/user/user.enums";
+import { Role } from "../../../../core/enums/user/role.enum";
 
 export class UserMapper {
   static toUserEntity(user: IMongoUserDocument): User | string {

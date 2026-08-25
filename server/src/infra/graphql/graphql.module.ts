@@ -4,11 +4,11 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { GraphQLError } from 'graphql';
 
-import { AvailabilityLoader } from 'src/adapters/api/graphql/loaders/availability.loader';
-import { AppointmentLoader } from 'src/adapters/api/graphql/loaders/appointment.loader';
+import { AvailabilityLoader } from '../../adapters/api/graphql/loaders/availability.loader';
+import { AppointmentLoader } from '../../adapters/api/graphql/loaders/appointment.loader';
 import { GraphqlConfigModule } from '../modules/graphql.module';
-import { DoctorLoader } from 'src/adapters/api/graphql/loaders/doctor.loader';
-import { UserLoader } from 'src/adapters/api/graphql/loaders/user.loader';
+import { DoctorLoader } from '../../adapters/api/graphql/loaders/doctor.loader';
+import { UserLoader } from '../../adapters/api/graphql/loaders/user.loader';
 
 @Module({
   imports: [

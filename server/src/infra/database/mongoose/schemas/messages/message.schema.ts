@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 export type MessageDocument = MongoMessageSchema & Document;
-import { MessageStatus } from 'src/core/interfaces/chat/chat.interfaces';
+import { MessageStatus } from '../../../../../core/interfaces/chat/chat.interfaces';
 
 @Schema({ timestamps: true, collection: 'messages' })
 export class MongoMessageSchema {

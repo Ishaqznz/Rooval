@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { WalletTransactionType } from 'src/core/enums/wallet/wallet.enum';
-import { WalletTransactionReason } from 'src/core/enums/wallet/wallet.enum';
+import { WalletTransactionType } from '../../../../../core/enums/wallet/wallet.enum';
+import { WalletTransactionReason } from '../../../../../core/enums/wallet/wallet.enum';
 
 export type WalletTransactionDocument =
   MongoWalletTransactionSchema & Document;

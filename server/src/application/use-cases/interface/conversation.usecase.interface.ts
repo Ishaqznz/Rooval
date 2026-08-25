@@ -1,6 +1,6 @@
-import { ICreateConversationRequestDTO } from "src/application/dto/conversation/request/createConversation.request.dto"
-import { IUpdateLastMessageRequestDTO } from "src/application/dto/conversation/request/updateLastMessage.request.dto"
-import { IConversationResponseDTO } from "src/application/dto/conversation/response/conversation.response.dto"
+import { ICreateConversationRequestDTO } from "../../dto/conversation/request/createConversation.request.dto"
+import { IUpdateLastMessageRequestDTO } from "../../dto/conversation/request/updateLastMessage.request.dto"
+import { IConversationResponseDTO } from "../../dto/conversation/response/conversation.response.dto"
 
 export interface IConversationUseCase {
     getConversations(userIds: string[]): Promise<IConversationResponseDTO> 

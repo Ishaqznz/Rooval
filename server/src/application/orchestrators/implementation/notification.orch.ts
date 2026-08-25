@@ -1,8 +1,8 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { INotificationOrchestrator } from "../interface/notification.orch.interface";
-import { INotificationUseCase } from "src/application/use-cases/interface/notification.usecase.interface";
-import { INotificationService } from "src/application/services/notification.service.interface";
-import { ICreateNotificationRequestDTO } from "src/application/dto/notification/request/create.request.dto";
+import { INotificationUseCase } from "../../use-cases/interface/notification.usecase.interface";
+import { INotificationService } from "../../services/notification.service.interface";
+import { ICreateNotificationRequestDTO } from "../../dto/notification/request/create.request.dto";
 
 @Injectable()
 export class NotificationOrchestrator

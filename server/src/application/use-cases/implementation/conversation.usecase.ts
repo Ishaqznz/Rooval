@@ -1,12 +1,12 @@
-import { IConversationResponseDTO } from "src/application/dto/conversation/response/conversation.response.dto";
+import { IConversationResponseDTO } from "../../dto/conversation/response/conversation.response.dto";
 import { IConversationUseCase } from "../interface/conversation.usecase.interface";
 import { Inject } from "@nestjs/common";
-import { IConversationRepository } from "src/core/repositories/conversation.repository.interface";
-import { ConversationOutputMapper } from "src/application/mapper/conversation/conversation.output.mapper";
-import { IUpdateLastMessageRequestDTO } from "src/application/dto/conversation/request/updateLastMessage.request.dto";
-import { UpdateLastMessage } from "src/core/entities/conversation/updateLastMessage.entity";
-import { CreateConversation } from "src/core/entities/conversation/createConversation.entity";
-import { ICreateConversationRequestDTO } from "src/application/dto/conversation/request/createConversation.request.dto";
+import { IConversationRepository } from "../../../core/repositories/conversation.repository.interface";
+import { ConversationOutputMapper } from "../../mapper/conversation/conversation.output.mapper";
+import { IUpdateLastMessageRequestDTO } from "../../dto/conversation/request/updateLastMessage.request.dto";
+import { UpdateLastMessage } from "../../../core/entities/conversation/updateLastMessage.entity";
+import { CreateConversation } from "../../../core/entities/conversation/createConversation.entity";
+import { ICreateConversationRequestDTO } from "../../dto/conversation/request/createConversation.request.dto";
 import { IUserUseCase } from "../interface/user.usecase.interface";
 
 export class ConversationUseCase implements IConversationUseCase {

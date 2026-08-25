@@ -1,20 +1,20 @@
-import { ICreateNotificationRequestDTO } from "src/application/dto/notification/request/create.request.dto";
+import { ICreateNotificationRequestDTO } from "../../dto/notification/request/create.request.dto";
 import { INotificationUseCase } from "../interface/notification.usecase.interface";
-import { INotificationResponseDTO } from "src/application/dto/notification/response/notification.response.dto";
-import { Notification } from "src/core/entities/notifications/notification.entity";
+import { INotificationResponseDTO } from "../../dto/notification/response/notification.response.dto";
+import { Notification } from "../../../core/entities/notifications/notification.entity";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
-import { INotificationRepository } from "src/core/repositories/notification.repository.interface";
-import { NotificationOutputMapper } from "src/application/mapper/notification/notification.output.mapper";
-import { ISendAdminNotificationRequestDTO } from "src/application/dto/notification/request/send.request.dto";
-import { SendAdminNotification } from "src/core/entities/notifications/sendAdminNotification.entity";
+import { INotificationRepository } from "../../../core/repositories/notification.repository.interface";
+import { NotificationOutputMapper } from "../../mapper/notification/notification.output.mapper";
+import { ISendAdminNotificationRequestDTO } from "../../dto/notification/request/send.request.dto";
+import { SendAdminNotification } from "../../../core/entities/notifications/sendAdminNotification.entity";
 import { IUserUseCase } from "../interface/user.usecase.interface";
-import { Audience, NotificationErrorType } from "src/core/enums/notifications/notification.enum";
-import { INotificationOrchestrator } from "src/application/orchestrators/interface/notification.orch.interface";
+import { Audience, NotificationErrorType } from "../../../core/enums/notifications/notification.enum";
+import { INotificationOrchestrator } from "../../orchestrators/interface/notification.orch.interface";
 import { IDoctorUseCase } from "../interface/doctor.usecase.interface";
-import { BusinessRuleViolationError } from "src/core/errors/businessRule.error";
+import { BusinessRuleViolationError } from "../../../core/errors/businessRule.error";
 import { IAppointmentUseCase } from "../interface/appointment.usecase.interface";
-import { INotificationService } from "src/application/services/notification.service.interface";
-import { ISendCallNotificationRequest } from "src/application/dto/notification/request/sendCallNotification.request.dto";
+import { INotificationService } from "../../services/notification.service.interface";
+import { ISendCallNotificationRequest } from "../../dto/notification/request/sendCallNotification.request.dto";
 
 @Injectable()
 export class NotificationUseCase implements INotificationUseCase {

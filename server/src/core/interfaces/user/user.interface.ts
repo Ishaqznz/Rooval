@@ -1,4 +1,4 @@
-import { AuthFilter, RoleFilter, SortField, StatusFilter, SortOrder } from "src/core/enums/user/user.enums"
+import { AuthFilter, RoleFilter, SortField, StatusFilter, SortOrder } from "../../enums/user/user.enums"
 
 export interface IUserQueryParams {
     page: number

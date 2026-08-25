@@ -1,4 +1,4 @@
-import { IDoctorProfile } from "src/core/interfaces/doctor/profile.interface";
+import { IDoctorProfile } from "../../../../core/interfaces/doctor/profile.interface";
 
 export interface IDoctorResponseDTO {
   id: string;

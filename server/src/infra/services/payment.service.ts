@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { IAppointmentResponseDTO } from "src/application/dto/appointment/response/appointment.response.dto";
-import { ICreateCheckoutSessionResponse } from "src/application/dto/checkout/request/create.request.dto";
-import { IPaymentService } from "src/application/services/payment.service.interface";
-import { stripe } from "src/config/stripe";
+import { IAppointmentResponseDTO } from "../../application/dto/appointment/response/appointment.response.dto";
+import { ICreateCheckoutSessionResponse } from "../../application/dto/checkout/request/create.request.dto";
+import { IPaymentService } from "../../application/services/payment.service.interface";
+import { stripe } from "../../config/stripe";
 
 @Injectable()
 export class PaymentService implements IPaymentService {

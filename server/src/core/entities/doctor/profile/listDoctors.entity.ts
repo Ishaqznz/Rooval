@@ -1,8 +1,8 @@
-import { ConsultationType, DoctorSortBy, OrderBy } from "src/core/enums/doctor/doctor.enums";
-import { PageVO } from "src/core/valueOfObjects/doctor/page.vo";
-import { LimitVO } from "src/core/valueOfObjects/doctor/limit.vo";
-import { FeeRangeVO } from "src/core/valueOfObjects/doctor/feeRange.vo";
-import { RatingVO } from "src/core/valueOfObjects/doctor/rating.vo";
+import { ConsultationType, DoctorSortBy, OrderBy } from "../../../enums/doctor/doctor.enums";
+import { PageVO } from "../../../valueOfObjects/doctor/page.vo";
+import { LimitVO } from "../../../valueOfObjects/doctor/limit.vo";
+import { FeeRangeVO } from "../../../valueOfObjects/doctor/feeRange.vo";
+import { RatingVO } from "../../../valueOfObjects/doctor/rating.vo";
 
 export class ListDoctors {
   private constructor(

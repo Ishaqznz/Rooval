@@ -1,8 +1,8 @@
-import { DashboardStats } from "src/adapters/api/graphql/types/doctor/model/dashboardStats.model";
-import { RatingOverview } from "src/adapters/api/graphql/types/doctor/model/ratingOverview.model";
-import { RevenueOverview } from "src/adapters/api/graphql/types/doctor/model/revenueOverview.model";
-import { IAppointmentResponseDTO } from "src/application/dto/appointment/response/appointment.response.dto";
-import { IReviewResponseDTO } from "src/application/dto/reviews/response/review.response.dto";
+import { DashboardStats } from "../../../../../adapters/api/graphql/types/doctor/model/dashboardStats.model";
+import { RatingOverview } from "../../../../../adapters/api/graphql/types/doctor/model/ratingOverview.model";
+import { RevenueOverview } from "../../../../../adapters/api/graphql/types/doctor/model/revenueOverview.model";
+import { IAppointmentResponseDTO } from "../../../appointment/response/appointment.response.dto";
+import { IReviewResponseDTO } from "../../../reviews/response/review.response.dto";
 
 export interface IDoctorDashboardResponseDTO {
     stats: DashboardStats

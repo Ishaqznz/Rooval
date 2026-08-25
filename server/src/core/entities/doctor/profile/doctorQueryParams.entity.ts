@@ -3,9 +3,9 @@ import {
   DoctorSortField, 
   DoctorSortOrder, 
   DoctorStatusFilter 
-} from "src/core/enums/doctor/doctor.enums";
+} from "../../../enums/doctor/doctor.enums";
 
-import { IDoctorQueryParams } from "src/core/interfaces/doctor/doctor.interface";
+import { IDoctorQueryParams } from "../../../interfaces/doctor/doctor.interface";
 
 export class DoctorQueryParams {
   page: number;

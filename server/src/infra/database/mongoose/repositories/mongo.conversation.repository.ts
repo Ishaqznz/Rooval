@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Conversation } from "src/core/entities/conversation/conversation.entity";
-import { IConversationRepository } from "src/core/repositories/conversation.repository.interface";
+import { Conversation } from "../../../../core/entities/conversation/conversation.entity";
+import { IConversationRepository } from "../../../../core/repositories/conversation.repository.interface";
 import { ConversationDocument, MongoConversationSchema } from "../schemas/conversation/conversation.shema";
 import mongoose, { Model } from "mongoose";
 import { IMongoConversationDocument } from "../interfaces/documents/mongo.conversation.document";
 import { ConversationMapper } from "../mapper/conversation.mapper";
-import { UpdateLastMessage } from "src/core/entities/conversation/updateLastMessage.entity";
-import { CreateConversation } from "src/core/entities/conversation/createConversation.entity";
+import { UpdateLastMessage } from "../../../../core/entities/conversation/updateLastMessage.entity";
+import { CreateConversation } from "../../../../core/entities/conversation/createConversation.entity";
 
 @Injectable()
 export class ConversationRepository implements IConversationRepository {

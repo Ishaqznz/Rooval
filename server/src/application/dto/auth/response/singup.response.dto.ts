@@ -1,5 +1,5 @@
-import { Role } from "src/core/enums/user/role.enum";
-import { IUserProfile } from "src/core/interfaces/user/profile.interface";
+import { Role } from "../../../../core/enums/user/role.enum";
+import { IUserProfile } from "../../../../core/interfaces/user/profile.interface";
 
 export interface IUserResponseDTO {
   id: string;

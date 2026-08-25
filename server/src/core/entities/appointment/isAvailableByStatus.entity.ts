@@ -1,4 +1,4 @@
-import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface";
+import { IAppointmentAvailabilitySession } from "../../interfaces/doctor/availabilitySessions.interface";
 
 export class IsAvailableByStatus {
     constructor(

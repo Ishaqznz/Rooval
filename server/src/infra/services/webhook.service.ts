@@ -1,5 +1,5 @@
-import { IWebHookService } from "src/application/services/webhook.service.interface";
-import { stripe } from "src/config/stripe";
+import { IWebHookService } from "../../application/services/webhook.service.interface";
+import { stripe } from "../../config/stripe";
 
 export class WebHookService implements IWebHookService {
     async handleStripeEvent(payload: Buffer, signature: string): Promise<string> {

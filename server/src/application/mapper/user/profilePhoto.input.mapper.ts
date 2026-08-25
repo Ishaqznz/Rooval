@@ -1,4 +1,4 @@
-import { ProfilePhoto } from "src/core/entities/user/profilePhoto.entity";
+import { ProfilePhoto } from "../../../core/entities/user/profilePhoto.entity";
 
 
 export class ProfilePhotoInputMapper {

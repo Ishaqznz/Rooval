@@ -1,4 +1,4 @@
-import { DoctorSpecialization } from "src/core/enums/doctor/profile.enums"
+import { DoctorSpecialization } from "../../enums/doctor/profile.enums"
 
 export interface IDoctorProfile {
     personal: {

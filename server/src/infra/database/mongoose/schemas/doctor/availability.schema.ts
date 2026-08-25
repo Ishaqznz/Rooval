@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { DayOfWeek } from 'src/core/enums/doctor/availability.enums';
+import { DayOfWeek } from '../../../../../core/enums/doctor/availability.enums';
 import { AvailabilitySession } from './session.schema';
 
 @Schema({ timestamps: true, collection: 'doctor_availabilities' })

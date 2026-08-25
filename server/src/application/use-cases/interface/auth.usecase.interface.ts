@@ -1,9 +1,9 @@
-import { ICreateUserRequestDTO } from "src/application/dto/auth/request/signup.request.dto"
-import { IUserResponseDTO } from "src/application/dto/auth/response/singup.response.dto"
-import { IDoctorResponseDTO } from "src/application/dto/auth/response/login.response.dto"
-import { IUserLoginRequestDTO } from "src/application/dto/auth/request/login.request.dto"
-import { IUserPasswordRequestDTO } from "src/application/dto/auth/request/forgot-passwords.request.dto"
-import { IGoogleLoginRequestDTO } from "src/application/dto/auth/request/googleLogin.request.dto"
+import { ICreateUserRequestDTO } from "../../dto/auth/request/signup.request.dto"
+import { IUserResponseDTO } from "../../dto/auth/response/singup.response.dto"
+import { IDoctorResponseDTO } from "../../dto/auth/response/login.response.dto"
+import { IUserLoginRequestDTO } from "../../dto/auth/request/login.request.dto"
+import { IUserPasswordRequestDTO } from "../../dto/auth/request/forgot-passwords.request.dto"
+import { IGoogleLoginRequestDTO } from "../../dto/auth/request/googleLogin.request.dto"
 
 export interface IAuthUseCase {
     signUp(input: ICreateUserRequestDTO): Promise<IUserResponseDTO>

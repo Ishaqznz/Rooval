@@ -1,4 +1,4 @@
-import { ExtendedMessage } from "src/core/entities/message/extendedMessage.entity";
+import { ExtendedMessage } from "../../../../core/entities/message/extendedMessage.entity";
 import { IMongoMessageDocument } from "../interfaces/documents/mongo.message.document";
 
 export class MessageMapper {

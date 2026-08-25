@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { IUserProfile } from "src/core/interfaces/user/profile.interface";
+import { IUserProfile } from "../../../../../core/interfaces/user/profile.interface";
 
 export interface IMongoUserDocument {
     _id: ObjectId,

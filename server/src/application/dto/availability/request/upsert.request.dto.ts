@@ -1,5 +1,5 @@
-import { DayOfWeek } from "src/core/enums/doctor/availability.enums"
-import { IAvailabilitySessions } from "src/core/interfaces/doctor/availabilitySessions.interface"
+import { DayOfWeek } from "../../../../core/enums/doctor/availability.enums"
+import { IAvailabilitySessions } from "../../../../core/interfaces/doctor/availabilitySessions.interface"
 
 export interface IUpsertAvailabilityRequestDTO {
     doctorId: string

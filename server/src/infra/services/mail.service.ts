@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import * as dotenv from 'dotenv';
-import { IMailService } from 'src/application/services/mail.service.interface';
+import { IMailService } from '../../application/services/mail.service.interface';
 dotenv.config();
 
 @Injectable()

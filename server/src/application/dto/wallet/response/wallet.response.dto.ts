@@ -1,4 +1,4 @@
-import { Role } from "src/core/enums/user/role.enum";
+import { Role } from "../../../../core/enums/user/role.enum";
 
 export interface IWalletResponseDTO {
     id: string;

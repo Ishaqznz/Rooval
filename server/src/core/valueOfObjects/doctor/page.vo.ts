@@ -1,5 +1,5 @@
 import { ValueObject } from "../valueObject";
-import { IPage } from "src/core/interfaces/doctor/listing.interface";
+import { IPage } from "../../interfaces/doctor/listing.interface";
 
 export class PageVO extends ValueObject<IPage> {
   private constructor(props: IPage) {

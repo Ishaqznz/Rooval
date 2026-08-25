@@ -1,5 +1,5 @@
 import { IMongoAppointmentDocument } from "../interfaces/documents/mongo.appointment.document";
-import { ExtendedAppointment } from "src/core/entities/appointment/extendedAppointment.entity";
+import { ExtendedAppointment } from "../../../../core/entities/appointment/extendedAppointment.entity";
 
 export class AppointmentMapper {
     static toAppointmentEntities(input: IMongoAppointmentDocument[]): ExtendedAppointment[] {

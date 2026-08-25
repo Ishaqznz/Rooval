@@ -1,4 +1,4 @@
-import { MessageType } from "src/core/enums/conversations/conversation.enum";
+import { MessageType } from "../../enums/conversations/conversation.enum";
 
 export interface ISendMessagePayload {
   receiverId: string;

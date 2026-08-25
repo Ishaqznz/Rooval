@@ -1,21 +1,21 @@
-import { ISendMessageRequestDTO } from "src/application/dto/message/request/sendMessage.request.dto";
-import { IMessageResponseDTO } from "src/application/dto/message/response/message.response.dto";
+import { ISendMessageRequestDTO } from "../../dto/message/request/sendMessage.request.dto";
+import { IMessageResponseDTO } from "../../dto/message/response/message.response.dto";
 import { IMessageUseCase } from "../interface/message.usecase.interface";
 import { Inject, Injectable } from "@nestjs/common";
-import { IMessageRepository } from "src/core/repositories/message.repository.interface";
-import { IGetMessageRequestDTO } from "src/application/dto/message/request/getMessage.request.dto";
-import { IMarkAsReadRequestDTO } from "src/application/dto/message/request/markAsRead.request.dto";
-import { GetMessage } from "src/core/entities/message/getMessage.entity";
+import { IMessageRepository } from "../../../core/repositories/message.repository.interface";
+import { IGetMessageRequestDTO } from "../../dto/message/request/getMessage.request.dto";
+import { IMarkAsReadRequestDTO } from "../../dto/message/request/markAsRead.request.dto";
+import { GetMessage } from "../../../core/entities/message/getMessage.entity";
 import { IConversationUseCase } from "../interface/conversation.usecase.interface";
-import { MessageInputMapper } from "src/application/mapper/message/message.input.mapper";
-import { MessageOutputMapper } from "src/application/mapper/message/message.output.mapper";
-import { MarkAsRead } from "src/core/entities/message/markAsRead.entity";
-import { MessageType } from "src/core/enums/conversations/conversation.enum";
-import { ICloudinaryService } from "src/application/services/cloudinary.service.interface";
-import { BusinessRuleViolationError } from "src/core/errors/businessRule.error";
-import { UserErrorType } from "src/core/enums/user/user.enums";
-import { IFileUploadRequestDTO } from "src/application/dto/message/request/fileUpload.request.dto";
-import { ISupaBaseService } from "src/application/services/supabase.service.interface";
+import { MessageInputMapper } from "../../mapper/message/message.input.mapper";
+import { MessageOutputMapper } from "../../mapper/message/message.output.mapper";
+import { MarkAsRead } from "../../../core/entities/message/markAsRead.entity";
+import { MessageType } from "../../../core/enums/conversations/conversation.enum";
+import { ICloudinaryService } from "../../services/cloudinary.service.interface";
+import { BusinessRuleViolationError } from "../../../core/errors/businessRule.error";
+import { UserErrorType } from "../../../core/enums/user/user.enums";
+import { IFileUploadRequestDTO } from "../../dto/message/request/fileUpload.request.dto";
+import { ISupaBaseService } from "../../services/supabase.service.interface";
 
 @Injectable()
 export class MessageUseCase implements IMessageUseCase {

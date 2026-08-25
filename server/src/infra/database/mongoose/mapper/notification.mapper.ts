@@ -1,4 +1,4 @@
-import { ExtendedNotification } from "src/core/entities/notifications/extendedNotification.entity";
+import { ExtendedNotification } from "../../../../core/entities/notifications/extendedNotification.entity";
 import { IMongoNotificationDocument } from "../interfaces/documents/mongo.notification.document";
 
 export class NotificationMapper {

@@ -1,18 +1,18 @@
-import { IUpsertAvailabilityRequestDTO } from "src/application/dto/availability/request/upsert.request.dto";
+import { IUpsertAvailabilityRequestDTO } from "../../dto/availability/request/upsert.request.dto";
 import { IAvailabilityUseCase } from "../interface/availability.usecase.interface";
-import { BusinessRuleViolationError } from "src/core/errors/businessRule.error";
+import { BusinessRuleViolationError } from "../../../core/errors/businessRule.error";
 import { Inject, Injectable } from "@nestjs/common";
-import { IAvailabilityRepository } from "src/core/repositories/availability.repository.interface";
-import { AvailabilityInputMapper } from "src/application/mapper/doctor/availability/availability.input.mapper";
-import { IGetSlotsRequestDTO } from "src/application/dto/availability/request/slots.request.dto";
-import { ISlotResponseDTO } from "src/application/dto/availability/response/slots.response.dto";
-import { GetAvailability } from "src/core/entities/doctor/availability/getAvailability.entity";
-import { AvailabilityDomainService } from "src/core/services/doctor/availability.service.core";
-import { IAvailabilityResponseDTO } from "src/application/dto/availability/response/availability.response.dto";
-import { AvailabilityOutputMapper } from "src/application/mapper/doctor/availability/availability.output.mapper";
-import { ITimeZoneService } from "src/application/services/timezone.service.interface";
-import { IAppointmentRepository } from "src/core/repositories/appointment.repository";
-import { AppointmentOverlap } from "src/core/entities/appointment/getAppointment.entity";
+import { IAvailabilityRepository } from "../../../core/repositories/availability.repository.interface";
+import { AvailabilityInputMapper } from "../../mapper/doctor/availability/availability.input.mapper";
+import { IGetSlotsRequestDTO } from "../../dto/availability/request/slots.request.dto";
+import { ISlotResponseDTO } from "../../dto/availability/response/slots.response.dto";
+import { GetAvailability } from "../../../core/entities/doctor/availability/getAvailability.entity";
+import { AvailabilityDomainService } from "../../../core/services/doctor/availability.service.core";
+import { IAvailabilityResponseDTO } from "../../dto/availability/response/availability.response.dto";
+import { AvailabilityOutputMapper } from "../../mapper/doctor/availability/availability.output.mapper";
+import { ITimeZoneService } from "../../services/timezone.service.interface";
+import { IAppointmentRepository } from "../../../core/repositories/appointment.repository";
+import { AppointmentOverlap } from "../../../core/entities/appointment/getAppointment.entity";
 
 @Injectable()
 export class AvailabilityUseCase implements IAvailabilityUseCase {

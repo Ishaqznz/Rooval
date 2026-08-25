@@ -1,5 +1,5 @@
 import { ValueObject } from "../valueObject";
-import { IDate } from "src/core/interfaces/doctor/availabilitySessions.interface";
+import { IDate } from "../../interfaces/doctor/availabilitySessions.interface";
 
 export class DateVO extends ValueObject<IDate> {
   private constructor(props: IDate) {

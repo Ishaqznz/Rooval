@@ -1,4 +1,4 @@
-import { WalletTransactionReason, WalletTransactionType } from "src/core/enums/wallet/wallet.enum"
+import { WalletTransactionReason, WalletTransactionType } from "../../enums/wallet/wallet.enum"
 
 export class Transaction {
     constructor(

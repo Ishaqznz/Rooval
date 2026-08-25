@@ -1,5 +1,5 @@
-import { IReviewResponseDTO } from "src/application/dto/reviews/response/review.response.dto";
-import { Review } from "src/core/entities/reviews/review.entity";
+import { IReviewResponseDTO } from "../../dto/reviews/response/review.response.dto";
+import { Review } from "../../../core/entities/reviews/review.entity";
 
 export class ReviewOutputMapper {
     static toReviewDtos(entities: Review[]): IReviewResponseDTO[] {

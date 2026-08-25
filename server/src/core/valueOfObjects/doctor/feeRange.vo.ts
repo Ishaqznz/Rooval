@@ -1,5 +1,5 @@
 import { ValueObject } from "../valueObject";
-import { IFeeRange } from "src/core/interfaces/doctor/listing.interface";
+import { IFeeRange } from "../../interfaces/doctor/listing.interface";
 
 export class FeeRangeVO extends ValueObject<IFeeRange> {
   private constructor(props: IFeeRange) {

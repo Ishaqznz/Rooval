@@ -1,5 +1,5 @@
-import { UserFullNameVO } from "src/core/valueOfObjects/user/userName.vo";
-import { UserEmailVO } from "src/core/valueOfObjects/user/userEmail.vo";
+import { UserFullNameVO } from "../../valueOfObjects/user/userName.vo";
+import { UserEmailVO } from "../../valueOfObjects/user/userEmail.vo";
 
 export class GoogleLogin {
   constructor(

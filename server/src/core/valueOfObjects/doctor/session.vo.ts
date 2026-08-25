@@ -1,4 +1,4 @@
-import { IAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface";
+import { IAvailabilitySession } from "../../interfaces/doctor/availabilitySessions.interface";
 import { ValueObject } from "../valueObject";
 
 export class SessionVO extends ValueObject<{ session: IAvailabilitySession }> {

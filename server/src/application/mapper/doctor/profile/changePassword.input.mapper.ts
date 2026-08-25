@@ -1,4 +1,4 @@
-import { ChangeDoctorPassord } from "src/core/entities/doctor/profile/changeDoctorPassword.entity";
+import { ChangeDoctorPassord } from "../../../../core/entities/doctor/profile/changeDoctorPassword.entity";
 
 export class ChangePasswordInputMapper {
     static toChangePasswordEntity(userId: string, password: string): ChangeDoctorPassord | string {

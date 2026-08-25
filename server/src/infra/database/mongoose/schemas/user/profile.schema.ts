@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Gender, AppointmentType } from 'src/core/enums/user/profile.enum';
+import { Gender, AppointmentType } from '../../../../../core/enums/user/profile.enum';
 
 @Schema({ _id: false })
 export class PersonalProfile {

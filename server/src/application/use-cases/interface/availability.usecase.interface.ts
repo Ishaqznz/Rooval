@@ -1,7 +1,7 @@
-import { IGetSlotsRequestDTO } from "src/application/dto/availability/request/slots.request.dto";
-import { IUpsertAvailabilityRequestDTO } from "src/application/dto/availability/request/upsert.request.dto";
-import { IAvailabilityResponseDTO } from "src/application/dto/availability/response/availability.response.dto";
-import { ISlotResponseDTO } from "src/application/dto/availability/response/slots.response.dto";
+import { IGetSlotsRequestDTO } from "../../dto/availability/request/slots.request.dto";
+import { IUpsertAvailabilityRequestDTO } from "../../dto/availability/request/upsert.request.dto";
+import { IAvailabilityResponseDTO } from "../../dto/availability/response/availability.response.dto";
+import { ISlotResponseDTO } from "../../dto/availability/response/slots.response.dto";
 
 export interface IAvailabilityUseCase {
     upsertAvailability(input: IUpsertAvailabilityRequestDTO[]): Promise<boolean>

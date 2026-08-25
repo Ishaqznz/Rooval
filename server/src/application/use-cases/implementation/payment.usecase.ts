@@ -1,22 +1,22 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { IPaymentUseCase } from "../interface/payment.usecase.interface";
-import { ICreateCheckoutSessionResponse } from "src/application/dto/checkout/request/create.request.dto";
-import { IPaymentService } from "src/application/services/payment.service.interface";
+import { ICreateCheckoutSessionResponse } from "../../dto/checkout/request/create.request.dto";
+import { IPaymentService } from "../../services/payment.service.interface";
 import { IAppointmentUseCase } from "../interface/appointment.usecase.interface";
-import { IWebHookService } from "src/application/services/webhook.service.interface";
-import { IPaymentRepository } from "src/core/repositories/payment.repository.interface";
-import { PaymentStatus } from "src/core/enums/appointments/appointment.enums";
-import { BusinessRuleViolationError } from "src/core/errors/businessRule.error";
-import { AppointmentErrorType } from "src/core/enums/appointments/appointment.enums";
+import { IWebHookService } from "../../services/webhook.service.interface";
+import { IPaymentRepository } from "../../../core/repositories/payment.repository.interface";
+import { PaymentStatus } from "../../../core/enums/appointments/appointment.enums";
+import { BusinessRuleViolationError } from "../../../core/errors/businessRule.error";
+import { AppointmentErrorType } from "../../../core/enums/appointments/appointment.enums";
 import { IDoctorUseCase } from "../interface/doctor.usecase.interface";
 import { IWalletUseCase } from "../interface/wallet.usecase.interface";
-import { WalletTransactionReason, WalletTransactionType } from "src/core/enums/wallet/wallet.enum";
+import { WalletTransactionReason, WalletTransactionType } from "../../../core/enums/wallet/wallet.enum";
 import { forwardRef } from "@nestjs/common";
-import { IWithdrawUserMoneyRequestDTO } from "src/application/dto/payment/request/withdrawUserMoney.request.dto";
-import { WithdrawUserMoney } from "src/core/entities/payment/withdrawUserMoney.entity";
-import { WithdrawDoctorMoney } from "src/core/entities/payment/withdrawDoctorMoney.entity";
-import { IWithdrawDoctorMoneyRequestDTO } from "src/application/dto/payment/request/withdrawDoctorMoney.request.dto";
-import { PaymentDomainService } from "src/core/services/payment/payment.service.core";
+import { IWithdrawUserMoneyRequestDTO } from "../../dto/payment/request/withdrawUserMoney.request.dto";
+import { WithdrawUserMoney } from "../../../core/entities/payment/withdrawUserMoney.entity";
+import { WithdrawDoctorMoney } from "../../../core/entities/payment/withdrawDoctorMoney.entity";
+import { IWithdrawDoctorMoneyRequestDTO } from "../../dto/payment/request/withdrawDoctorMoney.request.dto";
+import { PaymentDomainService } from "../../../core/services/payment/payment.service.core";
 
 @Injectable()
 export class PaymentUseCase implements IPaymentUseCase {

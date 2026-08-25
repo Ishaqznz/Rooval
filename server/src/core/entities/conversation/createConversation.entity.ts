@@ -1,5 +1,5 @@
-import { MessageType } from "src/core/enums/conversations/conversation.enum"
-import { Role } from "src/core/enums/user/role.enum"
+import { MessageType } from "../../enums/conversations/conversation.enum"
+import { Role } from "../../enums/user/role.enum"
 
 export class CreateConversation {
     constructor(

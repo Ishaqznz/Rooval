@@ -1,5 +1,5 @@
-import { MessageType } from "src/core/enums/conversations/conversation.enum";
-import { Role } from "src/core/enums/user/role.enum";
+import { MessageType } from "../../../../core/enums/conversations/conversation.enum";
+import { Role } from "../../../../core/enums/user/role.enum";
 
 export interface IConversationResponseDTO {
     id: string;

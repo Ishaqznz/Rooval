@@ -1,8 +1,8 @@
-import { UserFullNameVO } from "src/core/valueOfObjects/user/userName.vo";
-import { UserEmailVO } from "src/core/valueOfObjects/user/userEmail.vo";
-import { UserPasswordVO } from "src/core/valueOfObjects/user/userPhone";
-import { IUserProfile } from "src/core/interfaces/user/profile.interface";
-import { Role } from "src/core/enums/user/role.enum";
+import { UserFullNameVO } from "../../valueOfObjects/user/userName.vo";
+import { UserEmailVO } from "../../valueOfObjects/user/userEmail.vo";
+import { UserPasswordVO } from "../../valueOfObjects/user/userPhone";
+import { IUserProfile } from "../../interfaces/user/profile.interface";
+import { Role } from "../../enums/user/role.enum";
 
 export class User {
   constructor(

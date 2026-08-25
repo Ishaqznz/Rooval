@@ -1,6 +1,6 @@
-import { MessageType } from "src/core/enums/conversations/conversation.enum";
-import { Role } from "src/core/enums/user/role.enum";
-import { MessageStatus } from "src/core/interfaces/chat/chat.interfaces";
+import { MessageType } from "../../enums/conversations/conversation.enum";
+import { Role } from "../../enums/user/role.enum";
+import { MessageStatus } from "../../interfaces/chat/chat.interfaces";
 
 export class ExtendedMessage {
     constructor(

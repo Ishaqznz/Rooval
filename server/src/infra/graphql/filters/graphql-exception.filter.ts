@@ -1,9 +1,9 @@
 import { Catch, HttpStatus } from '@nestjs/common';
 import { GqlExceptionFilter } from '@nestjs/graphql';
 import { GraphQLError } from 'graphql';
-import { BusinessRuleViolationError } from 'src/core/errors/businessRule.error';
-import { NotFoundError } from 'src/core/errors/notFound.error';
-import { UnAuthorizedError } from 'src/core/errors/unauthorized.error';
+import { BusinessRuleViolationError } from '../../../core/errors/businessRule.error';
+import { NotFoundError } from '../../../core/errors/notFound.error';
+import { UnAuthorizedError } from '../../../core/errors/unauthorized.error';
 
 @Catch()
 export class GlobalGraphQLExceptionFilter implements GqlExceptionFilter {

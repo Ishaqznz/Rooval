@@ -1,5 +1,5 @@
-import { AuthFilter, RoleFilter, SortField, StatusFilter, SortOrder } from "src/core/enums/user/user.enums";
-import { IUserQueryParams } from "src/core/interfaces/user/user.interface";
+import { AuthFilter, RoleFilter, SortField, StatusFilter, SortOrder } from "../../enums/user/user.enums";
+import { IUserQueryParams } from "../../interfaces/user/user.interface";
 
 export class UserQueryParams {
   page: number;

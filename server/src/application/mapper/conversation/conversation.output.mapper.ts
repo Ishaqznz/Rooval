@@ -1,5 +1,5 @@
-import { IConversationResponseDTO } from "src/application/dto/conversation/response/conversation.response.dto";
-import { Conversation } from "src/core/entities/conversation/conversation.entity";
+import { IConversationResponseDTO } from "../../dto/conversation/response/conversation.response.dto";
+import { Conversation } from "../../../core/entities/conversation/conversation.entity";
 
 export class ConversationOutputMapper {
     static toConversationDtos(entities: Conversation[]): IConversationResponseDTO[] {

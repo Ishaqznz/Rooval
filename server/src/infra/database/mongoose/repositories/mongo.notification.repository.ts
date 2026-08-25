@@ -1,10 +1,10 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { Notification } from "src/core/entities/notifications/notification.entity";
-import { INotificationRepository } from "src/core/repositories/notification.repository.interface";
+import { Notification } from "../../../../core/entities/notifications/notification.entity";
+import { INotificationRepository } from "../../../../core/repositories/notification.repository.interface";
 import { MongoNotificationSchema } from "../schemas/notification/notification.schema";
 import { NotificationDocument } from "../schemas/notification/notification.schema";
 import mongoose, { Model } from "mongoose";
-import { ExtendedNotification } from "src/core/entities/notifications/extendedNotification.entity";
+import { ExtendedNotification } from "../../../../core/entities/notifications/extendedNotification.entity";
 import { IMongoNotificationDocument } from "../interfaces/documents/mongo.notification.document";
 import { NotificationMapper } from "../mapper/notification.mapper";
 

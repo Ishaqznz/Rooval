@@ -1,4 +1,4 @@
-import { ConsultationType } from "src/core/enums/doctor/doctor.enums";
+import { ConsultationType } from "../../../../../core/enums/doctor/doctor.enums";
 
 export interface IDoctorOnboardingRequestDTO {
   username: string;

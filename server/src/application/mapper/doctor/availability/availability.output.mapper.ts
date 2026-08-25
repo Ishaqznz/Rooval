@@ -1,6 +1,6 @@
-import { IAvailabilityResponseDTO } from "src/application/dto/availability/response/availability.response.dto";
-import { ExtendedAvailability } from "src/core/entities/doctor/availability/extendedAvailability.entity";
-import { DayOfWeek } from "src/core/enums/doctor/availability.enums";
+import { IAvailabilityResponseDTO } from "../../../dto/availability/response/availability.response.dto";
+import { ExtendedAvailability } from "../../../../core/entities/doctor/availability/extendedAvailability.entity";
+import { DayOfWeek } from "../../../../core/enums/doctor/availability.enums";
 
 export class AvailabilityOutputMapper {
     static toAvailabilitiesDTO(entities: ExtendedAvailability[]): IAvailabilityResponseDTO[] {

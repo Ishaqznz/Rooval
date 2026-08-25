@@ -1,4 +1,4 @@
-import { GoogleLogin } from 'src/core/entities/user/googleLogin.entity';
+import { GoogleLogin } from '../entities/user/googleLogin.entity';
 import { Doctor } from '../entities/doctor/profile/doctor.entity';
 import { User } from '../entities/user/user.entity';
 

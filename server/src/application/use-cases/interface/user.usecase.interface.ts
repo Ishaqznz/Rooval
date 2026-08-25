@@ -1,11 +1,11 @@
-import { ICountUsersRequestDTO } from "src/application/dto/user/request/countUsers.request.dto"
-import { IFindUsersRequestDTO } from "src/application/dto/user/request/findUsers.request.dto"
-import { IUserResponseDTO } from "src/application/dto/auth/response/singup.response.dto"
-import { IUpdateProfilePhotoDTO } from "src/application/dto/user/request/updateProfilePhoto.request.dto"
-import { IUpdateProfileRequestDTO } from "src/application/dto/user/request/udpateProfile.input"
-import { Role } from "src/core/enums/user/role.enum"
-import { IChatEnabledRequestDTO } from "src/application/dto/user/request/isChatEnabled.request.dto"
-import { IAdminDashboardResponseDTO } from "src/application/dto/user/response/adminDashboard.response.dto"
+import { ICountUsersRequestDTO } from "../../dto/user/request/countUsers.request.dto"
+import { IFindUsersRequestDTO } from "../../dto/user/request/findUsers.request.dto"
+import { IUserResponseDTO } from "../../dto/auth/response/singup.response.dto"
+import { IUpdateProfilePhotoDTO } from "../../dto/user/request/updateProfilePhoto.request.dto"
+import { IUpdateProfileRequestDTO } from "../../dto/user/request/udpateProfile.input"
+import { Role } from "../../../core/enums/user/role.enum"
+import { IChatEnabledRequestDTO } from "../../dto/user/request/isChatEnabled.request.dto"
+import { IAdminDashboardResponseDTO } from "../../dto/user/response/adminDashboard.response.dto"
 
 export interface IUserUseCase {
     findUsers(input: IFindUsersRequestDTO): Promise<IUserResponseDTO[]>

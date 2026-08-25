@@ -1,4 +1,4 @@
-import { ListTransactionType } from "src/core/enums/wallet/wallet.enum";
+import { ListTransactionType } from "../../../../core/enums/wallet/wallet.enum";
 
 export interface IGetTransactionsRequestDTO {
     walletId: string;

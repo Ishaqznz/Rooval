@@ -1,4 +1,4 @@
-import { FileUpload } from "src/core/entities/doctor/profile/fileupload.entity";
+import { FileUpload } from "../../../../core/entities/doctor/profile/fileupload.entity";
 
 export class FileUploadInputMapper {
     static toFileUploadEntity(profilePhoto: string, certificates: string[], doctorId: string): FileUpload {

@@ -1,24 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { IUserRepository } from 'src/core/repositories/user.repository.interface';
+import { IUserRepository } from '../../../../core/repositories/user.repository.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { MongoUserSchema, UserDocument } from '../schemas/user/user.schema';
 import mongoose, { Model } from 'mongoose';
-import { BusinessRuleViolationError } from 'src/core/errors/businessRule.error';
+import { BusinessRuleViolationError } from '../../../../core/errors/businessRule.error';
 import { UserMapper } from '../mapper/user.mapper';
-import { User } from 'src/core/entities/user/user.entity';
+import { User } from '../../../../core/entities/user/user.entity';
 import { IMongoUserDocument } from '../interfaces/documents/mongo.user.document';
-import { UserErrorType } from 'src/core/enums/user/user.enums';
-import { UserQueryParams } from 'src/core/entities/user/userQueryParams.entity';
-import { CountUsers } from 'src/core/entities/user/countUsers.entity';
-import { ProfilePhoto } from 'src/core/entities/user/profilePhoto.entity';
+import { UserErrorType } from '../../../../core/enums/user/user.enums';
+import { UserQueryParams } from '../../../../core/entities/user/userQueryParams.entity';
+import { CountUsers } from '../../../../core/entities/user/countUsers.entity';
+import { ProfilePhoto } from '../../../../core/entities/user/profilePhoto.entity';
 import { Types } from 'mongoose';
-import { UserProfileUpdate } from 'src/core/entities/user/updateProfile.entity';
+import { UserProfileUpdate } from '../../../../core/entities/user/updateProfile.entity';
 import { FilterQuery } from 'mongoose';
 import { UpdateQuery } from 'mongoose';
-import { StatusFilter, SortField, SortOrder, RoleFilter, AuthFilter } from 'src/core/enums/user/user.enums';
-import { RoleEntity } from 'src/core/entities/user/role.entity';
+import { StatusFilter, SortField, SortOrder, RoleFilter, AuthFilter } from '../../../../core/enums/user/user.enums';
+import { RoleEntity } from '../../../../core/entities/user/role.entity';
 import { DoctorDocument, MongoDoctorSchema } from '../schemas/doctor/doctor.schema';
-import { Role } from 'src/core/enums/user/role.enum';
+import { Role } from '../../../../core/enums/user/role.enum';
 
 @Injectable()
 export class MongoUserRepository implements IUserRepository {

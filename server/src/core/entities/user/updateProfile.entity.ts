@@ -1,4 +1,4 @@
-import { Gender } from "src/core/enums/user/profile.enum"
+import { Gender } from "../../enums/user/profile.enum"
 
 export class UserProfileUpdate {
     constructor(

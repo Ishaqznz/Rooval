@@ -1,4 +1,4 @@
-import { CallPayloadResponse } from "src/core/interfaces/sessions/call.interface";
+import { CallPayloadResponse } from "../../core/interfaces/sessions/call.interface";
 import { INotificationResponseDTO } from "../dto/notification/response/notification.response.dto";
 
 export interface INotificationService {

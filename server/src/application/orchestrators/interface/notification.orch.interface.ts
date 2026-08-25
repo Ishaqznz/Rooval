@@ -1,4 +1,4 @@
-import { ICreateNotificationRequestDTO } from "src/application/dto/notification/request/create.request.dto";
+import { ICreateNotificationRequestDTO } from "../../dto/notification/request/create.request.dto";
 
 export interface INotificationOrchestrator {
     notify(input: ICreateNotificationRequestDTO): Promise<void>;

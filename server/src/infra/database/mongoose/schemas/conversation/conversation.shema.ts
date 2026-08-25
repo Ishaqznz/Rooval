@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { MessageType } from 'src/core/enums/conversations/conversation.enum';
-import { Role } from 'src/core/enums/user/role.enum';
+import { MessageType } from '../../../../../core/enums/conversations/conversation.enum';
+import { Role } from '../../../../../core/enums/user/role.enum';
 export type ConversationDocument = MongoConversationSchema & Document;
 
 @Schema({ timestamps: true, collection: 'conversations' })

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Role } from 'src/core/enums/user/role.enum';
+import { Role } from '../../../../../core/enums/user/role.enum';
 
 export type WalletDocument = MongoWalletSchema & Document;
 

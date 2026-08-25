@@ -9,12 +9,12 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { WsAuthGuard } from 'src/common/guards/socket.guard';
-import { ISendMessagePayload } from 'src/core/interfaces/chat/chat.interfaces';
+import { WsAuthGuard } from '../../../common/guards/socket.guard';
+import { ISendMessagePayload } from '../../../core/interfaces/chat/chat.interfaces';
 import { SocketConnectionHandler } from '../handlers/connection.handler';
-import { IMessageUseCase } from 'src/application/use-cases/interface/message.usecase.interface';
-import { MessageStatus } from 'src/core/interfaces/chat/chat.interfaces';
-import { INotificationUseCase } from 'src/application/use-cases/interface/notification.usecase.interface';
+import { IMessageUseCase } from '../../../application/use-cases/interface/message.usecase.interface';
+import { MessageStatus } from '../../../core/interfaces/chat/chat.interfaces';
+import { INotificationUseCase } from '../../../application/use-cases/interface/notification.usecase.interface';
 
 @UseGuards(WsAuthGuard)
 @WebSocketGateway({

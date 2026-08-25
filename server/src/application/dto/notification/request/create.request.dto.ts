@@ -1,4 +1,4 @@
-import { NotificationType } from "src/core/enums/notifications/notification.enum"
+import { NotificationType } from "../../../../core/enums/notifications/notification.enum"
 
 export interface ICreateNotificationRequestDTO {
     receiverId: string

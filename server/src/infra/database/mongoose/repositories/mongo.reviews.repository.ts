@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import mongoose, { Model } from "mongoose";
-import { CreateReview } from "src/core/entities/reviews/createReview.entity";
-import { Review } from "src/core/entities/reviews/review.entity";
-import { IReviewsRepository } from "src/core/repositories/reviews.repository.interface";
+import { CreateReview } from "../../../../core/entities/reviews/createReview.entity";
+import { Review } from "../../../../core/entities/reviews/review.entity";
+import { IReviewsRepository } from "../../../../core/repositories/reviews.repository.interface";
 import { MongoReviewSchema, ReviewDocument } from "../schemas/reviews/reviews.schema";
 import { ReviewMapper } from "../mapper/reviews.mapper";
 import { IMongoReviewDocument } from "../interfaces/documents/mongo.review.document";

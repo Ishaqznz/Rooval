@@ -1,26 +1,26 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { IAuthRepository } from 'src/core/repositories/auth.repository.interface.';
-import { User } from 'src/core/entities/user/user.entity';
+import { IAuthRepository } from '../../../../core/repositories/auth.repository.interface.';
+import { User } from '../../../../core/entities/user/user.entity';
 import { MongoUserSchema, UserDocument } from '../schemas/user/user.schema';
 import mongoose, { Model } from 'mongoose';
 import { UserMapper } from '../mapper/user.mapper';
-import { BusinessRuleViolationError } from 'src/core/errors/businessRule.error';
+import { BusinessRuleViolationError } from '../../../../core/errors/businessRule.error';
 import { AuthMongoService } from '../services/mongo.auth.service';
 import Redis from 'ioredis';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import * as dotenv from 'dotenv';
 import { DoctorDocument } from '../schemas/doctor/doctor.schema';
 import { MongoDoctorSchema } from '../schemas/doctor/doctor.schema';
-import { Doctor } from 'src/core/entities/doctor/profile/doctor.entity';
+import { Doctor } from '../../../../core/entities/doctor/profile/doctor.entity';
 import { IMongoUserDocument } from '../interfaces/documents/mongo.user.document';
 import { DoctorMapper } from '../mapper/doctor.mapper';
 import { IMongoDoctorDocument } from '../interfaces/documents/mongo.doctor.document';
-import { AuthErrorType } from 'src/core/enums/auth/auth.enums';
-import { GoogleLogin } from 'src/core/entities/user/googleLogin.entity';
-import { IMailService } from 'src/application/services/mail.service.interface';
-import { IAuthService } from 'src/application/services/auth.service.interface';
-import { UserErrorType } from 'src/core/enums/user/user.enums';
+import { AuthErrorType } from '../../../../core/enums/auth/auth.enums';
+import { GoogleLogin } from '../../../../core/entities/user/googleLogin.entity';
+import { IMailService } from '../../../../application/services/mail.service.interface';
+import { IAuthService } from '../../../../application/services/auth.service.interface';
+import { UserErrorType } from '../../../../core/enums/user/user.enums';
 
 
 dotenv.config();

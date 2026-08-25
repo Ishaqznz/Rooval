@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as bycrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { IAuthService } from 'src/application/services/auth.service.interface';
-import { IMailService } from 'src/application/services/mail.service.interface';
+import { IAuthService } from '../../application/services/auth.service.interface';
+import { IMailService } from '../../application/services/mail.service.interface';
 
 @Injectable()
 export class AuthService implements IAuthService {

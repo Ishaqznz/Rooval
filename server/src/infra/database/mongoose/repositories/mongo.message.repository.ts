@@ -1,14 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { ExtendedMessage } from "src/core/entities/message/extendedMessage.entity";
-import { SendMessage } from "src/core/entities/message/sendMessage.entity";
-import { IMessageRepository } from "src/core/repositories/message.repository.interface";
+import { ExtendedMessage } from "../../../../core/entities/message/extendedMessage.entity";
+import { SendMessage } from "../../../../core/entities/message/sendMessage.entity";
+import { IMessageRepository } from "../../../../core/repositories/message.repository.interface";
 import { MessageDocument, MongoMessageSchema } from "../schemas/messages/message.schema";
 import mongoose, { Model } from "mongoose";
 import { IMongoMessageDocument } from "../interfaces/documents/mongo.message.document";
 import { MessageMapper } from "../mapper/message.mapper";
-import { GetMessage } from "src/core/entities/message/getMessage.entity";
-import { MarkAsRead } from "src/core/entities/message/markAsRead.entity";
+import { GetMessage } from "../../../../core/entities/message/getMessage.entity";
+import { MarkAsRead } from "../../../../core/entities/message/markAsRead.entity";
 import { CreateMessagePayload } from "../interfaces/types/message.payload.type";
 
 @Injectable()

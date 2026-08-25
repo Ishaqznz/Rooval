@@ -1,9 +1,9 @@
-import { Doctor } from "src/core/entities/doctor/profile/doctor.entity";
+import { Doctor } from "../../../../core/entities/doctor/profile/doctor.entity";
 import { IMongoDoctorDocument } from "../interfaces/documents/mongo.doctor.document";
-import { BusinessRuleViolationError } from "src/core/errors/businessRule.error";
-import { UserErrorType } from "src/core/enums/user/user.enums";
-import { ListDoctorsPayload } from "src/core/entities/doctor/profile/listDoctorsPayload.entity";
-import { Role } from "src/core/enums/user/role.enum";
+import { BusinessRuleViolationError } from "../../../../core/errors/businessRule.error";
+import { UserErrorType } from "../../../../core/enums/user/user.enums";
+import { ListDoctorsPayload } from "../../../../core/entities/doctor/profile/listDoctorsPayload.entity";
+import { Role } from "../../../../core/enums/user/role.enum";
 
 export class DoctorMapper {
   static toDoctorEntity(doctor: Partial<IMongoDoctorDocument>): Doctor {

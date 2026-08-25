@@ -1,5 +1,5 @@
-import { ISendMessageRequestDTO } from "src/application/dto/message/request/sendMessage.request.dto";
-import { SendMessage } from "src/core/entities/message/sendMessage.entity";
+import { ISendMessageRequestDTO } from "../../dto/message/request/sendMessage.request.dto";
+import { SendMessage } from "../../../core/entities/message/sendMessage.entity";
 
 export class MessageInputMapper {
     static toSendMessagEntity(input: ISendMessageRequestDTO, conversationId: string): SendMessage {

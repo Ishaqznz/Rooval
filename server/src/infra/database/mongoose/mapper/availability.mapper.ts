@@ -1,7 +1,7 @@
-import { Availability } from "src/core/entities/doctor/availability/upsertAvailability.entity";
+import { Availability } from "../../../../core/entities/doctor/availability/upsertAvailability.entity";
 import { IMongoAvailabilityDocument } from "../interfaces/documents/mongo.availability.document";
-import { BusinessRuleViolationError } from "src/core/errors/businessRule.error";
-import { ExtendedAvailability } from "src/core/entities/doctor/availability/extendedAvailability.entity";
+import { BusinessRuleViolationError } from "../../../../core/errors/businessRule.error";
+import { ExtendedAvailability } from "../../../../core/entities/doctor/availability/extendedAvailability.entity";
 
 export class AvailabilityMapper {
     static toAvailabilityEntities(

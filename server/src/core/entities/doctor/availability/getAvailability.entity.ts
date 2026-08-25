@@ -1,7 +1,7 @@
-import { AvailabilityDomainService } from "src/core/services/doctor/availability.service.core";
-import { DateVO } from "src/core/valueOfObjects/doctor/date.vo";
-import { DayOfWeekVO } from "src/core/valueOfObjects/doctor/dayOfWeek.vo";
-import { DoctorIdVO } from "src/core/valueOfObjects/doctor/doctorId.vo";
+import { AvailabilityDomainService } from "../../../services/doctor/availability.service.core";
+import { DateVO } from "../../../valueOfObjects/doctor/date.vo";
+import { DayOfWeekVO } from "../../../valueOfObjects/doctor/dayOfWeek.vo";
+import { DoctorIdVO } from "../../../valueOfObjects/doctor/doctorId.vo";
 
 export class GetAvailability {
     private constructor(

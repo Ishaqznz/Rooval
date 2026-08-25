@@ -1,7 +1,7 @@
-import { IDoctorResponseDTO } from "src/application/dto/auth/response/login.response.dto";
-import { IListDoctorsResponseDTO } from "src/application/dto/doctor/profile/response/listDoctors.response.dto";
-import { Doctor } from "src/core/entities/doctor/profile/doctor.entity";
-import { ListDoctorsPayload } from "src/core/entities/doctor/profile/listDoctorsPayload.entity";
+import { IDoctorResponseDTO } from "../../../dto/auth/response/login.response.dto";
+import { IListDoctorsResponseDTO } from "../../../dto/doctor/profile/response/listDoctors.response.dto";
+import { Doctor } from "../../../../core/entities/doctor/profile/doctor.entity";
+import { ListDoctorsPayload } from "../../../../core/entities/doctor/profile/listDoctorsPayload.entity";
 
 export class DoctorOutputMapper {
     static toDoctorDTO(doctor: Doctor): IDoctorResponseDTO {

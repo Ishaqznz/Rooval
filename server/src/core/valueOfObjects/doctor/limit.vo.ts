@@ -1,5 +1,5 @@
 import { ValueObject } from "../valueObject";
-import { ILimit } from "src/core/interfaces/doctor/listing.interface";
+import { ILimit } from "../../interfaces/doctor/listing.interface";
 
 export class LimitVO extends ValueObject<ILimit> {
   private constructor(props: ILimit) {

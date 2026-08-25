@@ -1,5 +1,5 @@
-import { IMessageResponseDTO } from "src/application/dto/message/response/message.response.dto";
-import { ExtendedMessage } from "src/core/entities/message/extendedMessage.entity";
+import { IMessageResponseDTO } from "../../dto/message/response/message.response.dto";
+import { ExtendedMessage } from "../../../core/entities/message/extendedMessage.entity";
 
 export class MessageOutputMapper {
     static toMessageDto(entity: ExtendedMessage): IMessageResponseDTO {

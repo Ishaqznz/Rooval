@@ -1,14 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Availability } from "src/core/entities/doctor/availability/upsertAvailability.entity";
-import { IAvailabilityRepository } from "src/core/repositories/availability.repository.interface";
+import { Availability } from "../../../../core/entities/doctor/availability/upsertAvailability.entity";
+import { IAvailabilityRepository } from "../../../../core/repositories/availability.repository.interface";
 import { DoctorAvailabilityDocument, DoctorAvailabilitySchema } from "../schemas/doctor/availability.schema";
 import { Model } from "mongoose";
 import mongoose from "mongoose";
-import { GetAvailability } from "src/core/entities/doctor/availability/getAvailability.entity";
+import { GetAvailability } from "../../../../core/entities/doctor/availability/getAvailability.entity";
 import { IMongoAvailabilityDocument } from "../interfaces/documents/mongo.availability.document";
 import { AvailabilityMapper } from "../mapper/availability.mapper";
-import { ExtendedAvailability } from "src/core/entities/doctor/availability/extendedAvailability.entity";
+import { ExtendedAvailability } from "../../../../core/entities/doctor/availability/extendedAvailability.entity";
 
 @Injectable()
 export class MongoAvailabilityRepository implements IAvailabilityRepository {

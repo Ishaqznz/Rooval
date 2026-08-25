@@ -1,5 +1,5 @@
-import { INotificationResponseDTO } from "src/application/dto/notification/response/notification.response.dto";
-import { ExtendedNotification } from "src/core/entities/notifications/extendedNotification.entity";
+import { INotificationResponseDTO } from "../../dto/notification/response/notification.response.dto";
+import { ExtendedNotification } from "../../../core/entities/notifications/extendedNotification.entity";
 
 export class NotificationOutputMapper {
     static toNotificationsDTO(entities: ExtendedNotification[]): INotificationResponseDTO[] {

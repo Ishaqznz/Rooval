@@ -1,5 +1,5 @@
-import { User } from "src/core/entities/user/user.entity";
-import { ICreateUserRequestDTO } from "src/application/dto/auth/request/signup.request.dto";
+import { User } from "../../../core/entities/user/user.entity";
+import { ICreateUserRequestDTO } from "../../dto/auth/request/signup.request.dto";
 
 export class UserInputMapper {
     static toUserEntity(user: ICreateUserRequestDTO): User | string {

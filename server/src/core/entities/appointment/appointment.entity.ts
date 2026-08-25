@@ -1,11 +1,11 @@
-import { UserIdVO } from "src/core/valueOfObjects/user/userId.vo";
-import { DoctorIdVO } from "src/core/valueOfObjects/doctor/doctorId.vo";
-import { AppointmentTypeVO } from "src/core/valueOfObjects/appointment/appointmentType.vo";
-import { AppointmentAmountVO } from "src/core/valueOfObjects/appointment/amount.vo";
-import { BufferTimeVO } from "src/core/valueOfObjects/appointment/bufferTime.vo";
-import { AppointmentSlotDurationVO } from "src/core/valueOfObjects/appointment/slotDuration.vo";
-import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface";
-import { DoctorAppointmentType } from "src/core/enums/appointments/appointment.enums";
+import { UserIdVO } from "../../valueOfObjects/user/userId.vo";
+import { DoctorIdVO } from "../../valueOfObjects/doctor/doctorId.vo";
+import { AppointmentTypeVO } from "../../valueOfObjects/appointment/appointmentType.vo";
+import { AppointmentAmountVO } from "../../valueOfObjects/appointment/amount.vo";
+import { BufferTimeVO } from "../../valueOfObjects/appointment/bufferTime.vo";
+import { AppointmentSlotDurationVO } from "../../valueOfObjects/appointment/slotDuration.vo";
+import { IAppointmentAvailabilitySession } from "../../interfaces/doctor/availabilitySessions.interface";
+import { DoctorAppointmentType } from "../../enums/appointments/appointment.enums";
 
 export class Appointment {
   constructor(

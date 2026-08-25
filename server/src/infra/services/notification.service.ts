@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { INotificationService } from "src/application/services/notification.service.interface";
-import { INotificationResponseDTO } from "src/application/dto/notification/response/notification.response.dto";
-import { ChatGateway } from "src/adapters/socket/gateways/socket.gateway";
-import { CallPayloadResponse } from "src/core/interfaces/sessions/call.interface";
+import { INotificationService } from "../../application/services/notification.service.interface";
+import { INotificationResponseDTO } from "../../application/dto/notification/response/notification.response.dto";
+import { ChatGateway } from "../../adapters/socket/gateways/socket.gateway";
+import { CallPayloadResponse } from "../../core/interfaces/sessions/call.interface";
 
 @Injectable()
 export class NotificationService implements INotificationService {

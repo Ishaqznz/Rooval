@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { FileUpload } from 'graphql-upload-ts';
-import { ISupaBaseService } from 'src/application/services/supabase.service.interface';
+import { ISupaBaseService } from '../../application/services/supabase.service.interface';
 import { Readable } from 'stream';
 import ws from 'ws';
 

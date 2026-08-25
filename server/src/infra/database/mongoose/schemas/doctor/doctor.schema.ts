@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { DoctorStatus } from '../../types/doctor.type';
-import { IDoctorProfile } from 'src/core/interfaces/doctor/profile.interface';
+import { IDoctorProfile } from '../../../../../core/interfaces/doctor/profile.interface';
 
 @Schema({ timestamps: true, collection: 'doctors' })
 export class MongoDoctorSchema {

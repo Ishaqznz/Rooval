@@ -1,7 +1,7 @@
-import { IDoctorProfile } from "src/core/interfaces/doctor/profile.interface";
-import { DoctorEmailVO } from "src/core/valueOfObjects/doctor/doctorEmail.vo";
-import { DoctorFullNameVO } from "src/core/valueOfObjects/doctor/doctorName.vo";
-import { DoctorPasswordVO } from "src/core/valueOfObjects/doctor/doctorPassword.vo";
+import { IDoctorProfile } from "../../../interfaces/doctor/profile.interface";
+import { DoctorEmailVO } from "../../../valueOfObjects/doctor/doctorEmail.vo";
+import { DoctorFullNameVO } from "../../../valueOfObjects/doctor/doctorName.vo";
+import { DoctorPasswordVO } from "../../../valueOfObjects/doctor/doctorPassword.vo";
 
 export class ListDoctorsPayload {
   constructor(

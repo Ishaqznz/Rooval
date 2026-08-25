@@ -1,24 +1,24 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import mongoose, { Model } from "mongoose";
-import { IWalletRepository } from "src/core/repositories/wallet.repository.inteface";
+import { IWalletRepository } from "../../../../core/repositories/wallet.repository.inteface";
 import { MongoWalletSchema, WalletDocument } from "../schemas/wallet/wallet.schema";
 import { MongoWalletTransactionSchema, WalletTransactionDocument } from "../schemas/wallet/walletTransaction.schema";
-import { CreateWallet } from "src/core/entities/wallet/createWallet.entity";
-import { CreateTransaction } from "src/core/entities/wallet/createTransaction.entity";
-import { AddMoney } from "src/core/entities/wallet/addMoney.entity";
-import { DeductMoney } from "src/core/entities/wallet/deductMoney.entity";
-import { GetBalance } from "src/core/entities/wallet/getBalance.entity";
-import { GetTransactions } from "src/core/entities/wallet/getTransactions.entity";
-import { GetWallet } from "src/core/entities/wallet/getWallet.entity";
-import { Wallet } from "src/core/entities/wallet/wallet.entity";
-import { Transaction } from "src/core/entities/wallet/transaction.entity";
+import { CreateWallet } from "../../../../core/entities/wallet/createWallet.entity";
+import { CreateTransaction } from "../../../../core/entities/wallet/createTransaction.entity";
+import { AddMoney } from "../../../../core/entities/wallet/addMoney.entity";
+import { DeductMoney } from "../../../../core/entities/wallet/deductMoney.entity";
+import { GetBalance } from "../../../../core/entities/wallet/getBalance.entity";
+import { GetTransactions } from "../../../../core/entities/wallet/getTransactions.entity";
+import { GetWallet } from "../../../../core/entities/wallet/getWallet.entity";
+import { Wallet } from "../../../../core/entities/wallet/wallet.entity";
+import { Transaction } from "../../../../core/entities/wallet/transaction.entity";
 import { IMongoWalletDocument } from "../interfaces/documents/mongo.wallet.document";
 import { IMongoTransactionDocument } from "../interfaces/documents/mongo.transaction.document";
 import { WalletMapper } from "../mapper/wallet.mapper";
-import { BusinessRuleViolationError } from "src/core/errors/businessRule.error";
-import { ListTransactions } from "src/core/entities/wallet/listTransactions.entity";
-import { ListTransactionType } from "src/core/enums/wallet/wallet.enum";
+import { BusinessRuleViolationError } from "../../../../core/errors/businessRule.error";
+import { ListTransactions } from "../../../../core/entities/wallet/listTransactions.entity";
+import { ListTransactionType } from "../../../../core/enums/wallet/wallet.enum";
 
 @Injectable()
 export class MongoWalletRepository implements IWalletRepository {

@@ -1,5 +1,5 @@
 import { Model } from "mongoose";
-import { IBaseRepository } from "src/core/repositories/base.repository";
+import { IBaseRepository } from "../../../../core/repositories/base.repository";
 
 export abstract class MongoBaseRepository<T> implements IBaseRepository<T> {
   constructor(protected readonly model: Model<T>) {}

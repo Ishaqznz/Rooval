@@ -1,7 +1,7 @@
 import { ObjectId } from "mongoose"
-import { MessageType } from "src/core/enums/conversations/conversation.enum"
-import { Role } from "src/core/enums/user/role.enum"
-import { MessageStatus } from "src/core/interfaces/chat/chat.interfaces"
+import { MessageType } from "../../../../../core/enums/conversations/conversation.enum"
+import { Role } from "../../../../../core/enums/user/role.enum"
+import { MessageStatus } from "../../../../../core/interfaces/chat/chat.interfaces"
 
 export interface IMongoMessageDocument {
     _id: ObjectId

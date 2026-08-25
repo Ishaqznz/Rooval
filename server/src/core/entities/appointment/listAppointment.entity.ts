@@ -1,5 +1,5 @@
-import { AppointmentStatus } from "src/core/enums/appointments/appointment.enums";
-import { AppointmentType } from "src/core/enums/user/profile.enum";
+import { AppointmentStatus } from "../../enums/appointments/appointment.enums";
+import { AppointmentType } from "../../enums/user/profile.enum";
 
 export class ListAppointments {
     constructor(

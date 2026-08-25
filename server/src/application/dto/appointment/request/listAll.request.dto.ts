@@ -1,5 +1,5 @@
-import { AppointmentStatus } from "src/core/enums/appointments/appointment.enums"
-import { AppointmentType } from "src/core/enums/user/profile.enum"
+import { AppointmentStatus } from "../../../../core/enums/appointments/appointment.enums"
+import { AppointmentType } from "../../../../core/enums/user/profile.enum"
 
 export interface IListAllAppointmentsRequestDTO {
     page: number

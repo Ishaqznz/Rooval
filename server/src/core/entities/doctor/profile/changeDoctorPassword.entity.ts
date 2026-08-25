@@ -1,4 +1,4 @@
-import { UserPasswordVO } from "src/core/valueOfObjects/user/userPhone";
+import { UserPasswordVO } from "../../../valueOfObjects/user/userPhone";
 
 export class ChangeDoctorPassord {
   constructor(

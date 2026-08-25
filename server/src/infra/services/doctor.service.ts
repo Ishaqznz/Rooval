@@ -1,4 +1,4 @@
-import { IDoctorService } from "src/application/services/doctor.service.interface";
+import { IDoctorService } from "../../application/services/doctor.service.interface";
 import * as bycrypt from 'bcrypt';
 
 export class DoctorService implements IDoctorService {

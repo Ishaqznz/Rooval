@@ -1,6 +1,6 @@
 import { StringExpression } from "mongoose"
-import { DayOfWeek } from "src/core/enums/doctor/availability.enums"
-import { IAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface"
+import { DayOfWeek } from "../../../../core/enums/doctor/availability.enums"
+import { IAvailabilitySession } from "../../../../core/interfaces/doctor/availabilitySessions.interface"
 
 export interface IAvailabilityResponseDTO {
     id: string

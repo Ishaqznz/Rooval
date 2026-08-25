@@ -1,6 +1,6 @@
 import { ObjectId } from "mongoose"
-import { LastMessageType } from "src/core/enums/conversations/conversation.enum"
-import { Role } from "src/core/enums/user/role.enum"
+import { LastMessageType } from "../../../../../core/enums/conversations/conversation.enum"
+import { Role } from "../../../../../core/enums/user/role.enum"
 
 export interface IMongoConversationDocument {
     _id: ObjectId

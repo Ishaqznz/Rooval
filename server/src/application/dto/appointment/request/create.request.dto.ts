@@ -1,5 +1,5 @@
-import { DoctorAppointmentType } from "src/core/enums/appointments/appointment.enums";
-import { IAppointmentAvailabilitySession } from "src/core/interfaces/doctor/availabilitySessions.interface"
+import { DoctorAppointmentType } from "../../../../core/enums/appointments/appointment.enums";
+import { IAppointmentAvailabilitySession } from "../../../../core/interfaces/doctor/availabilitySessions.interface"
 
 export interface ICreateAppointmentRequestDTO {
     userId: string;

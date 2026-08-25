@@ -1,5 +1,5 @@
 import { ObjectId } from "mongoose";
-import { IDoctorProfile } from "src/core/interfaces/doctor/profile.interface";
+import { IDoctorProfile } from "../../../../../core/interfaces/doctor/profile.interface";
 
 export interface IMongoDoctorDocument {
     _id: ObjectId,

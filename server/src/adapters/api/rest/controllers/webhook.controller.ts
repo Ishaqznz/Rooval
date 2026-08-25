@@ -1,6 +1,6 @@
 import { Controller, Post, Req, Res, Headers, Inject } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { IPaymentUseCase } from 'src/application/use-cases/interface/payment.usecase.interface';
+import { IPaymentUseCase } from '../../../../application/use-cases/interface/payment.usecase.interface';
 
 @Controller('webhook')
 export class WebhookController {

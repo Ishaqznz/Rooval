@@ -1,7 +1,7 @@
-import { IDoctorOnboardingRequestDTO } from "src/application/dto/doctor/profile/request/onboarding.request";
-import { IUpdateProfileRequestDTO } from "src/application/dto/doctor/profile/request/updateProfile.request.dto";
-import { DoctorOnboarding } from "src/core/entities/doctor/profile/onboarding.entity";
-import { DoctorProfileUpdate } from "src/core/entities/doctor/profile/updateProfile.entity";
+import { IDoctorOnboardingRequestDTO } from "../../../dto/doctor/profile/request/onboarding.request";
+import { IUpdateProfileRequestDTO } from "../../../dto/doctor/profile/request/updateProfile.request.dto";
+import { DoctorOnboarding } from "../../../../core/entities/doctor/profile/onboarding.entity";
+import { DoctorProfileUpdate } from "../../../../core/entities/doctor/profile/updateProfile.entity";
 
 export class DoctorInputMapper {
     static toOnboardingEntity(onboardingData: IDoctorOnboardingRequestDTO): DoctorOnboarding {

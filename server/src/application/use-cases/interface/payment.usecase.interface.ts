@@ -1,7 +1,7 @@
-import { ICreateCheckoutSessionResponse } from "src/application/dto/checkout/request/create.request.dto";
-import { IWithdrawUserMoneyRequestDTO } from "src/application/dto/payment/request/withdrawUserMoney.request.dto";
-import { IWithdrawDoctorMoneyRequestDTO } from "src/application/dto/payment/request/withdrawDoctorMoney.request.dto";
-import { PaymentStatus } from "src/core/enums/appointments/appointment.enums";
+import { ICreateCheckoutSessionResponse } from "../../dto/checkout/request/create.request.dto";
+import { IWithdrawUserMoneyRequestDTO } from "../../dto/payment/request/withdrawUserMoney.request.dto";
+import { IWithdrawDoctorMoneyRequestDTO } from "../../dto/payment/request/withdrawDoctorMoney.request.dto";
+import { PaymentStatus } from "../../../core/enums/appointments/appointment.enums";
 
 export interface IPaymentUseCase {
     createPaymentSession(appointmentId: string): Promise<ICreateCheckoutSessionResponse>

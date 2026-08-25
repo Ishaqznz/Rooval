@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { v2 as cloudinary } from "cloudinary";
 import { FileUpload } from "graphql-upload-ts";
-import { ICloudinaryService } from "src/application/services/cloudinary.service.interface";
+import { ICloudinaryService } from "../../application/services/cloudinary.service.interface";
 
 @Injectable()
 export class CloudinaryService implements ICloudinaryService {

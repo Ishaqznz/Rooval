@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
-import { JwtAuthGuard } from 'src/common/guards/auth.guard';
+import { JwtAuthGuard } from '../../../../common/guards/auth.guard';
 
 @Controller('download')
 export class DownloadController {

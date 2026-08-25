@@ -1,5 +1,5 @@
-import { ICreateReviewRequestDTO } from "src/application/dto/reviews/request/create.request.dto";
-import { IReviewResponseDTO } from "src/application/dto/reviews/response/review.response.dto";
+import { ICreateReviewRequestDTO } from "../../dto/reviews/request/create.request.dto";
+import { IReviewResponseDTO } from "../../dto/reviews/response/review.response.dto";
 
 export interface IReviewsUseCase {
     createReview(input: ICreateReviewRequestDTO): Promise<boolean>

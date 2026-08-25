@@ -1,4 +1,4 @@
-import { Role } from "src/core/enums/user/role.enum"
+import { Role } from "../../enums/user/role.enum"
 
 export class Wallet {
     constructor(

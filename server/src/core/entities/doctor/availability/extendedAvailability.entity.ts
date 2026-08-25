@@ -1,10 +1,10 @@
-import { DoctorIdVO } from "src/core/valueOfObjects/doctor/doctorId.vo";
-import { DayOfWeekVO } from "src/core/valueOfObjects/doctor/dayOfWeek.vo";
-import { AvailabilitySessionsVO } from "src/core/valueOfObjects/doctor/availabilitySession.vo";
-import { SlotDurationVO } from "src/core/valueOfObjects/doctor/slotDuration.vo";
-import { DayOfWeek } from "src/core/enums/doctor/availability.enums";
-import { IAvailabilitySessions } from "src/core/interfaces/doctor/availabilitySessions.interface";
-import { AvailabilityDomainService } from "src/core/services/doctor/availability.service.core";
+import { DoctorIdVO } from "../../../valueOfObjects/doctor/doctorId.vo";
+import { DayOfWeekVO } from "../../../valueOfObjects/doctor/dayOfWeek.vo";
+import { AvailabilitySessionsVO } from "../../../valueOfObjects/doctor/availabilitySession.vo";
+import { SlotDurationVO } from "../../../valueOfObjects/doctor/slotDuration.vo";
+import { DayOfWeek } from "../../../enums/doctor/availability.enums";
+import { IAvailabilitySessions } from "../../../interfaces/doctor/availabilitySessions.interface";
+import { AvailabilityDomainService } from "../../../services/doctor/availability.service.core";
 
 export class ExtendedAvailability {
   private constructor(

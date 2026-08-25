@@ -1,4 +1,4 @@
-import { Review } from "src/core/entities/reviews/review.entity";
+import { Review } from "../../../../core/entities/reviews/review.entity";
 import { IMongoReviewDocument } from "../interfaces/documents/mongo.review.document";
 
 export class ReviewMapper {

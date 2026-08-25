@@ -1,5 +1,5 @@
-import { ExtendedAppointment } from "src/core/entities/appointment/extendedAppointment.entity";
-import { IAppointmentResponseDTO } from "src/application/dto/appointment/response/appointment.response.dto";
+import { ExtendedAppointment } from "../../../core/entities/appointment/extendedAppointment.entity";
+import { IAppointmentResponseDTO } from "../../dto/appointment/response/appointment.response.dto";
 
 export class AppointmentOutputMapper {
   static toAppointmentDtos(

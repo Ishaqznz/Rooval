@@ -1,5 +1,5 @@
-import { IUpsertAvailabilityRequestDTO } from "src/application/dto/availability/request/upsert.request.dto";
-import { Availability } from "src/core/entities/doctor/availability/upsertAvailability.entity";
+import { IUpsertAvailabilityRequestDTO } from "../../../dto/availability/request/upsert.request.dto";
+import { Availability } from "../../../../core/entities/doctor/availability/upsertAvailability.entity";
 
 export class AvailabilityInputMapper {
 

@@ -1,4 +1,4 @@
-import { ConsultationFilter, DoctorSortField, DoctorSortOrder, DoctorStatusFilter } from "src/core/enums/doctor/doctor.enums"
+import { ConsultationFilter, DoctorSortField, DoctorSortOrder, DoctorStatusFilter } from "../../../../../core/enums/doctor/doctor.enums"
 
 export interface IFindDoctorsRequestDTO {
     page: number

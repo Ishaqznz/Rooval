@@ -1,4 +1,4 @@
-import { Gender } from "src/core/enums/user/profile.enum";
+import { Gender } from "../../../../core/enums/user/profile.enum";
 
 export interface IUpdateProfileRequestDTO {
   userId?: string

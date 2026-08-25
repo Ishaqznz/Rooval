@@ -1,7 +1,7 @@
-import { ICreateNotificationRequestDTO } from "src/application/dto/notification/request/create.request.dto"
-import { ISendAdminNotificationRequestDTO } from "src/application/dto/notification/request/send.request.dto"
-import { INotificationResponseDTO } from "src/application/dto/notification/response/notification.response.dto"
-import { ISendCallNotificationRequest } from "src/application/dto/notification/request/sendCallNotification.request.dto"
+import { ICreateNotificationRequestDTO } from "../../dto/notification/request/create.request.dto"
+import { ISendAdminNotificationRequestDTO } from "../../dto/notification/request/send.request.dto"
+import { INotificationResponseDTO } from "../../dto/notification/response/notification.response.dto"
+import { ISendCallNotificationRequest } from "../../dto/notification/request/sendCallNotification.request.dto"
 
 export interface INotificationUseCase {
     create(input: ICreateNotificationRequestDTO): Promise<INotificationResponseDTO>

@@ -1,4 +1,4 @@
-import { ConsultationType } from "src/core/enums/doctor/doctor.enums";
+import { ConsultationType } from "../../../enums/doctor/doctor.enums";
 
 export class DoctorOnboarding {
   constructor(

@@ -1,24 +1,24 @@
 import { Injectable } from "@nestjs/common";
-import { Appointment } from "src/core/entities/appointment/appointment.entity";
-import { IAppointmentRepository } from "src/core/repositories/appointment.repository";
+import { Appointment } from "../../../../core/entities/appointment/appointment.entity";
+import { IAppointmentRepository } from "../../../../core/repositories/appointment.repository";
 import { AppointmentDocument, AppointmentSchema } from "../schemas/doctor/appointment.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import mongoose, { Model } from "mongoose";
-import { BusinessRuleViolationError } from "src/core/errors/businessRule.error";
-import { ExtendedAppointment } from "src/core/entities/appointment/extendedAppointment.entity";
+import { BusinessRuleViolationError } from "../../../../core/errors/businessRule.error";
+import { ExtendedAppointment } from "../../../../core/entities/appointment/extendedAppointment.entity";
 import { IMongoAppointmentDocument } from "../interfaces/documents/mongo.appointment.document";
 import { AppointmentMapper } from "../mapper/appointment.mapper";
-import { AppointmentOverlap } from "src/core/entities/appointment/getAppointment.entity";
-import { CancelAppointment } from "src/core/entities/appointment/cancelAppointment.entity";
-import { AppointmentStatus, PaymentStatus } from "src/core/enums/appointments/appointment.enums";
-import { ListAppointments } from "src/core/entities/appointment/listAppointment.entity";
-import { CancelAppointmentByDoctor } from "src/core/entities/appointment/cancelAppointmentByDoctor.entity";
-import { ListAllAppointments } from "src/core/entities/appointment/listAllAppointment.entity";
-import { ListUserAppointments } from "src/core/entities/appointment/listUserAppointments.entity";
-import { DeleteAppointmentsBySession } from "src/core/entities/appointment/deleteAppointmentsBySession.entity";
-import { IsAvailableByStatus } from "src/core/entities/appointment/isAvailableByStatus.entity";
-import { AppointmentErrorType } from "src/core/enums/appointments/appointment.enums";
-import { ChangeAppointmentStatus } from "src/core/entities/appointment/changeAppointmentStatus.entity";
+import { AppointmentOverlap } from "../../../../core/entities/appointment/getAppointment.entity";
+import { CancelAppointment } from "../../../../core/entities/appointment/cancelAppointment.entity";
+import { AppointmentStatus, PaymentStatus } from "../../../../core/enums/appointments/appointment.enums";
+import { ListAppointments } from "../../../../core/entities/appointment/listAppointment.entity";
+import { CancelAppointmentByDoctor } from "../../../../core/entities/appointment/cancelAppointmentByDoctor.entity";
+import { ListAllAppointments } from "../../../../core/entities/appointment/listAllAppointment.entity";
+import { ListUserAppointments } from "../../../../core/entities/appointment/listUserAppointments.entity";
+import { DeleteAppointmentsBySession } from "../../../../core/entities/appointment/deleteAppointmentsBySession.entity";
+import { IsAvailableByStatus } from "../../../../core/entities/appointment/isAvailableByStatus.entity";
+import { AppointmentErrorType } from "../../../../core/enums/appointments/appointment.enums";
+import { ChangeAppointmentStatus } from "../../../../core/entities/appointment/changeAppointmentStatus.entity";
 
 @Injectable()
 export class MongoAppointmentRepository implements IAppointmentRepository {

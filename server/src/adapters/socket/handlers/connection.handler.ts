@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 import * as jwt from 'jsonwebtoken';
-import { MyJwtPayload } from "src/common/interfaces/jwt.interface";
+import { MyJwtPayload } from "../../../common/interfaces/jwt.interface";
 
 export class SocketConnectionHandler {
     static authHandleConnection(client: Socket) {

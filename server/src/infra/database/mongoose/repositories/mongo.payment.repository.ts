@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { PaymentStatus } from "src/core/enums/appointments/appointment.enums";
-import { IPaymentRepository } from "src/core/repositories/payment.repository.interface";
+import { PaymentStatus } from "../../../../core/enums/appointments/appointment.enums";
+import { IPaymentRepository } from "../../../../core/repositories/payment.repository.interface";
 import { AppointmentDocument, AppointmentSchema } from "../schemas/doctor/appointment.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import mongoose, { Model } from "mongoose";
-import { WithdrawUserMoney } from "src/core/entities/payment/withdrawUserMoney.entity";
-import { WithdrawDoctorMoney } from "src/core/entities/payment/withdrawDoctorMoney.entity";
+import { WithdrawUserMoney } from "../../../../core/entities/payment/withdrawUserMoney.entity";
+import { WithdrawDoctorMoney } from "../../../../core/entities/payment/withdrawDoctorMoney.entity";
 import { MongoWithdrawalRequestSchema, WithdrawalRequestDocument } from "../schemas/wallet/withdrawalRequest.schema";
-import { Role } from "src/core/enums/user/role.enum";
+import { Role } from "../../../../core/enums/user/role.enum";
 
 @Injectable()
 export class PaymentRepository implements IPaymentRepository {

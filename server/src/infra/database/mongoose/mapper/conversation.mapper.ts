@@ -1,4 +1,4 @@
-import { Conversation } from "src/core/entities/conversation/conversation.entity";
+import { Conversation } from "../../../../core/entities/conversation/conversation.entity";
 import { IMongoConversationDocument } from "../interfaces/documents/mongo.conversation.document";
 
 export class ConversationMapper {

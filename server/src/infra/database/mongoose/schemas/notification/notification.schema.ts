@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { NotificationType } from 'src/core/enums/notifications/notification.enum';
+import { NotificationType } from '../../../../../core/enums/notifications/notification.enum';
 export type NotificationDocument = MongoNotificationSchema & Document;
 
 @Schema({ timestamps: true, collection: 'notifications' })

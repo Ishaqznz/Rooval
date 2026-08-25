@@ -1,6 +1,6 @@
-import { CountUsers } from "src/core/entities/user/countUsers.entity";
-import { User } from "src/core/entities/user/user.entity";
-import { UserQueryParams } from "src/core/entities/user/userQueryParams.entity";
+import { CountUsers } from "../entities/user/countUsers.entity";
+import { User } from "../entities/user/user.entity";
+import { UserQueryParams } from "../entities/user/userQueryParams.entity";
 import { ProfilePhoto } from "../entities/user/profilePhoto.entity";
 import { UserProfileUpdate } from "../entities/user/updateProfile.entity";
 import { Role } from "../enums/user/role.enum";

@@ -1,5 +1,5 @@
-import { IUserResponseDTO } from "src/application/dto/auth/response/singup.response.dto";
-import { User } from "src/core/entities/user/user.entity";
+import { IUserResponseDTO } from "../../dto/auth/response/singup.response.dto";
+import { User } from "../../../core/entities/user/user.entity";
 
 export class UserOutputMapper {
     static toUserDTO(entity: User): IUserResponseDTO {

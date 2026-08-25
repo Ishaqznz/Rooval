@@ -1,10 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { IReviewsUseCase } from "../interface/reviews.usecase.interface";
-import { ICreateReviewRequestDTO } from "src/application/dto/reviews/request/create.request.dto";
-import { CreateReview } from "src/core/entities/reviews/createReview.entity";
-import { IReviewsRepository } from "src/core/repositories/reviews.repository.interface";
-import { IReviewResponseDTO } from "src/application/dto/reviews/response/review.response.dto";
-import { ReviewOutputMapper } from "src/application/mapper/reviews/reviews.output.mapper";
+import { ICreateReviewRequestDTO } from "../../dto/reviews/request/create.request.dto";
+import { CreateReview } from "../../../core/entities/reviews/createReview.entity";
+import { IReviewsRepository } from "../../../core/repositories/reviews.repository.interface";
+import { IReviewResponseDTO } from "../../dto/reviews/response/review.response.dto";
+import { ReviewOutputMapper } from "../../mapper/reviews/reviews.output.mapper";
 import { IAppointmentUseCase } from "../interface/appointment.usecase.interface";
 
 @Injectable()

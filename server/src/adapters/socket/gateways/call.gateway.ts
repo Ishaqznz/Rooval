@@ -9,11 +9,11 @@ import {
 } from '@nestjs/websockets';
 import { Inject, UseGuards } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { WsAuthGuard } from 'src/common/guards/socket.guard';
+import { WsAuthGuard } from '../../../common/guards/socket.guard';
 import { SocketConnectionHandler } from '../handlers/connection.handler';
-import { CallRoom } from 'src/core/interfaces/sessions/call.interface';
-import { JoinRoomData } from 'src/core/interfaces/sessions/call.interface';
-import { INotificationUseCase } from 'src/application/use-cases/interface/notification.usecase.interface';
+import { CallRoom } from '../../../core/interfaces/sessions/call.interface';
+import { JoinRoomData } from '../../../core/interfaces/sessions/call.interface';
+import { INotificationUseCase } from '../../../application/use-cases/interface/notification.usecase.interface';
 
 interface ExtendedCallRoom extends CallRoom {
   pendingCandidates: {

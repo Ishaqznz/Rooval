@@ -1,4 +1,4 @@
-import { ConsultationFilter, DoctorSortField, DoctorSortOrder, DoctorStatusFilter } from "src/core/enums/doctor/doctor.enums"
+import { ConsultationFilter, DoctorSortField, DoctorSortOrder, DoctorStatusFilter } from "../../enums/doctor/doctor.enums"
 
 export interface IDoctorQueryParams {
     page: number

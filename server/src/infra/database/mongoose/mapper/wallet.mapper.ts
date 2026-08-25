@@ -1,8 +1,8 @@
-import { Wallet } from "src/core/entities/wallet/wallet.entity";
-import { Transaction } from "src/core/entities/wallet/transaction.entity";
+import { Wallet } from "../../../../core/entities/wallet/wallet.entity";
+import { Transaction } from "../../../../core/entities/wallet/transaction.entity";
 import { IMongoWalletDocument } from "../interfaces/documents/mongo.wallet.document";
 import { IMongoTransactionDocument } from "../interfaces/documents/mongo.transaction.document";
-import { Role } from "src/core/enums/user/role.enum";
+import { Role } from "../../../../core/enums/user/role.enum";
 
 export class WalletMapper {
 
